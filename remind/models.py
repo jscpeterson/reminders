@@ -8,6 +8,18 @@ class Case(models.Model):
         (3, '3')
     )
 
+    def get_email(self, first_name, last_name):
+        return '{first}.{last}@da2nd.state.nm.us'.format(first=first_name, last=last_name)
+
+    def get_prosecutor_email(self):
+        return self.get_email(self.prosecutor_first_name, self.prosecutor_last_name)
+
+    def get_paralegal_email(self):
+        return self.get_email(self.paralegal_first_name, self.paralegal_last_name)
+
+    def get_supervisor_email(self):
+        return self.get_email(self.supervisor_first_name, self.supervisor_last_name)
+
     case_number = models.CharField(max_length=20)
     track = models.IntegerField(choices=TRACK_CHOICES, null=True, blank=True)
 
@@ -28,7 +40,7 @@ class Case(models.Model):
 
 class Deadline(models.Model):
     FFA = 0
-    SCHEDULING_ORDER = 1
+    SCHEDULING_CONFERENCE = 1
     WITNESS_LIST = 2
     REQUEST_PTI = 3
     CONDUCT_PTI = 4
@@ -45,7 +57,7 @@ class Deadline(models.Model):
 
     TYPE_CHOICES = (
         (FFA, 'FFA'),
-        (SCHEDULING_ORDER, 'Scheduling Order'),
+        (SCHEDULING_CONFERENCE, 'Scheduling Conference'),
         (WITNESS_LIST, 'Witness List'),
         (REQUEST_PTI, 'Request PTIs'),
         (CONDUCT_PTI, 'Conduct Initial PTIs'),
