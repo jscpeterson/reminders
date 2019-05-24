@@ -1,6 +1,25 @@
 from django.db import models
 
 
+class Case(models.Model):
+    TRACK_CHOICES = (
+        (1, '1'),
+        (2, '2'),
+        (3, '3')
+    )
+
+    case_number = models.CharField(max_length=20)
+    track = models.IntegerField(choices=TRACK_CHOICES, null=True, blank=True)
+    attorney_firstname = models.CharField(max_length=60)
+    attorney_lastname = models.CharField(max_length=60)
+
+    arraignment_date = models.DateTimeField(null=True, blank=True)
+    scheduling_order_date = models.DateTimeField(null=True, blank=True)
+    pti_request_date = models.DateTimeField(null=True, blank=True)
+    trial_date = models.DateTimeField(null=True, blank=True)
+    pass
+
+
 class Deadline(models.Model):
     FFA = 0
     SCHEDULING_ORDER = 1
@@ -40,25 +59,6 @@ class Deadline(models.Model):
     case = models.ForeignKey(Case, on_delete=models.PROTECT)
     date = models.DateTimeField()
     expired = models.BooleanField(default=False)
-
-
-class Case(models.Model):
-    TRACK_CHOICES = (
-        (1, '1'),
-        (2, '2'),
-        (3, '3')
-    )
-
-    case_number = models.CharField(max_length=20)
-    track = models.IntegerField(choices=TRACK_CHOICES, null=True, blank=True)
-    attorney_firstname = models.CharField(max_length=60)
-    attorney_lastname = models.CharField(max_length=60)
-
-    arraignment_date = models.DateTimeField(null=True, blank=True)
-    scheduling_order_date = models.DateTimeField(null=True, blank=True)
-    pti_request_date = models.DateTimeField(null=True, blank=True)
-    trial_date = models.DateTimeField(null=True, blank=True)
-    pass
 
 
 class Motion(models.Model):
