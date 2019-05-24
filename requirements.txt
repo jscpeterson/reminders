@@ -6,4 +6,4 @@ django-filter==2.1.0
 django-localflavor==2.1
 django-material==1.4.3
 SQLAlchemy==1.3.3
-
+holidays==0.9.10
