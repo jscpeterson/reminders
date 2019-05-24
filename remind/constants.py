@@ -11,6 +11,8 @@ SATURDAY = 5
 SUNDAY = 6
 
 TRACK_ONE_DEADLINE_LIMITS = {
+    str(Deadline.TRIAL): 210,
+    'trial_extended': 240,
     str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 14,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 30,  # Days after PTI request
@@ -27,6 +29,8 @@ TRACK_ONE_DEADLINE_LIMITS = {
 }
 
 TRACK_TWO_DEADLINE_LIMITS = {
+    str(Deadline.TRIAL): 300,
+    'trial_extended': 360,
     str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 21,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 45,  # Days after PTI request
@@ -43,6 +47,9 @@ TRACK_TWO_DEADLINE_LIMITS = {
 }
 
 TRACK_THREE_DEADLINE_LIMITS = {
+    str(Deadline.TRIAL): 455,
+    'trial_extended': 545,
+    str(Deadline.TRIAL): 210,
     str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 21,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 60,  # Days after PTI request
