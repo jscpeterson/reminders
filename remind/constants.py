@@ -1,5 +1,5 @@
 """ Constants used by Adult Felony processes """
-from models import Deadline
+from .models import Deadline
 
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
 

@@ -1,6 +1,6 @@
 from datetime import timedelta
 import holidays
-from models import Deadline
+from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
 
 
