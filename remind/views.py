@@ -1,3 +1,10 @@
-from django.shortcuts import render
+# from django.urls import reverse
+from django.views.generic.edit import CreateView
+from .models import Case
+from .forms import CaseForm
 
-# Create your views here.
+
+class CaseCreate(CreateView):
+    model = Case
+    form_class = CaseForm
+    success_url = '/remind/create/'
