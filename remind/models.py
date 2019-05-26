@@ -23,14 +23,11 @@ class Case(models.Model):
     case_number = models.CharField(max_length=20)
     track = models.IntegerField(choices=TRACK_CHOICES, null=True, blank=True)
 
-    prosecutor_first_name = models.CharField(max_length=60, null=True, blank=True)
-    prosecutor_last_name = models.CharField(max_length=60, null=True, blank=True)
+    prosecutor_name = models.CharField(max_length=60, null=True, blank=True)
 
-    paralegal_first_name = models.CharField(max_length=60, null=True, blank=True)
-    paralegal_last_name = models.CharField(max_length=60, null=True, blank=True)
+    paralegal_name = models.CharField(max_length=60, null=True, blank=True)
 
-    supervisor_first_name = models.CharField(max_length=60, null=True, blank=True)
-    supervisor_last_name = models.CharField(max_length=60, null=True, blank=True)
+    supervisor_name = models.CharField(max_length=60, null=True, blank=True)
 
     arraignment_date = models.DateTimeField(null=True, blank=True)
     scheduling_conference_date = models.DateTimeField(null=True, blank=True)
