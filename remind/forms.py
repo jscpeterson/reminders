@@ -6,12 +6,6 @@ from .models import Case
 class CaseForm(ModelForm):
     class Meta:
         model = Case
-        fields = '__all__'
-
-
-class CaseForm(ModelForm):
-    class Meta:
-        model = Case
         fields = [
             'case_number',
             'prosecutor_name',
