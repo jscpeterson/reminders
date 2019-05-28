@@ -10,7 +10,7 @@ class CaseCreate(CreateView):
     form_class = CaseForm
 
     def get_success_url(self):
-        return reverse('scheduling', kwargs={'case_num': self.object.case_number})
+        return reverse('scheduling', kwargs={'case_number': self.object.case_number})
 
 
 class SchedulingView(FormView):
@@ -18,19 +18,23 @@ class SchedulingView(FormView):
     template_name = 'remind/scheduling_form.html'
     form_class = SchedulingForm
 
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        case = Case.objects.get(case_number=self.kwargs['case_number'])
+        case.scheduling_conference_date = request.POST['scheduling_conference_date']
+        case.save(update_fields=['scheduling_conference_date'])
+        return HttpResponseRedirect(self.get_success_url())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def get_form_kwargs(self):
         return self.kwargs
 
-    def __init__(self, *args, **kwargs):
-        print('init')
-        super().__init__(*args, **kwargs)
-
     def get_success_url(self):
-        print('success')
-        return reverse('track', kwargs={'case_num': self.kwargs['case_num']})
-
-    def form_valid(self, form):
-        return HttpResponseRedirect(self.get_success_url())
+        return reverse('track', kwargs=self.kwargs)
 
 
 class TrackView(FormView):
