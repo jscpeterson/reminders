@@ -1,4 +1,4 @@
-from material.forms import ModelForm, Form
+from django.forms import ModelForm, Form
 from .models import Case, Deadline
 from django import forms
 from datetime import datetime
@@ -7,17 +7,14 @@ from .constants import SCHEDULING_ORDER_DEADLINE_DAYS
 
 
 class CaseForm(ModelForm):
-    # TODO Prevent user from being able to enter duplicate case
+    # TODO: Prevent user from being able to enter duplicate case
+    # TODO: Make this accept multiple User objects!
     class Meta:
         model = Case
         fields = ['case_number',
-                  'prosecutor_first_name',
-                  'prosecutor_last_name',
-                  'paralegal_first_name',
-                  'paralegal_last_name',
-                  'supervisor_first_name',
-                  'supervisor_last_name',
+                  'user',
                   'arraignment_date']
+
 
 
 class SchedulingForm(Form):

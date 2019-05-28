@@ -1,4 +1,5 @@
 from django.db import models
+from users.models import CustomUser
 
 
 class Case(models.Model):
@@ -8,30 +9,9 @@ class Case(models.Model):
         (3, '3')
     )
 
-    def get_email(self, first_name, last_name):
-        return '{first}.{last}@da2nd.state.nm.us'.format(first=first_name.lower(), last=last_name.lower())
-
-    def get_prosecutor_email(self):
-        return self.get_email((self.prosecutor_first_name.lower()), self.prosecutor_last_name.lower())
-
-    def get_paralegal_email(self):
-        return self.get_email(self.paralegal_first_name.lower(), self.paralegal_last_name.lower())
-
-    def get_supervisor_email(self):
-        return self.get_email(self.supervisor_first_name.lower(), self.supervisor_last_name.lower())
-
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=False)
     case_number = models.CharField(max_length=20)
     track = models.IntegerField(choices=TRACK_CHOICES, null=True, blank=True)
-
-    prosecutor_first_name = models.CharField(max_length=60, null=True, blank=True)
-    prosecutor_last_name = models.CharField(max_length=60, null=True, blank=True)
-
-    paralegal_first_name = models.CharField(max_length=60, null=True, blank=True)
-    paralegal_last_name = models.CharField(max_length=60, null=True, blank=True)
-
-    supervisor_first_name = models.CharField(max_length=60, null=True, blank=True)
-    supervisor_last_name = models.CharField(max_length=60, null=True, blank=True)
-
     arraignment_date = models.DateTimeField(null=True, blank=True)
     scheduling_conference_date = models.DateTimeField(null=True, blank=True)
     pti_request_date = models.DateTimeField(null=True, blank=True)
