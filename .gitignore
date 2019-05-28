@@ -137,3 +137,6 @@ model_pickles/
 
 # Misc Mac files
 .DS_Store
+
+# Parameter files
+*.ini
