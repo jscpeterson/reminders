@@ -8,8 +8,6 @@ class Case(models.Model):
         (3, '3')
     )
 
-
-
     case_number = models.CharField(max_length=20)
     track = models.IntegerField(choices=TRACK_CHOICES, null=True, blank=True)
 
