@@ -1,5 +1,7 @@
 from .models import Case, Deadline
 
+INDENT = '     '
+
 
 class Email:
 
@@ -49,62 +51,69 @@ class Email:
             ),
             self.DEADLINE_OUTSIDE_LIMITS: 'A deadline is invalid.',
             self.DEADLINE_NEEDS_EXTENSION: 'A deadline requires an extension.',
-            self.REMINDER: 'Deadline for {type} is on {datetime}.'.format(
+            self.REMINDER: 'Deadline for {type} is on {date}.'.format(
                 type=self.deadline_type,
-                datetime=self.deadline.datetime
+                date=self.deadline.datetime.date()
             ),
             self.SCHEDULING_CONFERENCE: 'Please enter scheduling information.',
             self.REQUEST_PTI: 'The defense may no longer request PTIs.',
             self.CONDUCT_PTI: 'The defense may no longer conduct PTIs.',
         }
 
-        output += self.email_type[subjects]
+        output += subjects[self.email_type]
 
         return output
 
     def get_message(self):
 
-        header = 'Dearest user: \n'  # TODO Get real header
+        header = 'Dear {first_name} {last_name}:\n\n'.format(
+            first_name=self.recipient.first_name,
+            last_name=self.recipient.last_name,
+        )
 
         messages = {
             self.DEADLINE_EXPIRED: self.get_deadline_expired_message(),
-            self.DEADLINE_OUTSIDE_LIMITS: self.get_deadline_invalid_message(),
-            self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
-            self.REMINDER: self.get_reminder_message(),
-            self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
-            self.REQUEST_PTI: self.get_request_pti_message(),
-            self.CONDUCT_PTI: self.get_conduct_pti_message(),
+            # self.DEADLINE_OUTSIDE_LIMITS: self.get_deadline_invalid_message(),
+            # self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
+            # self.REMINDER: self.get_reminder_message(),
+            # self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
+            # self.REQUEST_PTI: self.get_request_pti_message(),
+            # self.CONDUCT_PTI: self.get_conduct_pti_message(),
         }
         body = messages[self.email_type]
 
-        footer = 'Sincerely, \nReminderBot4000'  # TODO Get real footer
+        footer = '\n\nSincerely, \nReminderBot4000'
 
         return header + body + footer
 
     def get_deadline_expired_message(self):
-        # TODO Add message method
-        raise Exception('Message not implemented')
+        return '''{indent}The {type} deadline for case {case} expired on {date}.'''.format(
+            indent=INDENT,
+            type=self.deadline_type,
+            case=self.case.case_number,
+            date=self.deadline.datetime.date(),
+        )
 
-    def get_deadline_invalid_message(self):
-        # TODO Add message method
-        raise Exception('Message not implemented')
-
-    def get_deadline_extension_message(self):
-        # TODO Add message method
-        raise Exception('Message not implemented')
-
-    def get_reminder_message(self):
-        # TODO Add message method
-        raise Exception('Message not implemented')
-
-    def get_scheduling_message(self):
-        # TODO Add message method
-        raise Exception('Message not implemented')
-
-    def get_request_pti_message(self):
-        # TODO Add message method
-        raise Exception('Message not implemented')
-
-    def get_conduct_pti_message(self):
-        # TODO Add message method
-        raise Exception('Message not implemented')
+    # def get_deadline_invalid_message(self):
+    #     # TODO Add message method
+    #     raise Exception('Message not implemented')
+    #
+    # def get_deadline_extension_message(self):
+    #     # TODO Add message method
+    #     raise Exception('Message not implemented')
+    #
+    # def get_reminder_message(self):
+    #     # TODO Add message method
+    #     raise Exception('Message not implemented')
+    #
+    # def get_scheduling_message(self):
+    #     # TODO Add message method
+    #     raise Exception('Message not implemented')
+    #
+    # def get_request_pti_message(self):
+    #     # TODO Add message method
+    #     raise Exception('Message not implemented')
+    #
+    # def get_conduct_pti_message(self):
+    #     # TODO Add message method
+    #     raise Exception('Message not implemented')
