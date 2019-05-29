@@ -79,7 +79,7 @@ def get_actual_deadline_from_start(start_date, days):
         result_date = result_date + timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
+    result_date = result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
 
     return result_date
 
@@ -136,7 +136,7 @@ def get_actual_deadline_from_end(end_date, days):
         result_date = result_date - timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
+    result_date = result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
 
     return result_date
 
