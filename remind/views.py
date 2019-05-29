@@ -7,7 +7,7 @@ from .constants import TRIAL_DEADLINES
 from . import utils
 
 
-class CaseCreate(CreateView):
+class CaseCreateView(CreateView):
     model = Case
     form_class = CaseForm
 
@@ -123,7 +123,6 @@ class OrderView(FormView):
         return self.kwargs
 
     def post(self, request, *args, **kwargs):
-
         case = Case.objects.get(case_number=self.kwargs['case_number'])
 
         for key in TRIAL_DEADLINES:
@@ -140,6 +139,6 @@ class OrderView(FormView):
         return
 
 
-class UpdateView(FormView):
+class CaseUpdate(FormView):
     # TODO Create a form view that displays all the active deadlines on a case, allowing the user to modify them
     pass

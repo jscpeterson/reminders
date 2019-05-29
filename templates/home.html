@@ -4,11 +4,22 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-  Hi {{ user.username }}!
-  <p><a href="{% url 'logout' %}">logout</a></p>
+<p><a href="{% url 'logout' %}">logout</a></p>
+
+<h4>
+    Hi {{ user }}!
+</h4>
+
+<form action='remind/create' method='GET'>
+    <button type='submit'> Create New Case</button>
+</form>
+
+<form action='remind/update' method='GET'>
+    <button type='submit'> Update Existing Case</button>
+</form>
 {% else %}
-  <p>You are not logged in</p>
-  <a href="{% url 'login' %}">login</a> |
-  <a href="{% url 'signup' %}">signup</a>
+<p>You are not logged in</p>
+<a href="{% url 'login' %}">login</a> |
+<a href="{% url 'signup' %}">signup</a>
 {% endif %}
 {% endblock %}
