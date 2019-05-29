@@ -1,3 +1,4 @@
+from remind import utils
 from .models import Case, Deadline
 
 INDENT = '     '
@@ -77,8 +78,8 @@ class Email:
             # self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
             # self.REMINDER: self.get_reminder_message(),
             self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
-            # self.REQUEST_PTI: self.get_request_pti_message(),
-            # self.CONDUCT_PTI: self.get_conduct_pti_message(),
+            self.REQUEST_PTI: self.get_request_pti_message(),
+            self.CONDUCT_PTI: self.get_conduct_pti_message(),
         }
         body = messages[self.email_type]
 
@@ -110,18 +111,40 @@ class Email:
         url = 'http://127.0.0.1:8000/remind/{case_number}/track'.format(
             case_number=self.case.case_number
         )
-        return '''{indent}The scheduling conference was due to take place on {date} at {time}. Please enter the \
-results of the scheduling order at {url}.'''.format(
+
+        return '''{indent}The scheduling conference for case {case_number} was due to take place on {date} at {time}. \
+Please enter the results of the scheduling order at {url}.'''.format(
             indent=INDENT,
+            case_number=self.case.case_number,
             date=self.case.scheduling_conference_date.date(),
             time=self.case.scheduling_conference_date.time(),  # TODO Format properly
             url=url,
         )
 
-    # def get_request_pti_message(self):
-    #     # TODO Add message method
-    #     raise Exception('Message not implemented')
-    #
-    # def get_conduct_pti_message(self):
-    #     # TODO Add message method
-    #     raise Exception('Message not implemented')
+    def get_request_pti_message(self):
+        url = 'http://127.0.0.1:8000/remind/{case_number}/request_pti'.format(
+            case_number=self.case.case_number
+        )
+
+        request_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.REQUEST_PTI)]
+
+        return '''{indent}It has been {days} days since the scheduling conference for case {case_number}. If the \
+defense requested pretrial interviews, please enter the date they did so at {url}. If they did not, you are under no \
+longer under any obligation to assist them.'''.format(
+            indent=INDENT,
+            days=request_pti_days,
+            case_number=self.case.case_number,
+            url=url
+        )
+
+    def get_conduct_pti_message(self):
+        conduct_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.CONDUCT_PTI)]
+
+        return '''{indent}It has been {days} days since the defense requested pretrial interviews for case \
+{case_number} on {date}. If the defense has set up and conducted their pretrial interviews, you can disregard this \
+message. If they did not, this is a notification that you are no longer under any obligation to assist them.'''.format(
+            indent=INDENT,
+            date=self.case.pti_request_date,
+            days=conduct_pti_days,
+            case_number=self.case.case_number,
+        )
