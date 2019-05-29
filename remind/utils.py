@@ -1,7 +1,8 @@
 from datetime import timedelta
 import holidays
 from .models import Deadline
-from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
+from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
+    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS
 
 
 def clear_deadlines(case):
@@ -25,6 +26,18 @@ def count_holidays_weekends_in_range_from_start(start_date, num_days):
 
 def count_holidays_weekends_in_range_from_end(end_date, num_days):
     return sum([1 for i in range(num_days) if is_weekend_or_nm_holiday(end_date - timedelta(days=i))])
+
+
+def get_deadline_dict(track):
+    if track == 1:
+        deadlines = TRACK_ONE_DEADLINE_LIMITS
+    elif track == 2:
+        deadlines = TRACK_TWO_DEADLINE_LIMITS
+    elif track == 3:
+        deadlines = TRACK_THREE_DEADLINE_LIMITS
+    else:
+        raise Exception('Track not valid')
+    return deadlines
 
 
 def get_actual_deadline_from_start(start_date, days):
@@ -79,7 +92,7 @@ def get_actual_deadline_from_start(start_date, days):
         result_date = result_date + timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
+    result_date = result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
 
     return result_date
 
@@ -136,7 +149,7 @@ def get_actual_deadline_from_end(end_date, days):
         result_date = result_date - timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
+    result_date = result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
 
     return result_date
 

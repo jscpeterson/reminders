@@ -64,3 +64,13 @@ TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
+
+TRIAL_DEADLINES = {
+    str(Deadline.WITNESS_PTI): 'Deadline to complete witness pretrial interviews',
+    str(Deadline.SCIENTIFIC_EVIDENCE): 'Deadline to produce the results of scientific evidence',
+    str(Deadline.PRETRIAL_MOTION_FILING): 'Deadline to file any pretrial motions',
+    str(Deadline.PRETRIAL_CONFERENCE): 'Date and time of the pretrial conference',
+    str(Deadline.FINAL_WITNESS_LIST): 'Deadline to submit a final witness list',
+    str(Deadline.NEED_FOR_INTERPRETER): 'Deadline to file notice for language access services',
+    str(Deadline.PLEA_AGREEMENT): 'Deadline to submit any plea agreement to the Court',
+}

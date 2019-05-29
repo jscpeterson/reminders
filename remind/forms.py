@@ -1,9 +1,8 @@
 from material.forms import ModelForm, Form
 from .models import Case, Deadline
 from django import forms
-from datetime import datetime
 from . import utils
-from .constants import SCHEDULING_ORDER_DEADLINE_DAYS
+from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES
 
 
 class CaseForm(ModelForm):
@@ -23,32 +22,61 @@ class CaseForm(ModelForm):
 class SchedulingForm(Form):
 
     def __init__(self, *args, **kwargs):
-        super(SchedulingForm, self).__init__()
-
-        case = Case.objects.get(case_number=kwargs['case_num'])
-
-        self.fields['scheduling_date'] = forms.DateTimeField(
-            label='Date of the Scheduling Conference',
-            input_formats=['%Y-%m-%d']
-        )
+        super().__init__()
+        case = Case.objects.get(case_number=kwargs['case_number'])
 
         initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
-
-        self.fields['scheduling_deadline'] = forms.DateTimeField(
-            label='Maximum Possible Date',
-            initial=initial,
-            widget=forms.DateInput(),  # TODO Figure out how to remove time
-            input_formats=['']
+        self.fields['scheduling_conference_date'] = forms.DateTimeField(
+            label='Date and time of the scheduling conference',
+            initial=initial
         )
 
 
 class TrackForm(Form):
-    pass
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        case = Case.objects.get(case_number=kwargs['case_number'])
+
+        initial = case.scheduling_conference_date
+        self.fields['scheduling_conference_date'] = forms.DateTimeField(
+            label='What did the scheduling conference actually occur?',
+            initial=initial
+        )
+
+        self.fields['track'] = forms.ChoiceField(
+            choices=Case.TRACK_CHOICES,
+            label='What is the case track?',
+        )
 
 
 class TrialForm(Form):
-    pass
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        case = Case.objects.get(case_number=kwargs['case_number'])
+
+        deadline_dict = utils.get_deadline_dict(case.track)
+
+        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date,
+                                                       deadline_dict[str(Deadline.TRIAL)])
+        self.fields['trial_date'] = forms.DateTimeField(
+            label='Date and time of the trial\'s first day',
+            initial=initial
+        )
 
 
 class OrderForm(Form):
-    pass
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        case = Case.objects.get(case_number=kwargs['case_number'])
+
+        deadline_dict = utils.get_deadline_dict(case.track)
+
+        for key, label in TRIAL_DEADLINES.items():
+            initial = utils.get_actual_deadline_from_end(case.trial_date, deadline_dict[key])
+            self.fields[key] = forms.DateTimeField(
+                label=label,
+                initial=initial
+            )
