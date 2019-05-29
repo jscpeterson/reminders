@@ -1,8 +1,9 @@
 from material.forms import ModelForm, Form
-from .models import Case
+from .models import Case, Deadline
 from django import forms
 from . import utils
-from .constants import SCHEDULING_ORDER_DEADLINE_DAYS
+from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, \
+    TRACK_THREE_DEADLINE_LIMITS
 
 
 class CaseForm(ModelForm):
@@ -36,7 +37,6 @@ class TrackForm(Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__()
-        case = Case.objects.get(case_number=kwargs['case_number'])
 
         self.fields['track'] = forms.ChoiceField(
             choices=Case.TRACK_CHOICES,
@@ -49,6 +49,22 @@ class TrialForm(Form):
     def __init__(self, *args, **kwargs):
         super().__init__()
         case = Case.objects.get(case_number=kwargs['case_number'])
+
+        if case.track == 1:
+            deadlines = TRACK_ONE_DEADLINE_LIMITS
+        elif case.track == 2:
+            deadlines = TRACK_TWO_DEADLINE_LIMITS
+        elif case.track == 3:
+            deadlines = TRACK_THREE_DEADLINE_LIMITS
+        else:
+            raise Exception('Track not valid')
+
+        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date, deadlines[str(Deadline.TRIAL)])
+
+        self.fields['trial_date'] = forms.DateTimeField(
+            label='Trial',
+            initial=initial
+        )
 
 
 class OrderForm(Form):

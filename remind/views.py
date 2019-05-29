@@ -41,9 +41,6 @@ class TrackView(FormView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def get_form_kwargs(self):
-        return self.kwargs
-
     def post(self, request, *args, **kwargs):
         case = Case.objects.get(case_number=self.kwargs['case_number'])
         case.track = request.POST['track']
@@ -65,7 +62,9 @@ class TrialView(FormView):
         return self.kwargs
 
     def post(self, request, *args, **kwargs):
-        # TODO Get post data
+        case = Case.objects.get(case_number=self.kwargs['case_number'])
+        case.trial_date = request.POST['trial_date']
+        case.save(update_fields=['trial_date'])
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
