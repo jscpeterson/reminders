@@ -26,8 +26,8 @@ class SchedulingForm(Form):
         case = Case.objects.get(case_number=kwargs['case_number'])
 
         initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
-        self.fields['When is the scheduling conference scheduled?'] = forms.DateTimeField(
-            label='Scheduling Conference',
+        self.fields['scheduling_conference_date'] = forms.DateTimeField(
+            label='Date and time of the scheduling conference',
             initial=initial
         )
 
@@ -61,7 +61,7 @@ class TrialForm(Form):
         initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date,
                                                        deadline_dict[str(Deadline.TRIAL)])
         self.fields['trial_date'] = forms.DateTimeField(
-            label='Date and time the trial is scheduled to commence',
+            label='Date and time of the trial\'s first day',
             initial=initial
         )
 

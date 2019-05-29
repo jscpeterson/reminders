@@ -50,6 +50,9 @@ class TrackView(FormView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def get_form_kwargs(self):
+        return self.kwargs
+
     def post(self, request, *args, **kwargs):
         # Update scheduling conference date
         case = Case.objects.get(case_number=self.kwargs['case_number'])
