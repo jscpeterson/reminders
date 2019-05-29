@@ -25,6 +25,7 @@ class SchedulingView(FormView):
         return self.kwargs
 
     def post(self, request, *args, **kwargs):
+        # Set scheduling conference for date
         case = Case.objects.get(case_number=self.kwargs['case_number'])
         case.scheduling_conference_date = request.POST['scheduling_conference_date']
         case.save(update_fields=['scheduling_conference_date'])
@@ -50,6 +51,12 @@ class TrackView(FormView):
         super().__init__(*args, **kwargs)
 
     def post(self, request, *args, **kwargs):
+        # Update scheduling conference date
+        case = Case.objects.get(case_number=self.kwargs['case_number'])
+        case.scheduling_conference_date = request.POST['scheduling_conference_date']
+        case.save(update_fields=['scheduling_conference_date'])
+
+        # Set track for case
         case = Case.objects.get(case_number=self.kwargs['case_number'])
         case.track = request.POST['track']
         case.save(update_fields=['track'])
@@ -74,6 +81,7 @@ class TrialView(FormView):
         return self.kwargs
 
     def post(self, request, *args, **kwargs):
+        # Set trial date for case
         case = Case.objects.get(case_number=self.kwargs['case_number'])
         case.trial_date = request.POST['trial_date']
         case.save(update_fields=['trial_date'])

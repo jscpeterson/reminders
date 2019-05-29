@@ -2,8 +2,7 @@ from material.forms import ModelForm, Form
 from .models import Case, Deadline
 from django import forms
 from . import utils
-from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, \
-    TRACK_THREE_DEADLINE_LIMITS
+from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES
 
 
 class CaseForm(ModelForm):
@@ -27,7 +26,7 @@ class SchedulingForm(Form):
         case = Case.objects.get(case_number=kwargs['case_number'])
 
         initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
-        self.fields['scheduling_conference_date'] = forms.DateTimeField(
+        self.fields['When is the scheduling conference scheduled?'] = forms.DateTimeField(
             label='Scheduling Conference',
             initial=initial
         )
@@ -37,6 +36,13 @@ class TrackForm(Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__()
+        case = Case.objects.get(case_number=kwargs['case_number'])
+
+        initial = case.scheduling_conference_date
+        self.fields['scheduling_conference_date'] = forms.DateTimeField(
+            label='What did the scheduling conference actually occur?',
+            initial=initial
+        )
 
         self.fields['track'] = forms.ChoiceField(
             choices=Case.TRACK_CHOICES,
@@ -50,19 +56,12 @@ class TrialForm(Form):
         super().__init__()
         case = Case.objects.get(case_number=kwargs['case_number'])
 
-        if case.track == 1:
-            deadlines = TRACK_ONE_DEADLINE_LIMITS
-        elif case.track == 2:
-            deadlines = TRACK_TWO_DEADLINE_LIMITS
-        elif case.track == 3:
-            deadlines = TRACK_THREE_DEADLINE_LIMITS
-        else:
-            raise Exception('Track not valid')
+        deadline_dict = utils.get_deadline_dict(case.track)
 
-        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date, deadlines[str(Deadline.TRIAL)])
-
+        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date,
+                                                       deadline_dict[str(Deadline.TRIAL)])
         self.fields['trial_date'] = forms.DateTimeField(
-            label='Trial',
+            label='Date and time the trial is scheduled to commence',
             initial=initial
         )
 
@@ -72,3 +71,12 @@ class OrderForm(Form):
     def __init__(self, *args, **kwargs):
         super().__init__()
         case = Case.objects.get(case_number=kwargs['case_number'])
+
+        deadline_dict = utils.get_deadline_dict(case.track)
+
+        for key, value in TRIAL_DEADLINES.items():
+            initial = utils.get_actual_deadline_from_end(case.trial_date, deadline_dict[key])
+            self.fields[key] = forms.DateTimeField(
+                label=value,
+                initial=initial
+            )
