@@ -74,9 +74,9 @@ class OrderForm(Form):
 
         deadline_dict = utils.get_deadline_dict(case.track)
 
-        for key, value in TRIAL_DEADLINES.items():
+        for key, label in TRIAL_DEADLINES.items():
             initial = utils.get_actual_deadline_from_end(case.trial_date, deadline_dict[key])
             self.fields[key] = forms.DateTimeField(
-                label=value,
+                label=label,
                 initial=initial
             )

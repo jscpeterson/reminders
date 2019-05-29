@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm
+from .constants import TRIAL_DEADLINES
 
 
 class CaseCreate(CreateView):
@@ -113,9 +114,18 @@ class OrderView(FormView):
         return self.kwargs
 
     def post(self, request, *args, **kwargs):
-        # TODO Get post data
+
+        case = Case.objects.get(case_number=self.kwargs['case_number'])
+
+        for key in TRIAL_DEADLINES:
+            Deadline.objects.create(
+                case=case,
+                type=int(key),
+                datetime=request.POST[key],
+            )
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        # TODO Update
+        # TODO Figure out where to go from here
         return
