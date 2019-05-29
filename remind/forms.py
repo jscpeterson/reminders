@@ -1,21 +1,23 @@
-from material.forms import ModelForm, Form
+from django.forms import ModelForm, Form
 from .models import Case, Deadline
+from users.models import CustomUser
 from django import forms
 from . import utils
 from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES
 
 
 class CaseForm(ModelForm):
-    # TODO Prevent user from being able to enter duplicate case
+    supervisor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=1), empty_label=None)
+    prosecutor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=2), empty_label=None)
+    paralegal = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
+    arraignment_date = forms.DateTimeField(input_formats=['%Y-%m-%d %H:%M'])
+
     class Meta:
         model = Case
         fields = ['case_number',
-                  'prosecutor_first_name',
-                  'prosecutor_last_name',
-                  'paralegal_first_name',
-                  'paralegal_last_name',
-                  'supervisor_first_name',
-                  'supervisor_last_name',
+                  'supervisor',
+                  'prosecutor',
+                  'paralegal',
                   'arraignment_date']
 
 
