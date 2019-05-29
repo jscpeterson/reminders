@@ -4,6 +4,7 @@ from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm
 from .constants import TRIAL_DEADLINES
+from . import utils
 
 
 class CaseCreate(CreateView):
@@ -62,11 +63,20 @@ class TrackView(FormView):
 
         # Set track for case
         case = Case.objects.get(case_number=self.kwargs['case_number'])
-        case.track = request.POST['track']
+        case.track = int(request.POST['track'])
         case.save(update_fields=['track'])
 
         # Complete scheduling conference deadline timer
-        Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE).delete()
+        Deadline.objects.filter(case=case, type=Deadline.SCHEDULING_CONFERENCE).delete()
+
+        # Start Request PTI deadline timer
+        deadlines_dict = utils.get_deadline_dict(case.track)
+        day_after_request_due = deadlines_dict[str(Deadline.REQUEST_PTI)] + 1
+        Deadline.objects.create(
+            case=case,
+            type=Deadline.REQUEST_PTI,
+            datetime=utils.get_actual_deadline_from_start(case.scheduling_conference_date, day_after_request_due)
+        )
 
         return HttpResponseRedirect(self.get_success_url())
 
@@ -127,5 +137,10 @@ class OrderView(FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        # TODO Figure out where to go from here
+        # TODO Figure out where to go from here (UpdateView?)
         return
+
+
+class UpdateView(FormView):
+    # TODO Create a form view that displays all the active deadlines on a case, allowing the user to modify them
+    pass
