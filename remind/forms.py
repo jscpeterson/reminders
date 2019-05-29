@@ -38,6 +38,11 @@ class TrackForm(Form):
         super().__init__()
         case = Case.objects.get(case_number=kwargs['case_number'])
 
+        self.fields['track'] = forms.ChoiceField(
+            choices=Case.TRACK_CHOICES,
+            label='What is the case track?',
+        )
+
 
 class TrialForm(Form):
 
