@@ -76,7 +76,7 @@ class Email:
             # self.DEADLINE_OUTSIDE_LIMITS: self.get_deadline_invalid_message(),
             # self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
             # self.REMINDER: self.get_reminder_message(),
-            # self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
+            self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
             # self.REQUEST_PTI: self.get_request_pti_message(),
             # self.CONDUCT_PTI: self.get_conduct_pti_message(),
         }
@@ -105,11 +105,19 @@ class Email:
     # def get_reminder_message(self):
     #     # TODO Add message method
     #     raise Exception('Message not implemented')
-    #
-    # def get_scheduling_message(self):
-    #     # TODO Add message method
-    #     raise Exception('Message not implemented')
-    #
+
+    def get_scheduling_message(self):
+        url = 'http://127.0.0.1:8000/remind/{case_number}/track'.format(
+            case_number=self.case.case_number
+        )
+        return '''{indent}The scheduling conference was due to take place on {date} at {time}. Please enter the \
+results of the scheduling order at {url}.'''.format(
+            indent=INDENT,
+            date=self.case.scheduling_conference_date.date(),
+            time=self.case.scheduling_conference_date.time(),  # TODO Format properly
+            url=url,
+        )
+
     # def get_request_pti_message(self):
     #     # TODO Add message method
     #     raise Exception('Message not implemented')

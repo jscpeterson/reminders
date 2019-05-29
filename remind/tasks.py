@@ -32,7 +32,10 @@ def check_all_deadlines():
             print('Deadline {} expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
             deadline.expired = True
             deadline.save()
-            send_emails(Email.DEADLINE_EXPIRED, deadline)
+            if deadline.type == Deadline.SCHEDULING_CONFERENCE:
+                send_emails(Email.SCHEDULING_CONFERENCE, deadline)
+            else:
+                send_emails(Email.DEADLINE_EXPIRED, deadline)
             print('Email sent')
 
 
