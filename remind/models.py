@@ -9,13 +9,15 @@ class Case(models.Model):
         (3, '3')
     )
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=False)
-    case_number = models.CharField(max_length=20)
-    track = models.IntegerField(choices=TRACK_CHOICES, null=True, blank=True)
-    arraignment_date = models.DateTimeField(null=True, blank=True)
-    scheduling_conference_date = models.DateTimeField(null=True, blank=True)
-    pti_request_date = models.DateTimeField(null=True, blank=True)
-    trial_date = models.DateTimeField(null=True, blank=True)
+    prosecutor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='prosecutor')
+    paralegal = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='paralegal')
+    supervisor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='supervisor')
+    case_number = models.CharField(max_length=20, unique=True)
+    track = models.IntegerField(choices=TRACK_CHOICES, null=True)
+    arraignment_date = models.DateTimeField(null=True)
+    scheduling_conference_date = models.DateTimeField(null=True)
+    pti_request_date = models.DateTimeField(null=True)
+    trial_date = models.DateTimeField(null=True)
 
 
 class Deadline(models.Model):

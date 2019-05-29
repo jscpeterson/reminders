@@ -14,7 +14,6 @@ class CaseCreate(CreateView):
 
 
 class SchedulingView(FormView):
-
     template_name = 'remind/scheduling_form.html'
     form_class = SchedulingForm
 

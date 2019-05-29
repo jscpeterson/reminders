@@ -8,14 +8,10 @@ class CustomUser(AbstractUser):
         (2, 'Prosecutor'),
         (3, 'Paralegal')
     )
+    first_name = models.CharField(max_length=60)
+    last_name = models.CharField(max_length=60)
+    position = models.IntegerField(null=True)
 
-    def get_email_format(self, first_name, last_name):
-        return '{first}.{last}@da2nd.state.nm.us'.format(first=first_name.lower(), last=last_name.lower())
-
-    def get_email(self):
-        return self.get_email_format((self._first_name.lower()), self._last_name.lower())
-
-    first_name = models.CharField(max_length=60, null=True, blank=True)
-    last_name = models.CharField(max_length=60, null=True, blank=True)
-
-    position = models.IntegerField(choices=POSITION_CHOICES, null=True, blank=True)
+    def __str__(self):
+        display_name = self.first_name + " " + self.last_name
+        return display_name
