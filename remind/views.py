@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
-from .models import Case
+from .models import Case, Deadline
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm
 
 
@@ -28,6 +28,14 @@ class SchedulingView(FormView):
         case = Case.objects.get(case_number=self.kwargs['case_number'])
         case.scheduling_conference_date = request.POST['scheduling_conference_date']
         case.save(update_fields=['scheduling_conference_date'])
+
+        # Start scheduling conference deadline timer
+        Deadline.objects.create(
+            case=case,
+            type=Deadline.SCHEDULING_CONFERENCE,
+            datetime=case.scheduling_conference_date,
+        )
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -45,6 +53,10 @@ class TrackView(FormView):
         case = Case.objects.get(case_number=self.kwargs['case_number'])
         case.track = request.POST['track']
         case.save(update_fields=['track'])
+
+        # Complete scheduling conference deadline timer
+        Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE).delete()
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -65,6 +77,14 @@ class TrialView(FormView):
         case = Case.objects.get(case_number=self.kwargs['case_number'])
         case.trial_date = request.POST['trial_date']
         case.save(update_fields=['trial_date'])
+
+        # Start trial deadline timer
+        Deadline.objects.create(
+            case=case,
+            type=Deadline.TRIAL,
+            datetime=case.scheduling_conference_date,
+        )
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
