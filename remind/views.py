@@ -1,8 +1,9 @@
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
-from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm
+from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, UpdateHomeForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL
 from . import utils
 
@@ -201,3 +202,16 @@ class UpdateView(FormView):
 
     def get_success_url(self):
         return SOURCE_URL
+
+
+class UpdateHomeView(FormView):
+    template_name = 'remind/update_home_form.html'
+    form_class = UpdateHomeForm
+    case_number = ''
+
+    def form_valid(self, form):
+        self.case_number = form.cleaned_data['case_number']
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('update', kwargs={'case_number': self.case_number})

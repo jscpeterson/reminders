@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.forms import ModelForm, Form
 from .models import Case, Deadline
 from users.models import CustomUser
@@ -122,3 +123,12 @@ class UpdateForm(Form):
                 label=label,
                 initial=initial
             )
+
+
+class UpdateHomeForm(Form):
+    case_number = forms.CharField(required=True)
+
+    def clean(self):
+        cd = self.cleaned_data
+        if not Case.objects.filter(case_number=cd['case_number']):
+            raise ValidationError('Case not found with this number.')
