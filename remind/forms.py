@@ -102,3 +102,23 @@ class RequestPTIForm(Form):
             initial=initial,
             input_formats=['%Y-%m-%d']
         )
+
+
+class UpdateForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        case = Case.objects.get(case_number=kwargs['case_number'])
+
+        for index, deadline in enumerate(Deadline.objects.filter(case=case)):
+            key = 'deadline_{}'.format(index)
+            label = '{expired}Deadline for {type}'.format(
+                expired='(EXPIRED) ' if deadline.expired else '',
+                type=Deadline.TYPE_CHOICES[deadline.type][1]
+            )
+            initial = deadline.datetime
+
+            self.fields[key] = forms.DateTimeField(
+                label=label,
+                initial=initial
+            )

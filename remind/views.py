@@ -1,9 +1,8 @@
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
-from datetime import datetime
 from .models import Case, Deadline
-from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm
+from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL
 from . import utils
 
@@ -175,5 +174,31 @@ class RequestPTIView(FormView):
 
 
 class UpdateView(FormView):
-    # TODO Create a form view that displays all the active deadlines on a case, allowing the user to modify them
-    pass
+    template_name = 'remind/update_form.html'
+    form_class = UpdateForm
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return self.kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['case_number'] = self.kwargs['case_number']
+        return context
+
+    def post(self, request, *args, **kwargs):
+        case = Case.objects.get(case_number=self.kwargs['case_number'])
+
+        for index, deadline in enumerate(Deadline.objects.filter(case=case)):
+            key = 'deadline_{}'.format(index)
+            if deadline.datetime.strftime('%Y-%m-%d %H:%M:%S') != request.POST[key]:
+                deadline.datetime = request.POST[key]
+                deadline.save(update_fields=['datetime'])
+                # TODO remove expired flag if necessary
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return SOURCE_URL
