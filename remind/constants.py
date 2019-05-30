@@ -51,7 +51,6 @@ TRACK_TWO_DEADLINE_LIMITS = {
 TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 455,
     'trial_extended': 545,
-    str(Deadline.TRIAL): 210,
     str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 21,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 60,  # Days after PTI request

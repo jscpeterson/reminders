@@ -105,7 +105,7 @@ class TrialView(FormView):
         Deadline.objects.create(
             case=case,
             type=Deadline.TRIAL,
-            datetime=case.scheduling_conference_date,
+            datetime=case.trial_date,
         )
 
         return HttpResponseRedirect(self.get_success_url())
