@@ -1,6 +1,8 @@
 """ Constants used by Adult Felony processes """
 from .models import Deadline
 
+SOURCE_URL = 'http://127.0.0.1:8000'
+
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
 
 LAST_DAY_HOUR = 23
@@ -49,7 +51,6 @@ TRACK_TWO_DEADLINE_LIMITS = {
 TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 455,
     'trial_extended': 545,
-    str(Deadline.TRIAL): 210,
     str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 21,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 60,  # Days after PTI request

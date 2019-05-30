@@ -30,7 +30,8 @@ class SchedulingForm(Form):
         initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
         self.fields['scheduling_conference_date'] = forms.DateTimeField(
             label='Date and time of the scheduling conference',
-            initial=initial
+            initial=initial,
+            input_formats=['%Y-%m-%d %H:%M']
         )
 
 
@@ -64,7 +65,8 @@ class TrialForm(Form):
                                                        deadline_dict[str(Deadline.TRIAL)])
         self.fields['trial_date'] = forms.DateTimeField(
             label='Date and time of the trial\'s first day',
-            initial=initial
+            initial=initial,
+            input_formats=['%Y-%m-%d %H:%M']
         )
 
 
@@ -80,5 +82,23 @@ class OrderForm(Form):
             initial = utils.get_actual_deadline_from_end(case.trial_date, deadline_dict[key])
             self.fields[key] = forms.DateTimeField(
                 label=label,
-                initial=initial
+                initial=initial,
+                input_formats=['%Y-%m-%d %H:%M']
             )
+
+
+class RequestPTIForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        case = Case.objects.get(case_number=kwargs['case_number'])
+
+        deadline_dict = utils.get_deadline_dict(case.track)
+
+        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date,
+                                                       deadline_dict[str(Deadline.REQUEST_PTI)])
+        self.fields['request_pti_date'] = forms.DateTimeField(
+            label='Date that the defense requested pretrial interviews',
+            initial=initial,
+            input_formats=['%Y-%m-%d']
+        )
