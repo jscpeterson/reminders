@@ -3,14 +3,18 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
+    SUPERVISOR = 1
+    PROSECUTOR = 2
+    PARALEGAL = 3
     POSITION_CHOICES = (
-        (1, 'Supervisor'),
-        (2, 'Prosecutor'),
-        (3, 'Paralegal')
+        (SUPERVISOR, 'Supervisor'),
+        (PROSECUTOR, 'Prosecutor'),
+        (PARALEGAL, 'Paralegal')
     )
     first_name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
     position = models.IntegerField(null=True)
+    # TODO: Make position a choicefield
 
     def __str__(self):
         display_name = self.first_name + " " + self.last_name

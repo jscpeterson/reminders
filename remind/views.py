@@ -7,7 +7,7 @@ from .constants import TRIAL_DEADLINES, SOURCE_URL
 from . import utils
 
 
-class CaseCreate(CreateView):
+class CaseCreateView(CreateView):
     model = Case
     form_class = CaseForm
 
@@ -124,7 +124,6 @@ class OrderView(FormView):
         return self.kwargs
 
     def post(self, request, *args, **kwargs):
-
         case = Case.objects.get(case_number=self.kwargs['case_number'])
 
         for key in TRIAL_DEADLINES:
