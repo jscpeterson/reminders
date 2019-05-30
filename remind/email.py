@@ -1,6 +1,6 @@
 from remind import utils
 from .models import Case, Deadline
-from .constants import SOURCE_URL
+from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS
 
 INDENT = '     '
 
@@ -29,7 +29,7 @@ class Email:
         self.email_type = email_type
         self.recipient = recipient
         self.deadline = deadline
-        self.deadline_type = Deadline.TYPE_CHOICES[deadline.type][1]
+        self.deadline_desc = DEADLINE_DESCRIPTIONS[str(deadline.type)]
         self.case = deadline.case
 
     '''
@@ -48,13 +48,13 @@ class Email:
         output = 'Case {}: '.format(self.case.case_number)
 
         subjects = {
-            self.DEADLINE_EXPIRED: 'Deadline for {type} has expired.'.format(
-                type=self.deadline_type
+            self.DEADLINE_EXPIRED: '{desc} has expired.'.format(
+                desc=self.deadline_desc.capitalize()
             ),
             self.DEADLINE_OUTSIDE_LIMITS: 'A deadline is invalid.',
             self.DEADLINE_NEEDS_EXTENSION: 'A deadline requires an extension.',
-            self.REMINDER: 'Deadline for {type} is on {date}.'.format(
-                type=self.deadline_type,
+            self.REMINDER: '{desc} is on {date}.'.format(
+                desc=self.deadline_desc.capitalize(),
                 date=self.deadline.datetime.date()
             ),
             self.SCHEDULING_CONFERENCE: 'Please enter scheduling information.',
@@ -89,9 +89,9 @@ class Email:
         return header + body + footer
 
     def get_deadline_expired_message(self):
-        return '''{indent}The {type} deadline for case {case} expired on {date}.'''.format(
+        return '''{indent}The {desc} for case {case} expired on {date}.'''.format(
             indent=INDENT,
-            type=self.deadline_type,
+            desc=self.deadline_desc,
             case=self.case.case_number,
             date=self.deadline.datetime.date(),
         )

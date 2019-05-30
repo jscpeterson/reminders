@@ -4,7 +4,7 @@ from .models import Case, Deadline
 from users.models import CustomUser
 from django import forms
 from . import utils
-from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES
+from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS
 
 
 class CaseForm(ModelForm):
@@ -79,7 +79,8 @@ class OrderForm(Form):
 
         deadline_dict = utils.get_deadline_dict(case.track)
 
-        for key, label in TRIAL_DEADLINES.items():
+        for key in TRIAL_DEADLINES:
+            label = DEADLINE_DESCRIPTIONS[key].capitalize()
             initial = utils.get_actual_deadline_from_end(case.trial_date, deadline_dict[key])
             self.fields[key] = forms.DateTimeField(
                 label=label,
@@ -113,9 +114,9 @@ class UpdateForm(Form):
 
         for index, deadline in enumerate(Deadline.objects.filter(case=case)):
             key = 'deadline_{}'.format(index)
-            label = '{expired}Deadline for {type}'.format(
+            label = '{expired}{deadline_desc}'.format(
                 expired='(EXPIRED) ' if deadline.expired else '',
-                type=Deadline.TYPE_CHOICES[deadline.type][1]
+                deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize()
             )
             initial = deadline.datetime
 
@@ -127,6 +128,7 @@ class UpdateForm(Form):
 
 class UpdateHomeForm(Form):
     case_number = forms.CharField(required=True)
+    # FIXME For some reason required=True is not working, an empty field throws a KeyError
 
     def clean(self):
         cd = self.cleaned_data

@@ -66,30 +66,30 @@ TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
 
-TRIAL_DEADLINES = {
-    str(Deadline.WITNESS_PTI): 'Deadline to complete witness pretrial interviews',
-    str(Deadline.SCIENTIFIC_EVIDENCE): 'Deadline to produce the results of scientific evidence',
-    str(Deadline.PRETRIAL_MOTION_FILING): 'Deadline to file any pretrial motions',
-    str(Deadline.PRETRIAL_CONFERENCE): 'Date and time of the pretrial conference',
-    str(Deadline.FINAL_WITNESS_LIST): 'Deadline to submit a final witness list',
-    str(Deadline.NEED_FOR_INTERPRETER): 'Deadline to file notice for language access services',
-    str(Deadline.PLEA_AGREEMENT): 'Deadline to submit any plea agreement to the Court',
+TRIAL_DEADLINES = [
+    str(Deadline.WITNESS_PTI),
+    str(Deadline.SCIENTIFIC_EVIDENCE),
+    str(Deadline.PRETRIAL_MOTION_FILING),
+    str(Deadline.PRETRIAL_CONFERENCE),
+    str(Deadline.FINAL_WITNESS_LIST),
+    str(Deadline.NEED_FOR_INTERPRETER),
+    str(Deadline.PLEA_AGREEMENT),
+]
+
+DEADLINE_DESCRIPTIONS = {
+    # str(Deadline.FFA): '',
+    str(Deadline.SCHEDULING_CONFERENCE): 'date of the scheduling conference',
+    str(Deadline.WITNESS_LIST): 'deadline to file a witness list',
+    str(Deadline.REQUEST_PTI): 'deadline for the defense to request pretrial interviews',
+    str(Deadline.CONDUCT_PTI): 'deadline for the defense to conduct pretrial interviews',
+    str(Deadline.WITNESS_PTI): 'deadline to complete witness pretrial interviews',
+    str(Deadline.SCIENTIFIC_EVIDENCE): 'deadline to produce the results of scientific evidence',
+    str(Deadline.PRETRIAL_MOTION_FILING): 'deadline to file any pretrial motions',
+    # str(Deadline.PRETRIAL_MOTION_RESPONSE): '',
+    # str(Deadline.PRETRIAL_MOTION_HEARING): '',
+    str(Deadline.PRETRIAL_CONFERENCE): 'date and time of the pretrial conference',
+    str(Deadline.FINAL_WITNESS_LIST): 'deadline to submit a final witness list',
+    str(Deadline.NEED_FOR_INTERPRETER): 'deadline to file notice for language access services',
+    str(Deadline.PLEA_AGREEMENT): 'deadline to submit any plea agreement to the Court',
+    str(Deadline.TRIAL): 'date the trial will commence',
 }
-#
-# DEADLINE_DESCRIPTIONS = {
-#     FFA = 0
-# SCHEDULING_CONFERENCE = 1
-# WITNESS_LIST = 2
-# REQUEST_PTI = 3
-# CONDUCT_PTI = 4
-# WITNESS_PTI = 5
-# SCIENTIFIC_EVIDENCE = 6
-# PRETRIAL_MOTION_FILING = 7
-# PRETRIAL_MOTION_RESPONSE = 8
-# PRETRIAL_MOTION_HEARING = 9
-# PRETRIAL_CONFERENCE = 10
-# FINAL_WITNESS_LIST = 11
-# NEED_FOR_INTERPRETER = 12
-# PLEA_AGREEMENT = 13
-# TRIAL = 14
-# }
