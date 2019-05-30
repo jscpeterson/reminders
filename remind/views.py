@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm
-from .constants import TRIAL_DEADLINES
+from .constants import TRIAL_DEADLINES, SOURCE_URL
 from . import utils
 
 
@@ -41,7 +41,7 @@ class SchedulingView(FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('track', kwargs=self.kwargs)
+        return SOURCE_URL
 
 
 class TrackView(FormView):
@@ -136,8 +136,7 @@ class OrderView(FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        # TODO Figure out where to go from here (UpdateView?)
-        return
+        return SOURCE_URL
 
 
 class UpdateView(FormView):

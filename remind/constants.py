@@ -1,6 +1,8 @@
 """ Constants used by Adult Felony processes """
 from .models import Deadline
 
+SOURCE_URL = 'http://127.0.0.1:8000'
+
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
 
 LAST_DAY_HOUR = 23

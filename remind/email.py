@@ -1,5 +1,6 @@
 from remind import utils
 from .models import Case, Deadline
+from .constants import SOURCE_URL
 
 INDENT = '     '
 
@@ -108,7 +109,8 @@ class Email:
     #     raise Exception('Message not implemented')
 
     def get_scheduling_message(self):
-        url = 'http://127.0.0.1:8000/remind/{case_number}/track'.format(
+        url = '{source}/remind/{case_number}/track'.format(
+            source=SOURCE_URL,
             case_number=self.case.case_number
         )
 
@@ -122,7 +124,8 @@ Please enter the results of the scheduling order at {url}.'''.format(
         )
 
     def get_request_pti_message(self):
-        url = 'http://127.0.0.1:8000/remind/{case_number}/request_pti'.format(
+        url = '{source}/remind/{case_number}/request_pti'.format(
+            source=SOURCE_URL,
             case_number=self.case.case_number
         )
 
