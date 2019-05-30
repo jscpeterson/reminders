@@ -82,3 +82,19 @@ class OrderForm(Form):
                 label=label,
                 initial=initial
             )
+
+
+class RequestPTIForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        case = Case.objects.get(case_number=kwargs['case_number'])
+
+        deadline_dict = utils.get_deadline_dict(case.track)
+
+        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date,
+                                                       deadline_dict[str(Deadline.REQUEST_PTI)])
+        self.fields['request_pti_date'] = forms.DateTimeField(
+            label='Date that the defense requested pretrial interviews',
+            initial=initial,
+        )

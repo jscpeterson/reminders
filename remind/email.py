@@ -128,8 +128,10 @@ Please enter the results of the scheduling order at {url}.'''.format(
             source=SOURCE_URL,
             case_number=self.case.case_number
         )
-
-        request_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.REQUEST_PTI)]
+        try:
+            request_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.REQUEST_PTI)]
+        except Exception:
+            request_pti_days = 14
 
         return '''{indent}It has been {days} days since the scheduling conference for case {case_number}. If the \
 defense requested pretrial interviews, please enter the date they did so at {url}. If they did not, you are under no \
@@ -141,7 +143,10 @@ longer under any obligation to assist them.'''.format(
         )
 
     def get_conduct_pti_message(self):
-        conduct_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.CONDUCT_PTI)]
+        try:
+            conduct_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.CONDUCT_PTI)]
+        except Exception:
+            conduct_pti_days = 14
 
         return '''{indent}It has been {days} days since the defense requested pretrial interviews for case \
 {case_number} on {date}. If the defense has set up and conducted their pretrial interviews, you can disregard this \

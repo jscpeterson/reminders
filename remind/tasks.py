@@ -34,6 +34,10 @@ def check_all_deadlines():
             deadline.save()
             if deadline.type == Deadline.SCHEDULING_CONFERENCE:
                 send_emails(Email.SCHEDULING_CONFERENCE, deadline)
+            elif deadline.type == Deadline.REQUEST_PTI:
+                send_emails(Email.REQUEST_PTI, deadline)
+            elif deadline.type == Deadline.CONDUCT_PTI:
+                send_emails(Email.CONDUCT_PTI, deadline)
             else:
                 send_emails(Email.DEADLINE_EXPIRED, deadline)
             print('Email sent')
