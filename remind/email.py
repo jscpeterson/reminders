@@ -119,7 +119,7 @@ Please enter the results of the scheduling order at {url}.'''.format(
             indent=INDENT,
             case_number=self.case.case_number,
             date=self.case.scheduling_conference_date.date(),
-            time=self.case.scheduling_conference_date.time(),  # TODO Format properly
+            time=self.case.scheduling_conference_date.strftime('%H:%M'),
             url=url,
         )
 
@@ -152,7 +152,7 @@ longer under any obligation to assist them.'''.format(
 {case_number} on {date}. If the defense has set up and conducted their pretrial interviews, you can disregard this \
 message. If they did not, this is a notification that you are no longer under any obligation to assist them.'''.format(
             indent=INDENT,
-            date=self.case.pti_request_date,
+            date=self.case.pti_request_date,  # FIXME Format sucks. Can't call strftime or date as they may be null
             days=conduct_pti_days,
             case_number=self.case.case_number,
         )
