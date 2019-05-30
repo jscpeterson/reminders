@@ -1,6 +1,8 @@
 """ Constants used by Adult Felony processes """
 from .models import Deadline
 
+SOURCE_URL = 'http://127.0.0.1:8000'
+
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
 
 LAST_DAY_HOUR = 23
@@ -49,7 +51,6 @@ TRACK_TWO_DEADLINE_LIMITS = {
 TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 455,
     'trial_extended': 545,
-    str(Deadline.TRIAL): 210,
     str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 21,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 60,  # Days after PTI request
@@ -74,3 +75,21 @@ TRIAL_DEADLINES = {
     str(Deadline.NEED_FOR_INTERPRETER): 'Deadline to file notice for language access services',
     str(Deadline.PLEA_AGREEMENT): 'Deadline to submit any plea agreement to the Court',
 }
+#
+# DEADLINE_DESCRIPTIONS = {
+#     FFA = 0
+# SCHEDULING_CONFERENCE = 1
+# WITNESS_LIST = 2
+# REQUEST_PTI = 3
+# CONDUCT_PTI = 4
+# WITNESS_PTI = 5
+# SCIENTIFIC_EVIDENCE = 6
+# PRETRIAL_MOTION_FILING = 7
+# PRETRIAL_MOTION_RESPONSE = 8
+# PRETRIAL_MOTION_HEARING = 9
+# PRETRIAL_CONFERENCE = 10
+# FINAL_WITNESS_LIST = 11
+# NEED_FOR_INTERPRETER = 12
+# PLEA_AGREEMENT = 13
+# TRIAL = 14
+# }

@@ -4,6 +4,8 @@ from celery import shared_task
 
 from datetime import datetime
 from django.utils import timezone
+
+from .email import Email
 from .models import Deadline
 from django.core.mail import send_mail
 from django.conf import settings
@@ -30,39 +32,34 @@ def check_all_deadlines():
             print('Deadline {} expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
             deadline.expired = True
             deadline.save()
-            send_email(deadline)
+            if deadline.type == Deadline.SCHEDULING_CONFERENCE:
+                send_emails(Email.SCHEDULING_CONFERENCE, deadline)
+            elif deadline.type == Deadline.REQUEST_PTI:
+                send_emails(Email.REQUEST_PTI, deadline)
+            elif deadline.type == Deadline.CONDUCT_PTI:
+                send_emails(Email.CONDUCT_PTI, deadline)
+            else:
+                send_emails(Email.DEADLINE_EXPIRED, deadline)
             print('Email sent')
 
 
 @shared_task()
-def send_email(deadline):
+def send_emails(email_type, deadline):
 
-    type = Deadline.TYPE_CHOICES[deadline.type][1]
+    recipients = [
+        deadline.case.prosecutor,
+        # deadline.case.paralegal,
+        # deadline.case.supervisor,
+    ]
 
-    subject = 'Deadline for {type} for case {case} expired'.format(type=type, case=deadline.case.case_number)
-
-    message = '''Hello {first_name} {last_name},
-    The deadline for the {type} for case {case} expired on {date}.
- 
-    Thanks,
-    DA 2nd Reminders
-    '''.format(
-        first_name=deadline.case.prosecutor_first_name,
-        last_name=deadline.case.prosecutor_last_name,
-        type=type,
-        case=deadline.case.case_number,
-        date=deadline.datetime.date(),
-    )
-
-    send_mail(
-        subject=subject,
-        message=message,
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[
-            deadline.case.get_prosecutor_email(),
-            deadline.case.get_supervisor_email(),
-        ],
-        fail_silently=True
-    )
+    for recipient in recipients:
+        email = Email(email_type, recipient, deadline)
+        send_mail(
+            subject=email.get_subject(),
+            message=email.get_message(),
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[recipient.email],
+            fail_silently=True
+        )
 
 

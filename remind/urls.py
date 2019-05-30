@@ -7,5 +7,6 @@ urlpatterns = [
     path('<str:case_number>/track/', views.TrackView.as_view(), name='track'),
     path('<str:case_number>/trial/', views.TrialView.as_view(), name='trial'),
     path('<str:case_number>/order/', views.OrderView.as_view(), name='order'),
-    path('update/', views.CaseUpdate.as_view()),
+    path('<str:case_number>/request_pti/', views.RequestPTIView.as_view(), name='request_pti'),
+    path('<str:case_number>/update/', views.UpdateView.as_view(), name='update')
 ]

@@ -2,8 +2,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
-from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm
-from .constants import TRIAL_DEADLINES
+from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm
+from .constants import TRIAL_DEADLINES, SOURCE_URL
 from . import utils
 
 
@@ -41,7 +41,7 @@ class SchedulingView(FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('track', kwargs=self.kwargs)
+        return SOURCE_URL
 
 
 class TrackView(FormView):
@@ -61,6 +61,7 @@ class TrackView(FormView):
         case.save(update_fields=['scheduling_conference_date'])
 
         # Set track for case
+        # Defining this variable again ensures scheduling_conference_date is saved as a datetime
         case = Case.objects.get(case_number=self.kwargs['case_number'])
         case.track = int(request.POST['track'])
         case.save(update_fields=['track'])
@@ -103,7 +104,7 @@ class TrialView(FormView):
         Deadline.objects.create(
             case=case,
             type=Deadline.TRIAL,
-            datetime=case.scheduling_conference_date,
+            datetime=case.trial_date,
         )
 
         return HttpResponseRedirect(self.get_success_url())
@@ -135,10 +136,68 @@ class OrderView(FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        # TODO Figure out where to go from here (UpdateView?)
-        return
+        return SOURCE_URL
 
 
-class CaseUpdate(FormView):
-    # TODO Create a form view that displays all the active deadlines on a case, allowing the user to modify them
-    pass
+class RequestPTIView(FormView):
+    template_name = 'remind/request_pti_form.html'
+    form_class = RequestPTIForm
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return self.kwargs
+
+    def post(self, request, *args, **kwargs):
+        # Set Request PTI date
+        case = Case.objects.get(case_number=self.kwargs['case_number'])
+        case.pti_request_date = request.POST['request_pti_date']
+        case.save(update_fields=['pti_request_date'])
+
+        # Defining this variable again ensures pti_request_date is saved as a datetime
+        case = Case.objects.get(case_number=self.kwargs['case_number'])
+
+        # Start Conduct PTI deadline timer
+        deadlines_dict = utils.get_deadline_dict(case.track)
+        day_after_request_due = deadlines_dict[str(Deadline.CONDUCT_PTI)] + 1
+        Deadline.objects.create(
+            case=case,
+            type=Deadline.CONDUCT_PTI,
+            datetime=utils.get_actual_deadline_from_start(case.pti_request_date, day_after_request_due)
+        )
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return SOURCE_URL
+
+
+class UpdateView(FormView):
+    template_name = 'remind/update_form.html'
+    form_class = UpdateForm
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return self.kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context['case_number'] = self.kwargs['case_number']
+        return context
+
+    def post(self, request, *args, **kwargs):
+        case = Case.objects.get(case_number=self.kwargs['case_number'])
+
+        for index, deadline in enumerate(Deadline.objects.filter(case=case)):
+            key = 'deadline_{}'.format(index)
+            if deadline.datetime.strftime('%Y-%m-%d %H:%M:%S') != request.POST[key]:
+                deadline.datetime = request.POST[key]
+                deadline.save(update_fields=['datetime'])
+                # TODO remove expired flag if necessary
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return SOURCE_URL

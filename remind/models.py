@@ -43,7 +43,7 @@ class Deadline(models.Model):
         (WITNESS_LIST, 'Witness List'),
         (REQUEST_PTI, 'Request PTIs'),
         (CONDUCT_PTI, 'Conduct Initial PTIs'),
-        (WITNESS_PTI, 'Winess PTIs'),
+        (WITNESS_PTI, 'Witness PTIs'),
         (SCIENTIFIC_EVIDENCE, 'Scientific Evidence'),
         (PRETRIAL_MOTION_FILING, 'Pretrial Motion Filing'),
         (PRETRIAL_MOTION_RESPONSE, 'Pretrial Motion Response'),
