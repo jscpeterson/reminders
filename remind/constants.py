@@ -75,3 +75,21 @@ TRIAL_DEADLINES = {
     str(Deadline.NEED_FOR_INTERPRETER): 'Deadline to file notice for language access services',
     str(Deadline.PLEA_AGREEMENT): 'Deadline to submit any plea agreement to the Court',
 }
+#
+# DEADLINE_DESCRIPTIONS = {
+#     FFA = 0
+# SCHEDULING_CONFERENCE = 1
+# WITNESS_LIST = 2
+# REQUEST_PTI = 3
+# CONDUCT_PTI = 4
+# WITNESS_PTI = 5
+# SCIENTIFIC_EVIDENCE = 6
+# PRETRIAL_MOTION_FILING = 7
+# PRETRIAL_MOTION_RESPONSE = 8
+# PRETRIAL_MOTION_HEARING = 9
+# PRETRIAL_CONFERENCE = 10
+# FINAL_WITNESS_LIST = 11
+# NEED_FOR_INTERPRETER = 12
+# PLEA_AGREEMENT = 13
+# TRIAL = 14
+# }

@@ -28,6 +28,10 @@ def count_holidays_weekends_in_range_from_end(end_date, num_days):
     return sum([1 for i in range(num_days) if is_weekend_or_nm_holiday(end_date - timedelta(days=i))])
 
 
+class InvalidCaseTrackException(Exception):
+    pass
+
+
 def get_deadline_dict(track):
     if track == 1:
         deadlines = TRACK_ONE_DEADLINE_LIMITS
@@ -36,7 +40,7 @@ def get_deadline_dict(track):
     elif track == 3:
         deadlines = TRACK_THREE_DEADLINE_LIMITS
     else:
-        raise Exception('Track not valid')
+        raise InvalidCaseTrackException('Track "{}" not valid'.format(track))
     return deadlines
 
 
