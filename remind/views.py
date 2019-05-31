@@ -68,7 +68,9 @@ class TrackView(FormView):
         case.save(update_fields=['track'])
 
         # Complete scheduling conference deadline timer
-        Deadline.objects.filter(case=case, type=Deadline.SCHEDULING_CONFERENCE).delete()
+        scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
+        scheduling_conference_deadline.completed = True
+        scheduling_conference_deadline.save(update_fields=['completed'])
 
         # Start Request PTI deadline timer
         deadlines_dict = utils.get_deadline_dict(case.track)

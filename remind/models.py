@@ -59,6 +59,7 @@ class Deadline(models.Model):
     case = models.ForeignKey(Case, on_delete=models.PROTECT)
     datetime = models.DateTimeField()
     expired = models.BooleanField(default=False)
+    completed = models.BooleanField(default=False)
 
 
 class Motion(models.Model):
