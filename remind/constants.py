@@ -93,3 +93,39 @@ DEADLINE_DESCRIPTIONS = {
     str(Deadline.PLEA_AGREEMENT): 'deadline to submit any plea agreement to the Court',
     str(Deadline.TRIAL): 'date the trial will commence',
 }
+
+FIRST_REMINDER_DAYS = {
+    # str(Deadline.FFA): '',
+    str(Deadline.SCHEDULING_CONFERENCE): 5,
+    str(Deadline.WITNESS_LIST): 5,
+    str(Deadline.REQUEST_PTI): 5,
+    str(Deadline.CONDUCT_PTI): 5,
+    str(Deadline.WITNESS_PTI): 5,
+    str(Deadline.SCIENTIFIC_EVIDENCE): 5,
+    str(Deadline.PRETRIAL_MOTION_FILING): 5,
+    # str(Deadline.PRETRIAL_MOTION_RESPONSE): '',
+    # str(Deadline.PRETRIAL_MOTION_HEARING): '',
+    str(Deadline.PRETRIAL_CONFERENCE): 5,
+    str(Deadline.FINAL_WITNESS_LIST): 5,
+    str(Deadline.NEED_FOR_INTERPRETER): 5,
+    str(Deadline.PLEA_AGREEMENT): 5,
+    str(Deadline.TRIAL): 5,
+}
+
+SECOND_REMINDER_DAYS = {
+    # str(Deadline.FFA): '',
+    str(Deadline.SCHEDULING_CONFERENCE): 2,
+    str(Deadline.WITNESS_LIST): 2,
+    str(Deadline.REQUEST_PTI): 2,
+    str(Deadline.CONDUCT_PTI): 2,
+    str(Deadline.WITNESS_PTI): 2,
+    str(Deadline.SCIENTIFIC_EVIDENCE): 2,
+    str(Deadline.PRETRIAL_MOTION_FILING): 2,
+    # str(Deadline.PRETRIAL_MOTION_RESPONSE): '',
+    # str(Deadline.PRETRIAL_MOTION_HEARING): '',
+    str(Deadline.PRETRIAL_CONFERENCE): 2,
+    str(Deadline.FINAL_WITNESS_LIST): 2,
+    str(Deadline.NEED_FOR_INTERPRETER): 2,
+    str(Deadline.PLEA_AGREEMENT): 2,
+    str(Deadline.TRIAL): 2,
+}
