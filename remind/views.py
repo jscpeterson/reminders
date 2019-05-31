@@ -196,7 +196,6 @@ class UpdateView(FormView):
             if deadline.datetime.strftime('%Y-%m-%d %H:%M:%S') != request.POST[key]:
                 deadline.datetime = request.POST[key]
                 deadline.save(update_fields=['datetime'])
-                # TODO remove expired flag if necessary
 
         return HttpResponseRedirect(self.get_success_url())
 

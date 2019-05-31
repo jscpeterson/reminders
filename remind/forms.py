@@ -116,13 +116,14 @@ class UpdateForm(Form):
             key = 'deadline_{}'.format(index)
             label = '{expired}{deadline_desc}'.format(
                 expired='(EXPIRED) ' if deadline.expired else '',
-                deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize()
+                deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
             )
             initial = deadline.datetime
 
             self.fields[key] = forms.DateTimeField(
                 label=label,
-                initial=initial
+                initial=initial,
+                disabled=deadline.expired
             )
 
 
