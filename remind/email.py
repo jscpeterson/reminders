@@ -1,4 +1,5 @@
 from remind import utils
+from django.utils import timezone
 from .models import Deadline
 from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL
 
@@ -80,8 +81,8 @@ class Email:
 
         messages = {
             self.DEADLINE_EXPIRED: self.get_deadline_expired_message(),
-            # self.DEADLINE_OUTSIDE_LIMITS: self.get_deadline_invalid_message(),
-            # self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
+            self.DEADLINE_OUTSIDE_LIMITS: self.get_deadline_invalid_message(),
+            self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
             self.FIRST_REMINDER: self.get_first_reminder_message(),
             self.SECOND_REMINDER: self.get_second_reminder_message(),
             self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
@@ -102,16 +103,32 @@ class Email:
             date=self.deadline.datetime.date(),
         )
 
-    # def get_deadline_invalid_message(self):
-    #     # TODO Add message method
-    #     raise Exception('Message not implemented')
-    #
-    # def get_deadline_extension_message(self):
-    #     # TODO Add message method
-    #     raise Exception('Message not implemented')
+    def get_deadline_invalid_message(self):
+        url = SOURCE_URL  # TODO Get real URL
+
+        return '''{indent}The {desc} is over {days} days from the {event}, which may be in violation of LR2-400.\
+\n\n{indent}Please visit {url} to confirm that the judge is aware of this.'''.format(
+            indent=INDENT,
+            desc=self.deadline_desc,
+            days=0,  # TODO Get real days
+            event=timezone.now(),  # TODO Get real event date
+            url=url
+        )
+
+    def get_deadline_extension_message(self):
+        url = SOURCE_URL  # TODO Get real URL
+
+        return '''{indent}The {desc} is over {days} days from the {event}, which is permissible if an extension has \
+been filed.\n\n{indent}Please visit {url} to confirm that you have filed for an extension.'''.format(
+            indent=INDENT,
+            desc=self.deadline_desc,
+            days=0,  # TODO Get real days
+            event=timezone.now(),  # TODO Get real event date
+            url=url
+        )
 
     def get_first_reminder_message(self):
-        url = '{source}/remind/{pk}/complete'.format(  # TODO Replace with actual URL
+        url = '{source}/remind/{pk}/complete'.format(
             source=SOURCE_URL,
             pk=self.deadline.pk,
         )
