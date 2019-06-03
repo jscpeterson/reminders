@@ -3,7 +3,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
-from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, UpdateHomeForm
+from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
+    UpdateHomeForm, CompleteForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL
 from . import utils
 
@@ -20,11 +21,32 @@ class SchedulingView(FormView):
     template_name = 'remind/scheduling_form.html'
     form_class = SchedulingForm
 
+    def get_initial(self):
+        return super().get_initial()
+
+    def get_prefix(self):
+        return super().get_prefix()
+
+    def get_form_class(self):
+        return super().get_form_class()
+
+    def get_form(self, form_class=None):
+        return super().get_form(form_class)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def get_form_kwargs(self):
         return self.kwargs
+
+    def form_valid(self, form):
+        super(SchedulingView, self).form_valid()
+    
+    def form_invalid(self, form):
+        super(SchedulingView, self).form_invalid()
 
     def post(self, request, *args, **kwargs):
         # Set scheduling conference for date
@@ -216,3 +238,20 @@ class UpdateHomeView(FormView):
 
     def get_success_url(self):
         return reverse('update', kwargs={'case_number': self.case_number})
+
+
+class CompleteView(FormView):
+    template_name = 'remind/complete_form.html'
+    form_class = CompleteForm
+
+    def get_form_kwargs(self):
+        return self.kwargs
+
+    def post(self, request, *args, **kwargs):
+        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
+        deadline.completed = request.POST['completed']
+        deadline.save(update_fields=['completed'])
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return SOURCE_URL

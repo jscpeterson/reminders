@@ -111,9 +111,9 @@ class Email:
     #     raise Exception('Message not implemented')
 
     def get_first_reminder_message(self):
-        url = '{source}'.format(  # TODO Replace with actual URL
+        url = '{source}/remind/{pk}/complete'.format(  # TODO Replace with actual URL
             source=SOURCE_URL,
-            # case_number=self.case.case_number
+            pk=self.deadline.pk,
         )
 
         return '''{indent}This is a reminder that the {desc} for case {case} is on {date} at {time}. If this task has \
