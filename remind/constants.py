@@ -1,7 +1,8 @@
-""" Constants used by Adult Felony processes """
 from .models import Deadline
 
 SOURCE_URL = 'http://127.0.0.1:8000'
+ADMINISTRATION_EMAIL = 'joseph.peterson@da2nd.state.nm.us'
+SUPPORT_EMAIL = 'joseph.peterson@da2nd.state.nm.us'
 
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
 
@@ -66,7 +67,7 @@ TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
 
-TRIAL_DEADLINES = [
+TRIAL_DEADLINES = (
     str(Deadline.WITNESS_PTI),
     str(Deadline.SCIENTIFIC_EVIDENCE),
     str(Deadline.PRETRIAL_MOTION_FILING),
@@ -74,7 +75,16 @@ TRIAL_DEADLINES = [
     str(Deadline.FINAL_WITNESS_LIST),
     str(Deadline.NEED_FOR_INTERPRETER),
     str(Deadline.PLEA_AGREEMENT),
-]
+)
+
+# Deadlines that do not require a reminder
+EVENT_DEADLINES = (
+    Deadline.SCHEDULING_CONFERENCE,
+    Deadline.PRETRIAL_CONFERENCE,
+    Deadline.TRIAL,
+    Deadline.REQUEST_PTI,
+    Deadline.CONDUCT_PTI
+)
 
 DEADLINE_DESCRIPTIONS = {
     # str(Deadline.FFA): '',
@@ -92,4 +102,40 @@ DEADLINE_DESCRIPTIONS = {
     str(Deadline.NEED_FOR_INTERPRETER): 'deadline to file notice for language access services',
     str(Deadline.PLEA_AGREEMENT): 'deadline to submit any plea agreement to the Court',
     str(Deadline.TRIAL): 'date the trial will commence',
+}
+
+FIRST_REMINDER_DAYS = {
+    # Deadline.FFA): '',
+    Deadline.SCHEDULING_CONFERENCE: 5,
+    Deadline.WITNESS_LIST: 5,
+    Deadline.REQUEST_PTI: 5,
+    Deadline.CONDUCT_PTI: 5,
+    Deadline.WITNESS_PTI: 5,
+    Deadline.SCIENTIFIC_EVIDENCE: 5,
+    Deadline.PRETRIAL_MOTION_FILING: 5,
+    # Deadline.PRETRIAL_MOTION_RESPONSE: '',
+    # Deadline.PRETRIAL_MOTION_HEARING: '',
+    Deadline.PRETRIAL_CONFERENCE: 5,
+    Deadline.FINAL_WITNESS_LIST: 5,
+    Deadline.NEED_FOR_INTERPRETER: 5,
+    Deadline.PLEA_AGREEMENT: 5,
+    Deadline.TRIAL: 5,
+}
+
+SECOND_REMINDER_DAYS = {
+    # Deadline.FFA: '',
+    Deadline.SCHEDULING_CONFERENCE: 2,
+    Deadline.WITNESS_LIST: 2,
+    Deadline.REQUEST_PTI: 2,
+    Deadline.CONDUCT_PTI: 2,
+    Deadline.WITNESS_PTI: 2,
+    Deadline.SCIENTIFIC_EVIDENCE: 2,
+    Deadline.PRETRIAL_MOTION_FILING: 2,
+    # Deadline.PRETRIAL_MOTION_RESPONSE: '',
+    # Deadline.PRETRIAL_MOTION_HEARING: '',
+    Deadline.PRETRIAL_CONFERENCE: 2,
+    Deadline.FINAL_WITNESS_LIST: 2,
+    Deadline.NEED_FOR_INTERPRETER: 2,
+    Deadline.PLEA_AGREEMENT: 2,
+    Deadline.TRIAL: 2,
 }

@@ -2,11 +2,12 @@
 from __future__ import absolute_import, unicode_literals
 from celery import shared_task
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 
 from .email import Email
 from .models import Deadline
+from .constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS, ADMINISTRATION_EMAIL, EVENT_DEADLINES
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -25,41 +26,74 @@ def check_all_deadlines():
     """ Checks to see if any deadlines are past due """
     now = timezone.now()
     print('Now the time is {}'.format(now.strftime('%H:%M:%S.%f')))
-    for deadline in Deadline.objects.filter(expired=False):
-        if deadline.datetime > now:
-            print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
+
+    for deadline in Deadline.objects.filter(expired=False, completed=False):
+        days_until = deadline.datetime - now
+
+        # If deadline is in EVENT_DEADLINES it does not need a reminder or a deadline expiry notice
+        if deadline.type in EVENT_DEADLINES:
+            # If it is past the deadline, send emails in specific cases, otherwise, silently complete the task.
+            if days_until <= timedelta(days=0):
+                if deadline.type == Deadline.SCHEDULING_CONFERENCE:
+                    send_emails(Email.SCHEDULING_CONFERENCE, deadline)
+                elif deadline.type == Deadline.REQUEST_PTI:
+                    send_emails(Email.REQUEST_PTI, deadline)
+                elif deadline.type == Deadline.CONDUCT_PTI:
+                    send_emails(Email.CONDUCT_PTI, deadline)
+                deadline.completed = True
+                deadline.save(update_fields=['completed'])
+                print('Deadline {} completed: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
+                continue
+
         else:
-            print('Deadline {} expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
-            deadline.expired = True
-            deadline.save()
-            if deadline.type == Deadline.SCHEDULING_CONFERENCE:
-                send_emails(Email.SCHEDULING_CONFERENCE, deadline)
-            elif deadline.type == Deadline.REQUEST_PTI:
-                send_emails(Email.REQUEST_PTI, deadline)
-            elif deadline.type == Deadline.CONDUCT_PTI:
-                send_emails(Email.CONDUCT_PTI, deadline)
-            else:
+            # If it is past the deadline, send expiry emails and flag the deadline as expired
+            if days_until <= timedelta(days=0):
+                print('Deadline {} expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
                 send_emails(Email.DEADLINE_EXPIRED, deadline)
-            print('Email sent')
+                deadline.expired = True
+                deadline.save(update_fields=['expired'])
+                continue
+            # Send second reminder if it is within the SECOND_REMINDER time and two reminders have not been sent
+            elif (days_until <= timedelta(days=SECOND_REMINDER_DAYS[deadline.type])) and deadline.reminders_sent < 2:
+                print('Reminder sent for deadline {} on {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
+                send_emails(Email.SECOND_REMINDER, deadline)
+                deadline.reminders_sent += 1
+                deadline.save(update_fields=['reminders_sent'])
+                continue
+            # Send first reminder if it is within the FIRST_REMINDER time and no reminders have been sent
+            elif (days_until <= timedelta(days=FIRST_REMINDER_DAYS[deadline.type])) and deadline.reminders_sent < 1:
+                print('Reminder sent for deadline {} on {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
+                send_emails(Email.FIRST_REMINDER, deadline)
+                deadline.reminders_sent += 1
+                deadline.save(update_fields=['reminders_sent'])
+                continue
+
+        # If code has not hit continue, deadline does not need to do anything.
+        print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
 
 
 @shared_task()
 def send_emails(email_type, deadline):
 
-    recipients = [
-        deadline.case.prosecutor,
-        # deadline.case.paralegal,
-        # deadline.case.supervisor,
+    # https://docs.djangoproject.com/en/2.2/topics/email/#sending-multiple-emails
+
+    recipient_emails = [
+        deadline.case.prosecutor.email,
+        deadline.case.paralegal.email,
     ]
 
-    for recipient in recipients:
-        email = Email(email_type, recipient, deadline)
-        send_mail(
-            subject=email.get_subject(),
-            message=email.get_message(),
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[recipient.email],
-            fail_silently=True
-        )
+    if email_type == Email.SECOND_REMINDER:
+        recipient_emails.append(deadline.case.supervisor.email)
+    elif email_type == Email.DEADLINE_EXPIRED:
+        recipient_emails.append(deadline.case.supervisor.email)
+        recipient_emails.append(ADMINISTRATION_EMAIL)
 
-
+    email = Email(email_type, deadline.case.prosecutor, deadline)
+    send_mail(
+        subject=email.get_subject(),
+        message=email.get_message(),
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=recipient_emails,
+        fail_silently=True
+    )
+    print('Email sent')

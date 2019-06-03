@@ -1,6 +1,6 @@
 from remind import utils
-from .models import Case, Deadline
-from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS
+from .models import Deadline
+from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL
 
 INDENT = '     '
 
@@ -10,16 +10,18 @@ class Email:
     DEADLINE_EXPIRED = 0
     DEADLINE_OUTSIDE_LIMITS = 1
     DEADLINE_NEEDS_EXTENSION = 2
-    REMINDER = 3
-    SCHEDULING_CONFERENCE = 4
-    REQUEST_PTI = 5
-    CONDUCT_PTI = 6
+    FIRST_REMINDER = 3
+    SECOND_REMINDER = 4
+    SCHEDULING_CONFERENCE = 5
+    REQUEST_PTI = 6
+    CONDUCT_PTI = 7
 
     EMAIL_TYPES = (
         (DEADLINE_EXPIRED, 'Deadline expired'),
         (DEADLINE_OUTSIDE_LIMITS, 'Deadline outside limits'),
         (DEADLINE_NEEDS_EXTENSION, 'Deadline needs extension to be valid'),
-        (REMINDER, 'Reminder'),
+        (FIRST_REMINDER, 'First reminder'),
+        (SECOND_REMINDER, 'Second reminder'),
         (SCHEDULING_CONFERENCE, 'Day of scheduling conference'),
         (REQUEST_PTI, 'Day defense can no longer request PTI'),
         (CONDUCT_PTI, 'Day defense can no longer conduct PTI')
@@ -53,7 +55,11 @@ class Email:
             ),
             self.DEADLINE_OUTSIDE_LIMITS: 'A deadline is invalid.',
             self.DEADLINE_NEEDS_EXTENSION: 'A deadline requires an extension.',
-            self.REMINDER: '{desc} is on {date}.'.format(
+            self.FIRST_REMINDER: '{desc} is on {date}.'.format(
+                desc=self.deadline_desc.capitalize(),
+                date=self.deadline.datetime.date()
+            ),
+            self.SECOND_REMINDER: 'Second reminder - {desc} is on {date}.'.format(
                 desc=self.deadline_desc.capitalize(),
                 date=self.deadline.datetime.date()
             ),
@@ -67,7 +73,6 @@ class Email:
         return output
 
     def get_message(self):
-
         header = 'Dear {first_name} {last_name}:\n\n'.format(
             first_name=self.recipient.first_name,
             last_name=self.recipient.last_name,
@@ -77,7 +82,8 @@ class Email:
             self.DEADLINE_EXPIRED: self.get_deadline_expired_message(),
             # self.DEADLINE_OUTSIDE_LIMITS: self.get_deadline_invalid_message(),
             # self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
-            # self.REMINDER: self.get_reminder_message(),
+            self.FIRST_REMINDER: self.get_first_reminder_message(),
+            self.SECOND_REMINDER: self.get_second_reminder_message(),
             self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
             self.REQUEST_PTI: self.get_request_pti_message(),
             self.CONDUCT_PTI: self.get_conduct_pti_message(),
@@ -89,7 +95,7 @@ class Email:
         return header + body + footer
 
     def get_deadline_expired_message(self):
-        return '''{indent}The {desc} for case {case} expired on {date}.'''.format(
+        return '''{indent}The {desc} for case {case} expired on {date}. Administration has been notified.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
             case=self.case.case_number,
@@ -103,10 +109,33 @@ class Email:
     # def get_deadline_extension_message(self):
     #     # TODO Add message method
     #     raise Exception('Message not implemented')
-    #
-    # def get_reminder_message(self):
-    #     # TODO Add message method
-    #     raise Exception('Message not implemented')
+
+    def get_first_reminder_message(self):
+        url = '{source}/remind/{pk}/complete'.format(  # TODO Replace with actual URL
+            source=SOURCE_URL,
+            pk=self.deadline.pk,
+        )
+
+        return '''{indent}This is a reminder that the {desc} for case {case} is on {date} at {time}. If this task has \
+been completed or is not necessary in this case, please go to {url} to notify the office. If you encounter any \
+problems, please notify {contact}.'''.format(
+            indent=INDENT,
+            desc=self.deadline_desc,
+            case=self.case,
+            date=self.deadline.datetime.date(),
+            time=self.deadline.datetime.strftime('%H:%M'),
+            url=url,
+            contact=SUPPORT_EMAIL,
+        )
+
+    def get_second_reminder_message(self):
+        return self.get_first_reminder_message() + '''\n\n{indent}{supervisor} has received a copy of this message. \
+Administration will be notified if the task is not completed by {date}.'''.format(
+            indent=INDENT,
+            supervisor=self.case.supervisor,
+            date=self.deadline.datetime.date(),
+            contact=SUPPORT_EMAIL,
+        )
 
     def get_scheduling_message(self):
         url = '{source}/remind/{case_number}/track'.format(
@@ -147,6 +176,8 @@ longer under any obligation to assist them.'''.format(
             conduct_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.CONDUCT_PTI)]
         except utils.InvalidCaseTrackException:
             conduct_pti_days = 14
+
+            # TODO Get self.case.pti_request_date here and handle a null case
 
         return '''{indent}It has been {days} days since the defense requested pretrial interviews for case \
 {case_number} on {date}. If the defense has set up and conducted their pretrial interviews, you can disregard this \

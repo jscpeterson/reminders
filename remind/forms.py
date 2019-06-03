@@ -6,6 +6,11 @@ from django import forms
 from . import utils
 from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS
 
+TRUE_FALSE_CHOICES = (
+    (True, 'Yes'),
+    (False, 'No')
+)
+
 
 class CaseForm(ModelForm):
     supervisor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=1), empty_label=None)
@@ -24,16 +29,20 @@ class CaseForm(ModelForm):
 
 class SchedulingForm(Form):
 
+    scheduling_conference_date = forms.DateTimeField(
+        input_formats=['%Y-%m-%d %H:%M'],
+        label='Date and time of the scheduling conference'
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__()
         case = Case.objects.get(case_number=kwargs['case_number'])
 
         initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
-        self.fields['scheduling_conference_date'] = forms.DateTimeField(
-            label='Date and time of the scheduling conference',
-            initial=initial,
-            input_formats=['%Y-%m-%d %H:%M']
-        )
+        self.fields['scheduling_conference_date'].initial = initial
+
+    def clean(self):
+        super(SchedulingForm, self).clean()
 
 
 class TrackForm(Form):
@@ -112,10 +121,11 @@ class UpdateForm(Form):
         super().__init__()
         case = Case.objects.get(case_number=kwargs['case_number'])
 
-        for index, deadline in enumerate(Deadline.objects.filter(case=case)):
+        for index, deadline in enumerate(Deadline.objects.filter(case=case,)):
             key = 'deadline_{}'.format(index)
-            label = '{expired}{deadline_desc}'.format(
+            label = '{expired}{completed}{deadline_desc}'.format(
                 expired='(EXPIRED) ' if deadline.expired else '',
+                completed='(COMPLETED) ' if deadline.completed else '',
                 deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
             )
             initial = deadline.datetime
@@ -123,7 +133,7 @@ class UpdateForm(Form):
             self.fields[key] = forms.DateTimeField(
                 label=label,
                 initial=initial,
-                disabled=deadline.expired
+                disabled=deadline.expired or deadline.completed
             )
 
 
@@ -135,3 +145,22 @@ class UpdateHomeForm(Form):
         cd = self.cleaned_data
         if not Case.objects.filter(case_number=cd['case_number']):
             raise ValidationError('Case not found with this number.')
+
+
+class CompleteForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        deadline_pk = kwargs.pop('deadline_pk')
+        super(CompleteForm, self).__init__()
+
+        deadline = Deadline.objects.get(pk=deadline_pk)
+
+        label = 'Has the {desc} on case {case} been completed?'.format(
+            desc=DEADLINE_DESCRIPTIONS[str(deadline.type)],
+            case=deadline.case.case_number
+        )
+
+        self.fields['completed'] = forms.ChoiceField(
+            choices=TRUE_FALSE_CHOICES,
+            label=label
+        )
