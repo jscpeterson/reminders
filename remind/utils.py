@@ -175,3 +175,19 @@ def is_deadline_within_limits(deadline, event, days, future_event=False):
     else:
         actual_deadline = get_actual_deadline_from_start(event, days)
         return deadline - actual_deadline >= timedelta(days=0)
+
+
+def is_extension_required(deadline):
+    """
+    Returns True if a deadline requires an extension to be valid.
+    :return: True if a deadline requires an extension to be valid.
+    """
+    deadline_dict = get_deadline_dict(deadline.case.track)
+    if deadline.type == Deadline.TRIAL:
+        max_date_default = deadline.case.scheduling_conference_date + timedelta(days=deadline_dict[Deadline.TRIAL])
+        max_date_extension = deadline.case.scheduling_conference_date + timedelta(days=deadline_dict['trial_extended'])
+        return max_date_default <= deadline.datetime <= max_date_extension
+    elif deadline.type == Deadline.SCIENTIFIC_EVIDENCE:
+        max_date_default = deadline.case.trial_date - timedelta(days=deadline_dict[Deadline.SCIENTIFIC_EVIDENCE])
+        max_date_extension = deadline.case.trial_date - timedelta(days=deadline_dict['scientific_evidence_extended'])
+        return max_date_extension >= deadline.datetime >= max_date_default

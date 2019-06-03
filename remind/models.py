@@ -1,5 +1,3 @@
-from . import utils
-from datetime import timedelta
 from django.db import models
 from users.models import CustomUser
 
@@ -64,20 +62,7 @@ class Deadline(models.Model):
     completed = models.BooleanField(default=False)
     reminders_sent = models.IntegerField(default=0)
 
-    def is_extension_required(self):
-        """
-        Returns True if a deadline requires an extension to be valid.
-        :return: True if a deadline requires an extension to be valid.
-        """
-        deadline_dict = utils.get_deadline_dict(self.case.track)
-        if self.type == Deadline.TRIAL:
-            max_date_default = self.case.scheduling_conference_date + timedelta(days=deadline_dict[Deadline.TRIAL])
-            max_date_extension = self.case.scheduling_conference_date + timedelta(days=deadline_dict['trial_extended'])
-            return max_date_default <= self.datetime <= max_date_extension
-        elif self.type == Deadline.SCIENTIFIC_EVIDENCE:
-            max_date_default = self.case.trial_date - timedelta(days=deadline_dict[Deadline.SCIENTIFIC_EVIDENCE])
-            max_date_extension = self.case.trial_date - timedelta(days=deadline_dict['scientific_evidence_extended'])
-            return max_date_extension >= self.datetime >= max_date_default
+
 
 
 class Motion(models.Model):
