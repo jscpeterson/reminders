@@ -1,12 +1,26 @@
 {% extends 'base.html' %}
+{% load material_form %}
 
 {% block title %}Sign Up{% endblock %}
 
 {% block content %}
-<h2>Sign up</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Sign up</button>
-</form>
+    <div class="content container">
+        <div class="row">
+          <h2>Sign up</h2>
+        </div>
+        <div class="row">
+          <form method="post">
+            {% csrf_token %}
+            {% form form=form %}{% endform %}
+            <button type="submit" name="_submit" class="btn">Sign up</button>
+          </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('select').material_select();
+        });
+    </script>
+
 {% endblock %}
