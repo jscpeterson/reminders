@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-<!--{% extends 'base.html' %}-->
-
+<html>
+{% extends 'base.html' %}
+<!--{% load static %}-->
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-<html>
 <head>
     <title> Home </title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <!--Add CSS Style-->
 </head>
 
@@ -38,20 +37,16 @@
 <form action='remind/update' method='GET'>
     <button type='submit'> Update Existing Case</button>
 </form>
-</html>
+
 
 {% else %}
-<html>
-<!--This is the login screen-->
 <head>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <title> Login </title>
     <!--Add CSS Style-->
     <style>
-        .body{
-            background-image: url("background.jpg");
-            background-size: cover;
+       body{
+            background-color: light-blue;
+            <!--background-size: cover;-->
             color:#fff;
         }
         .login{
@@ -74,13 +69,14 @@
     </style>
 
 </head>
+
 <body>
 <div class="row">
     <div class="col s6 offset-s3">
         <div class="card">
 
-            <div class="card-action red white-text">
-                <h3>Login Form</h3>
+            <div class="card-action center-align red white-text">
+                <h3>Login</h3>
             </div>
 
             <div class="card-content">
@@ -102,8 +98,6 @@
                     <button class="btn-large red">Sign Up</button>
                 </div>
                 <br>
-                <br>
-
             </div>
         </div>
     </div>
