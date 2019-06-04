@@ -104,7 +104,15 @@ class Email:
         )
 
     def get_deadline_invalid_message(self):
-        url = SOURCE_URL  # TODO Get real URL
+        url = '{source}/remind/{pk}/judge_confirmed'.format(
+            source=SOURCE_URL,
+            pk=self.deadline.pk,
+        )
+
+        update_url = '{source}/remind/{case_number}/update'.format(
+            source=SOURCE_URL,
+            case_number=self.deadline.case.case_number,
+        )
 
         # If a track has not been set yet no deadlines will need an extension
         # This variable must be set to something however to prevent an exception
@@ -114,15 +122,24 @@ class Email:
             required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
 
         return '''{indent}The {desc} is over {days} days from the triggering event, which may be in violation of \
-LR2-400. Please visit {url} to confirm that the judge is aware of this.'''.format(
+LR2-400. Please visit {url} to confirm that the judge is aware of this, or visit {update_url} to change the date.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
             days=required_days,
-            url=url
+            url=url,
+            update_url=update_url,
         )
 
     def get_deadline_extension_message(self):
-        url = SOURCE_URL  # TODO Get real URL
+        url = '{source}/remind/{pk}/extension'.format(
+            source=SOURCE_URL,
+            pk=self.deadline.pk,
+        )
+
+        update_url = '{source}/remind/{case_number}/update'.format(
+            source=SOURCE_URL,
+            case_number=self.deadline.case.case_number,
+        )
 
         # If a track has not been set yet no deadlines will need an extension
         # This variable must be set to something however to prevent an exception
@@ -132,11 +149,13 @@ LR2-400. Please visit {url} to confirm that the judge is aware of this.'''.forma
             required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
 
         return '''{indent}The {desc} is over {days} days from the triggering event, which is permissible if an \
-extension has been filed. Please visit {url} to confirm that you have filed for an extension.'''.format(
+extension has been filed. Please visit {url} to confirm that you have filed for an extension, or visit {update_url} to 
+change the date.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
             days=required_days,
-            url=url
+            url=url,
+            update_url=update_url,
         )
 
     def get_first_reminder_message(self):

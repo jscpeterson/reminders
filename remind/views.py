@@ -288,3 +288,28 @@ class ExtensionView(FormView):
 class JudgeConfirmedView(FormView):
     template_name = 'remind/judge_confirmed_form.html'
     form_class = JudgeConfirmedForm
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return self.kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
+        context['deadline_desc'] = DEADLINE_DESCRIPTIONS[str(deadline.type)]
+        context['case_number'] = deadline.case.case_number
+        context['date'] = deadline.datetime
+        required_days = utils.get_deadline_dict(deadline.case.track)[str(deadline.type)]
+        context['required_days'] = required_days
+        return context
+
+    def post(self, request, *args, **kwargs):
+        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
+        deadline.invalid_judge_approved = request.POST['judge_approved']
+        deadline.save(update_fields=['invalid_judge_approved'])
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return SOURCE_URL

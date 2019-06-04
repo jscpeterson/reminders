@@ -9,6 +9,7 @@
         <div class="row">
             <form method="POST">
                 {% csrf_token %}
+                The {{ deadline_desc }} for case {{ case_number }} is on {{ date }}. This is over {{ required_days }} days from the triggering event.<br />
                 {% form form=form %}{% endform %}
                 <button type="submit" name="_submit" class="btn">Submit</button>
             </form>

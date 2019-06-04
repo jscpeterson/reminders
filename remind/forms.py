@@ -183,3 +183,8 @@ class JudgeConfirmedForm(Form):
     def __init__(self, *args, **kwargs):
         deadline_pk = kwargs.pop('deadline_pk')
         super().__init__()
+
+        self.fields['judge_approved'] = forms.ChoiceField(
+            choices=TRUE_FALSE_CHOICES,
+            label='Has this deadline been approved by the judge?'
+        )
