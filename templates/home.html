@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 {% extends 'base.html' %}
-<!--{% load static %}-->
+{% load material_form %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
@@ -15,7 +16,7 @@
 
 <nav>
     <div class="nav-wrapper">
-        <a href="#" class="brand-logo center"><img src="logo.png"></a>
+        <a href="#" class="brand-logo center"><img src="static/templates/logo.png"></a>
         <ul id="nav-mobile" class="left hide-on-med-and-down">
             <li><a href="sass.html">Sass</a></li>
             <li><a href="badges.html">Components</a></li>
@@ -84,22 +85,29 @@
                 <div class="form-field">
                     <label for="username">Username</label>
                     <input type="text" id="username">
-                </div>
-                <br>
+                </div><br>
 
                 <div class="form-field">
                     <label for="password">Password</label>
                     <input type="password" id="password">
-                </div>
-                <br>
+                </div><br>
 
                 <div class="form-field center-align">
-                    <form action='' method='POST'>
+                    <form method="post">
+                        {% csrf_token %}
+                        {% form form=form %}{% endform %}
                         <button type='submit' class="btn-large"> Login</button>
                     </form>
-                    <a href="{% url 'signup' %}">signup</a>
-                </div>
-                <br>
+                </div><br>
+
+                <div class="form-field center-align">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% form form=form %}{% endform %}
+                        <button type='submit' class="btn-large">Sign Up</button>
+                    </form>
+                </div><br>
+
             </div>
         </div>
     </div>
