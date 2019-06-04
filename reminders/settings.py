@@ -112,21 +112,17 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Custom User model
-AUTH_USER_MODEL = 'users.CustomUser' # new
+AUTH_USER_MODEL = 'users.CustomUser'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
-
-
-
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Denver'
 
 USE_I18N = True
 
@@ -149,7 +145,7 @@ CELERY_BROKER_URL = 'amqp://guest@localhost:5672'
 #: from unwanted access (see userguide/security.html)
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'America/Denver'
+CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
 CELERY_BEAT_SCHEDULE = {

@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
@@ -17,54 +18,27 @@ class CaseCreateView(CreateView):
         return reverse('scheduling', kwargs={'case_number': self.object.case_number})
 
 
-class SchedulingView(FormView):
-    template_name = 'remind/scheduling_form.html'
-    form_class = SchedulingForm
+def scheduling_view(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = SchedulingForm(request.POST, case_number=kwargs.get('case_number'))
+        if form.is_valid():
+            # Set scheduling conference for date
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+            case.scheduling_conference_date = form.cleaned_data.get('scheduling_conference_date')
+            case.save(update_fields=['scheduling_conference_date'])
 
-    def get_initial(self):
-        return super().get_initial()
+            # Start scheduling conference deadline timer
+            Deadline.objects.create(
+                case=case,
+                type=Deadline.SCHEDULING_CONFERENCE,
+                datetime=case.scheduling_conference_date,
+            )
+            return HttpResponseRedirect(SOURCE_URL)
 
-    def get_prefix(self):
-        return super().get_prefix()
+    else:
+        form = SchedulingForm(case_number=kwargs['case_number'])
 
-    def get_form_class(self):
-        return super().get_form_class()
-
-    def get_form(self, form_class=None):
-        return super().get_form(form_class)
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        return self.kwargs
-
-    def form_valid(self, form):
-        super(SchedulingView, self).form_valid()
-    
-    def form_invalid(self, form):
-        super(SchedulingView, self).form_invalid()
-
-    def post(self, request, *args, **kwargs):
-        # Set scheduling conference for date
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
-        case.scheduling_conference_date = request.POST['scheduling_conference_date']
-        case.save(update_fields=['scheduling_conference_date'])
-
-        # Start scheduling conference deadline timer
-        Deadline.objects.create(
-            case=case,
-            type=Deadline.SCHEDULING_CONFERENCE,
-            datetime=case.scheduling_conference_date,
-        )
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return SOURCE_URL
+    return render(request, 'remind/scheduling_form.html', {'form': form})
 
 
 class TrackView(FormView):

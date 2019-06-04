@@ -31,18 +31,14 @@ class SchedulingForm(Form):
 
     scheduling_conference_date = forms.DateTimeField(
         input_formats=['%Y-%m-%d %H:%M'],
-        label='Date and time of the scheduling conference'
+        label='Date and time of the scheduling conference',
     )
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
-        case = Case.objects.get(case_number=kwargs['case_number'])
-
-        initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
-        self.fields['scheduling_conference_date'].initial = initial
-
-    def clean(self):
-        super(SchedulingForm, self).clean()
+        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        super().__init__(*args, **kwargs)
+        # initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
+        # self.fields['scheduling_conference_date'].initial = initial
 
 
 class TrackForm(Form):
