@@ -148,13 +148,28 @@ class TestExtensionCheck(TestCase):
         self.assertFalse(utils.is_extension_required(invalid_deadline))
 
     def test_scientific_deadline(self):
-        # TODO Track 1 scientific evidence date before deadline max should be FALSE
-        # TODO Track 1 scientific evidence date between deadline and extension max should be TRUE
-        # TODO Track 1 scientific evidence date after extension max should be FALSE
-        # TODO Track 2 scientific evidence date before deadline max should be FALSE
-        # TODO Track 2 scientific evidence date between deadline and extension max should be TRUE
-        # TODO Track 2 scientific evidence date after extension max should be FALSE
-        # TODO Track 3 scientific evidence date before deadline max should be FALSE
-        # TODO Track 3 scientific evidence date between deadline and extension max should be TRUE
-        # TODO Track 3 scientific evidence date after extension max should be FALSE
-        return
+        case = Case.objects.create(
+            trial_date=datetime(2019, 6, 3),
+            track=2,
+            paralegal=self.paralegal,
+            prosecutor=self.prosecutor,
+            supervisor=self.supervisor,
+        )
+        good_deadline = Deadline.objects.create(
+            type=Deadline.SCIENTIFIC_EVIDENCE,
+            datetime=datetime(2019, 2, 1),
+            case=case,
+        )
+        invalid_deadline = Deadline.objects.create(
+            type=Deadline.SCIENTIFIC_EVIDENCE,
+            datetime=datetime(2019, 4, 1),
+            case=case,
+        )
+        extension_deadline = Deadline.objects.create(
+            type=Deadline.SCIENTIFIC_EVIDENCE,
+            datetime=datetime(2019, 2, 10),
+            case=case,
+        )
+        self.assertFalse(utils.is_extension_required(good_deadline))
+        self.assertTrue(utils.is_extension_required(extension_deadline))
+        self.assertFalse(utils.is_extension_required(invalid_deadline))

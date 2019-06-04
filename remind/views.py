@@ -30,7 +30,7 @@ class SchedulingView(FormView):
     def get_form_class(self):
         return super().get_form_class()
 
-    def get_form(self, form_class=None):
+    def get_form(self, form_class=SchedulingForm):
         return super().get_form(form_class)
 
     def get_context_data(self, **kwargs):
