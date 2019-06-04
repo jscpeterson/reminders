@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <!--{% extends 'base.html' %}-->
-<html>
 
 
 {% block title %}Home{% endblock %}
@@ -9,11 +8,10 @@
 {% if user.is_authenticated %}
 <html>
 <head>
+    <title> Home </title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <title> Home </title>
     <!--Add CSS Style-->
-
 </head>
 
 <nav>
@@ -72,6 +70,7 @@
         .login button:hover{
             padding:0px 40px;
         }
+
     </style>
 
 </head>
@@ -95,12 +94,6 @@
                 <div class="form-field">
                     <label for="password">Password</label>
                     <input type="password" id="password">
-                </div>
-                <br>
-
-                <div class="form-field">
-                    <input type="checkbox" id="remember">
-                    <label for="remember">Remember me</label>
                 </div>
                 <br>
 
