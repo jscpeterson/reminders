@@ -37,8 +37,8 @@ class SchedulingForm(Form):
     def __init__(self, *args, **kwargs):
         case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
-        # initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
-        # self.fields['scheduling_conference_date'].initial = initial
+        initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
+        self.fields['scheduling_conference_date'].initial = initial
 
 
 class TrackForm(Form):
