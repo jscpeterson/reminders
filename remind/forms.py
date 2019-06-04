@@ -164,3 +164,22 @@ class CompleteForm(Form):
             choices=TRUE_FALSE_CHOICES,
             label=label
         )
+
+
+class ExtensionForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        deadline_pk = kwargs.pop('deadline_pk')
+        super().__init__()
+
+        self.fields['extension_filed'] = forms.ChoiceField(
+            choices=TRUE_FALSE_CHOICES,
+            label='Have you filed for an extension?'
+        )
+
+
+class JudgeConfirmedForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        deadline_pk = kwargs.pop('deadline_pk')
+        super().__init__()

@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
-    UpdateHomeForm, CompleteForm
-from .constants import TRIAL_DEADLINES, SOURCE_URL
+    UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
+from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS
 from . import utils
 
 
@@ -255,3 +255,36 @@ class CompleteView(FormView):
 
     def get_success_url(self):
         return SOURCE_URL
+
+
+class ExtensionView(FormView):
+    template_name = 'remind/extension_form.html'
+    form_class = ExtensionForm
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_form_kwargs(self):
+        return self.kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
+        context['deadline_desc'] = DEADLINE_DESCRIPTIONS[str(deadline.type)]
+        context['case_number'] = deadline.case.case_number
+        context['date'] = deadline.datetime
+        return context
+
+    def post(self, request, *args, **kwargs):
+        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
+        deadline.invalid_extension_filed = request.POST['extension_filed']
+        deadline.save(update_fields=['invalid_extension_filed'])
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return SOURCE_URL
+
+
+class JudgeConfirmedView(FormView):
+    template_name = 'remind/judge_confirmed_form.html'
+    form_class = JudgeConfirmedForm
