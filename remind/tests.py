@@ -6,6 +6,7 @@ from .constants import LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
 from .models import Deadline, Case
 from users.models import CustomUser
 
+
 class TestActualDeadline(TestCase):
 
     def test_long_deadline_from_start(self):
@@ -135,7 +136,7 @@ class TestExtensionCheck(TestCase):
         )
         invalid_deadline = Deadline.objects.create(
             type=Deadline.TRIAL,
-            datetime=datetime(2019, 9, 9),
+            datetime=datetime(2019, 9, 10),
             case=case,
         )
         extension_deadline = Deadline.objects.create(
@@ -173,3 +174,68 @@ class TestExtensionCheck(TestCase):
         self.assertFalse(utils.is_extension_required(good_deadline))
         self.assertTrue(utils.is_extension_required(extension_deadline))
         self.assertFalse(utils.is_extension_required(invalid_deadline))
+
+
+class TestInvalidDeadlineCheck(TestCase):
+
+    def setUp(self):
+        self.paralegal = CustomUser.objects.create(
+            first_name='Bart',
+            last_name='Simpson',
+            position=CustomUser.PARALEGAL,
+            username='plegal',
+        )
+        self.prosecutor = CustomUser.objects.create(
+            first_name='Lionel',
+            last_name='Hutz',
+            position=CustomUser.PROSECUTOR,
+            username='lawyerman123',
+        )
+        self.supervisor = CustomUser.objects.create(
+            first_name='Montgomery',
+            last_name='Burns',
+            position=CustomUser.SUPERVISOR,
+            username='supervisor001',
+        )
+
+    def test_scheduling_conference(self):
+        case = Case.objects.create(
+            arraignment_date=datetime(2019, 1, 11),
+            track=1,
+            paralegal=self.paralegal,
+            prosecutor=self.prosecutor,
+            supervisor=self.supervisor,
+        )
+        good_deadline = Deadline.objects.create(
+            type=Deadline.SCHEDULING_CONFERENCE,
+            datetime=datetime(2019, 2, 8),
+            case=case,
+        )
+        invalid_deadline = Deadline.objects.create(
+            type=Deadline.SCHEDULING_CONFERENCE,
+            datetime=datetime(2019, 2, 12),
+            case=case,
+        )
+        self.assertFalse(utils.is_deadline_invalid(good_deadline))
+        self.assertTrue(utils.is_deadline_invalid(invalid_deadline))
+
+    def test_trial_deadline(self):
+        case = Case.objects.create(
+            trial_date=datetime(2019, 6, 3),
+            track=1,
+            paralegal=self.paralegal,
+            prosecutor=self.prosecutor,
+            supervisor=self.supervisor,
+        )
+        good_deadline = Deadline.objects.create(
+            type=Deadline.FINAL_WITNESS_LIST,
+            datetime=datetime(2019, 5, 17),
+            case=case,
+        )
+        invalid_deadline = Deadline.objects.create(
+            type=Deadline.FINAL_WITNESS_LIST,
+            datetime=datetime(2019, 5, 24),
+            case=case,
+        )
+        self.assertFalse(utils.is_deadline_invalid(good_deadline))
+        self.assertTrue(utils.is_deadline_invalid(invalid_deadline))

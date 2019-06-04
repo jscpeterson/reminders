@@ -2,7 +2,8 @@ from datetime import timedelta
 import holidays
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
-    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS
+    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, SCHEDULING_ORDER_DEADLINE_DAYS, \
+    TRIAL_DEADLINES
 
 
 def clear_deadlines(case):
@@ -189,15 +190,38 @@ def is_extension_required(deadline):
         deadline_dict = get_deadline_dict(deadline.case.track)
 
     if deadline.type == Deadline.TRIAL:
-        max_date_default = deadline.case.arraignment_date + timedelta(days=deadline_dict[str(Deadline.TRIAL)])
-        max_date_extension = deadline.case.arraignment_date + timedelta(days=deadline_dict['trial_extended'])
+        max_date_default = get_actual_deadline_from_start(deadline.case.arraignment_date,
+                                                          deadline_dict[str(Deadline.TRIAL)])
+        max_date_extension = get_actual_deadline_from_start(deadline.case.arraignment_date,
+                                                            deadline_dict['trial_extended'])
         return max_date_default <= deadline.datetime <= max_date_extension
     elif deadline.type == Deadline.SCIENTIFIC_EVIDENCE:
-        max_date_default = deadline.case.trial_date - timedelta(days=deadline_dict[str(Deadline.SCIENTIFIC_EVIDENCE)])
-        max_date_extension = deadline.case.trial_date - timedelta(days=deadline_dict['scientific_evidence_extended'])
+        max_date_default = get_actual_deadline_from_end(deadline.case.trial_date,
+                                                        deadline_dict[str(Deadline.SCIENTIFIC_EVIDENCE)])
+        max_date_extension = get_actual_deadline_from_end(deadline.case.trial_date,
+                                                          deadline_dict['scientific_evidence_extended'])
         return max_date_extension >= deadline.datetime >= max_date_default
 
 
+class DeadlineTypeException(Exception):
+    pass
+
+
 def is_deadline_invalid(deadline):
-    # TODO implement
-    return False
+    """
+    Returns True if a deadline is outside permissible limits from a triggering event.
+    """
+    if deadline.type == Deadline.SCHEDULING_CONFERENCE:
+        return deadline.datetime.date() > get_actual_deadline_from_start(deadline.case.arraignment_date,
+                                                                         SCHEDULING_ORDER_DEADLINE_DAYS).date()
+
+    if deadline.case.track is None:
+        return False
+    else:
+        deadline_dict = get_deadline_dict(deadline.case.track)
+        if str(deadline.type) in TRIAL_DEADLINES:
+            required_days = deadline_dict[str(deadline.type)]
+            date = get_actual_deadline_from_end(deadline.case.trial_date, required_days)
+            return deadline.datetime.date() > date.date()
+
+    raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
