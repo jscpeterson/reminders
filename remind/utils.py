@@ -214,7 +214,6 @@ def is_deadline_invalid(deadline):
     if deadline.type == Deadline.SCHEDULING_CONFERENCE:
         return deadline.datetime.date() > get_actual_deadline_from_start(deadline.case.arraignment_date,
                                                                          SCHEDULING_ORDER_DEADLINE_DAYS).date()
-
     if deadline.case.track is None:
         return False
     else:
@@ -224,4 +223,4 @@ def is_deadline_invalid(deadline):
             date = get_actual_deadline_from_end(deadline.case.trial_date, required_days)
             return deadline.datetime.date() > date.date()
 
-    raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
+    # raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))

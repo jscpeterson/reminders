@@ -91,7 +91,7 @@ class Email:
         }
         body = messages[self.email_type]
 
-        footer = '\n\nSincerely, \nReminderBot4000'
+        footer = '\n\nDA 2nd Reminders'
 
         return header + body + footer
 
@@ -149,7 +149,7 @@ LR2-400. Please visit {url} to confirm that the judge is aware of this, or visit
             required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
 
         return '''{indent}The {desc} is over {days} days from the triggering event, which is permissible if an \
-extension has been filed. Please visit {url} to confirm that you have filed for an extension, or visit {update_url} to 
+extension has been filed. Please visit {url} to confirm that you have filed for an extension, or visit {update_url} to \
 change the date.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
@@ -169,7 +169,7 @@ been completed or is not necessary in this case, please go to {url} to notify th
 problems, please notify {contact}.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
-            case=self.case,
+            case=self.case.case_number,
             date=self.deadline.datetime.date(),
             time=self.deadline.datetime.strftime('%H:%M'),
             url=url,
@@ -225,13 +225,10 @@ longer under any obligation to assist them.'''.format(
         except utils.InvalidCaseTrackException:
             conduct_pti_days = 14
 
-            # TODO Get self.case.pti_request_date here and handle a null case
-
         return '''{indent}It has been {days} days since the defense requested pretrial interviews for case \
-{case_number} on {date}. If the defense has set up and conducted their pretrial interviews, you can disregard this \
+{case_number}. If the defense has set up and conducted their pretrial interviews, you can disregard this \
 message. If they did not, this is a notification that you are no longer under any obligation to assist them.'''.format(
             indent=INDENT,
-            date=self.case.pti_request_date,  # FIXME Format sucks. Can't call strftime or date as they may be null
             days=conduct_pti_days,
             case_number=self.case.case_number,
         )
