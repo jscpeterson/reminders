@@ -44,13 +44,13 @@ class SchedulingForm(Form):
 class TrackForm(Form):
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
-        case = Case.objects.get(case_number=kwargs['case_number'])
+        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        super().__init__(*args, **kwargs)
 
         initial = case.scheduling_conference_date
         self.fields['scheduling_conference_date'] = forms.DateTimeField(
             label='What did the scheduling conference actually occur?',
-            initial=initial
+            initial=initial,
         )
 
         self.fields['track'] = forms.ChoiceField(
@@ -62,8 +62,8 @@ class TrackForm(Form):
 class TrialForm(Form):
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
-        case = Case.objects.get(case_number=kwargs['case_number'])
+        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        super().__init__(*args, **kwargs)
 
         deadline_dict = utils.get_deadline_dict(case.track)
 
@@ -79,8 +79,8 @@ class TrialForm(Form):
 class OrderForm(Form):
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
-        case = Case.objects.get(case_number=kwargs['case_number'])
+        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        super().__init__(*args, **kwargs)
 
         deadline_dict = utils.get_deadline_dict(case.track)
 
@@ -97,8 +97,8 @@ class OrderForm(Form):
 class RequestPTIForm(Form):
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
-        case = Case.objects.get(case_number=kwargs['case_number'])
+        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        super().__init__(*args, **kwargs)
 
         deadline_dict = utils.get_deadline_dict(case.track)
 
@@ -114,8 +114,8 @@ class RequestPTIForm(Form):
 class UpdateForm(Form):
 
     def __init__(self, *args, **kwargs):
-        super().__init__()
-        case = Case.objects.get(case_number=kwargs['case_number'])
+        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        super().__init__(*args, **kwargs)
 
         for index, deadline in enumerate(Deadline.objects.filter(case=case,)):
             key = 'deadline_{}'.format(index)
@@ -147,7 +147,7 @@ class CompleteForm(Form):
 
     def __init__(self, *args, **kwargs):
         deadline_pk = kwargs.pop('deadline_pk')
-        super(CompleteForm, self).__init__()
+        super(CompleteForm, self).__init__(*args, **kwargs)
 
         deadline = Deadline.objects.get(pk=deadline_pk)
 
