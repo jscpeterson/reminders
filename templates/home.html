@@ -75,7 +75,7 @@
     <div class="col s6 offset-s3">
         <div class="card">
 
-            <div class="card-action center-align red white-text">
+            <div class="card-action center-align">
                 <h3>Login</h3>
             </div>
 
@@ -94,8 +94,10 @@
                 <br>
 
                 <div class="form-field center-align">
-                    <button class="btn-large red">Login</button>
-                    <button class="btn-large red">Sign Up</button>
+                    <form action='' method='POST'>
+                        <button type='submit' class="btn-large"> Login</button>
+                    </form>
+                    <a href="{% url 'signup' %}">signup</a>
                 </div>
                 <br>
             </div>
@@ -127,7 +129,7 @@
 <!--</div>-->
 <!--<div class="card-action">-->
 <!--<a href="{% url 'login' %}">login</a>-->
-<!--<a href="{% url 'signup' %}">signup</a>-->
+
 <!--</div>-->
 <!--</div>-->
 <!--</div>-->
