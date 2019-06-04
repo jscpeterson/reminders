@@ -182,7 +182,12 @@ def is_extension_required(deadline):
     Returns True if a deadline requires an extension to be valid.
     :return: True if a deadline requires an extension to be valid.
     """
-    deadline_dict = get_deadline_dict(deadline.case.track)
+    # If a track has not been set yet no deadlines will need an extension
+    if deadline.case.track is None:
+        return False
+    else:
+        deadline_dict = get_deadline_dict(deadline.case.track)
+
     if deadline.type == Deadline.TRIAL:
         max_date_default = deadline.case.arraignment_date + timedelta(days=deadline_dict[str(Deadline.TRIAL)])
         max_date_extension = deadline.case.arraignment_date + timedelta(days=deadline_dict['trial_extended'])
@@ -191,3 +196,8 @@ def is_extension_required(deadline):
         max_date_default = deadline.case.trial_date - timedelta(days=deadline_dict[str(Deadline.SCIENTIFIC_EVIDENCE)])
         max_date_extension = deadline.case.trial_date - timedelta(days=deadline_dict['scientific_evidence_extended'])
         return max_date_extension >= deadline.datetime >= max_date_default
+
+
+def is_deadline_invalid(deadline):
+    # TODO implement
+    return False

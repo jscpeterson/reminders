@@ -1,6 +1,6 @@
 from remind import utils
 from django.utils import timezone
-from .models import Deadline
+from .models import Deadline, Case
 from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL
 
 INDENT = '     '
@@ -106,24 +106,36 @@ class Email:
     def get_deadline_invalid_message(self):
         url = SOURCE_URL  # TODO Get real URL
 
-        return '''{indent}The {desc} is over {days} days from the {event}, which may be in violation of LR2-400.\
-\n\n{indent}Please visit {url} to confirm that the judge is aware of this.'''.format(
+        # If a track has not been set yet no deadlines will need an extension
+        # This variable must be set to something however to prevent an exception
+        if self.deadline.case.track is None:
+            required_days = 0
+        else:
+            required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
+
+        return '''{indent}The {desc} is over {days} days from the triggering event, which may be in violation of \
+LR2-400. Please visit {url} to confirm that the judge is aware of this.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
-            days=0,  # TODO Get real days
-            event=timezone.now(),  # TODO Get real event date
+            days=required_days,
             url=url
         )
 
     def get_deadline_extension_message(self):
         url = SOURCE_URL  # TODO Get real URL
 
-        return '''{indent}The {desc} is over {days} days from the {event}, which is permissible if an extension has \
-been filed.\n\n{indent}Please visit {url} to confirm that you have filed for an extension.'''.format(
+        # If a track has not been set yet no deadlines will need an extension
+        # This variable must be set to something however to prevent an exception
+        if self.deadline.case.track is None:
+            required_days = 0
+        else:
+            required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
+
+        return '''{indent}The {desc} is over {days} days from the triggering event, which is permissible if an \
+extension has been filed. Please visit {url} to confirm that you have filed for an extension.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
-            days=0,  # TODO Get real days
-            event=timezone.now(),  # TODO Get real event date
+            days=required_days,
             url=url
         )
 

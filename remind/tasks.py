@@ -5,9 +5,10 @@ from celery import shared_task
 from datetime import datetime, timedelta
 from django.utils import timezone
 
-from .email import Email
 from .models import Deadline
 from .constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS, ADMINISTRATION_EMAIL, EVENT_DEADLINES
+from .email import Email
+from . import utils
 from django.core.mail import send_mail
 from django.conf import settings
 
@@ -67,6 +68,18 @@ def check_all_deadlines():
                 deadline.reminders_sent += 1
                 deadline.save(update_fields=['reminders_sent'])
                 continue
+
+        # Send notice if celery detects a deadline is invalid or requires an extension
+        if utils.is_extension_required(deadline) and not deadline.invalid_notice_sent:
+            send_emails(Email.DEADLINE_NEEDS_EXTENSION, deadline)
+            deadline.invalid_notice_sent = True
+            deadline.save(update_fields=['invalid_notice_sent'])
+            continue
+        elif utils.is_deadline_invalid(deadline) and not deadline.invalid_notice_sent:
+            send_emails(Email.DEADLINE_OUTSIDE_LIMITS, deadline)
+            deadline.invalid_notice_sent = True
+            deadline.save(update_fields=['invalid_notice_sent'])
+            continue
 
         # If code has not hit continue, deadline does not need to do anything.
         print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
