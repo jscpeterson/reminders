@@ -1,8 +1,10 @@
 from django.test import TestCase
 from datetime import datetime
+from django.utils import timezone
 from . import utils
 from .constants import LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
-
+from .models import Deadline, Case
+from users.models import CustomUser
 
 class TestActualDeadline(TestCase):
 
@@ -94,3 +96,65 @@ class TestDeadlineCheck(TestCase):
         self.assertTrue(utils.is_deadline_within_limits(deadline=deadline, event=event, days=days, future_event=True))
         self.assertTrue(utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=True))
         self.assertFalse(utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=True))
+
+
+class TestExtensionCheck(TestCase):
+
+    def setUp(self):
+        self.paralegal = CustomUser.objects.create(
+            first_name='Bart',
+            last_name='Simpson',
+            position=CustomUser.PARALEGAL,
+            username='plegal',
+        )
+        self.prosecutor = CustomUser.objects.create(
+            first_name='Lionel',
+            last_name='Hutz',
+            position=CustomUser.PROSECUTOR,
+            username='lawyerman123',
+        )
+        self.supervisor = CustomUser.objects.create(
+            first_name='Montgomery',
+            last_name='Burns',
+            position=CustomUser.SUPERVISOR,
+            username='supervisor001',
+        )
+
+    def test_trial_deadline(self):
+        case = Case.objects.create(
+            arraignment_date=datetime(2019, 1, 11),
+            track=1,
+            paralegal=self.paralegal,
+            prosecutor=self.prosecutor,
+            supervisor=self.supervisor,
+        )
+        good_deadline = Deadline.objects.create(
+            type=Deadline.TRIAL,
+            datetime=datetime(2019, 7, 8),
+            case=case,
+        )
+        invalid_deadline = Deadline.objects.create(
+            type=Deadline.TRIAL,
+            datetime=datetime(2019, 9, 9),
+            case=case,
+        )
+        extension_deadline = Deadline.objects.create(
+            type=Deadline.TRIAL,
+            datetime=datetime(2019, 8, 21),
+            case=case,
+        )
+        self.assertFalse(utils.is_extension_required(good_deadline))
+        self.assertTrue(utils.is_extension_required(extension_deadline))
+        self.assertFalse(utils.is_extension_required(invalid_deadline))
+
+    def test_scientific_deadline(self):
+        # TODO Track 1 scientific evidence date before deadline max should be FALSE
+        # TODO Track 1 scientific evidence date between deadline and extension max should be TRUE
+        # TODO Track 1 scientific evidence date after extension max should be FALSE
+        # TODO Track 2 scientific evidence date before deadline max should be FALSE
+        # TODO Track 2 scientific evidence date between deadline and extension max should be TRUE
+        # TODO Track 2 scientific evidence date after extension max should be FALSE
+        # TODO Track 3 scientific evidence date before deadline max should be FALSE
+        # TODO Track 3 scientific evidence date between deadline and extension max should be TRUE
+        # TODO Track 3 scientific evidence date after extension max should be FALSE
+        return

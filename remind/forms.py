@@ -71,7 +71,7 @@ class TrialForm(Form):
 
         deadline_dict = utils.get_deadline_dict(case.track)
 
-        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date,
+        initial = utils.get_actual_deadline_from_start(case.arraignment_date,
                                                        deadline_dict[str(Deadline.TRIAL)])
         self.fields['trial_date'] = forms.DateTimeField(
             label='Date and time of the trial\'s first day',
