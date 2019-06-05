@@ -5,10 +5,11 @@ from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
 from .models import Case, Deadline
 from users.models import CustomUser
+from datetime import timedelta
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
-from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS
+from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS
 from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
@@ -23,6 +24,17 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         self.object.created_by = self.request.user
         self.object.save()
+
+        # Start first deadline for Witness List
+        Deadline.objects.create(
+            case=self.object,
+            type=Deadline.WITNESS_LIST,
+            datetime=utils.get_actual_deadline_from_start(
+                start_date=self.object.arraignment_date,
+                days=WITNESS_LIST_DEADLINE_DAYS),
+            created_by=self.request.user
+        )
+
         return reverse('remind:scheduling', kwargs={'case_number': self.object.case_number})
 
 
