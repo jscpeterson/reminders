@@ -2,7 +2,30 @@ from django.db import models
 from users.models import CustomUser
 
 
-class Case(models.Model):
+class TimeStampedModel(models.Model):
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+
+    created_by = models.ForeignKey(
+        CustomUser,
+        related_name='created_%(class)s_items',
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True
+    )
+    updated_by = models.ForeignKey(
+        CustomUser,
+        related_name='updated_%(class)s_items',
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Case(TimeStampedModel):
     TRACK_CHOICES = (
         (1, '1'),
         (2, '2'),
@@ -20,7 +43,7 @@ class Case(models.Model):
     trial_date = models.DateTimeField(null=True)
 
 
-class Deadline(models.Model):
+class Deadline(TimeStampedModel):
     FFA = 0
     SCHEDULING_CONFERENCE = 1
     WITNESS_LIST = 2
