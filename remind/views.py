@@ -4,8 +4,8 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
-    UpdateHomeForm, CompleteForm
-from .constants import TRIAL_DEADLINES, SOURCE_URL
+    UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
+from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS
 from . import utils
 
 
@@ -195,3 +195,42 @@ def complete(request, *args, **kwargs):
 
     return render(request, 'remind/complete_form.html', {'form': form})
 
+
+def extension(request, *args, **kwargs):
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+    if request.method == 'POST':
+        form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
+        if form.is_valid():
+            deadline.invalid_extension_filed = form.cleaned_data.get('extension_filed')
+            deadline.save(update_fields=['invalid_extension_filed'])
+            return HttpResponseRedirect(SOURCE_URL)
+        else:
+            print('why')
+
+    else:
+        form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
+
+    return render(request, 'remind/extension_form.html', {'form': form,
+                                                          'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
+                                                          'case_number': deadline.case.case_number,
+                                                          'date': deadline.datetime})
+
+
+def judge_confirmed(request, *args, **kwargs):
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+    if request.method == 'POST':
+        form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
+        if form.is_valid():
+            deadline.invalid_judge_approved = form.cleaned_data.get('judge_approved')
+            deadline.save(update_fields=['invalid_judge_approved'])
+            return HttpResponseRedirect(SOURCE_URL)
+
+    else:
+        form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
+
+    return render(request, 'remind/judge_confirmed_form.html', {'form': form,
+                                                          'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
+                                                          'case_number': deadline.case.case_number,
+                                                          'date': deadline.datetime,
+                                                          'required_days': utils.get_deadline_dict(deadline.case.track)
+                                                          [str(deadline.type)]})

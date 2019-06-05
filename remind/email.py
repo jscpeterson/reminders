@@ -1,6 +1,7 @@
 from remind import utils
-from .models import Deadline
-from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL
+from django.utils import timezone
+from .models import Deadline, Case
+from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL, SCHEDULING_ORDER_DEADLINE_DAYS
 
 INDENT = '     '
 
@@ -80,8 +81,8 @@ class Email:
 
         messages = {
             self.DEADLINE_EXPIRED: self.get_deadline_expired_message(),
-            # self.DEADLINE_OUTSIDE_LIMITS: self.get_deadline_invalid_message(),
-            # self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
+            self.DEADLINE_OUTSIDE_LIMITS: self.get_deadline_invalid_message(),
+            self.DEADLINE_NEEDS_EXTENSION: self.get_deadline_extension_message(),
             self.FIRST_REMINDER: self.get_first_reminder_message(),
             self.SECOND_REMINDER: self.get_second_reminder_message(),
             self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
@@ -90,7 +91,7 @@ class Email:
         }
         body = messages[self.email_type]
 
-        footer = '\n\nSincerely, \nReminderBot4000'
+        footer = '\n\nDA 2nd Reminders'
 
         return header + body + footer
 
@@ -102,16 +103,65 @@ class Email:
             date=self.deadline.datetime.date(),
         )
 
-    # def get_deadline_invalid_message(self):
-    #     # TODO Add message method
-    #     raise Exception('Message not implemented')
-    #
-    # def get_deadline_extension_message(self):
-    #     # TODO Add message method
-    #     raise Exception('Message not implemented')
+    def get_deadline_invalid_message(self):
+        url = '{source}/remind/{pk}/judge_confirmed'.format(
+            source=SOURCE_URL,
+            pk=self.deadline.pk,
+        )
+
+        update_url = '{source}/remind/{case_number}/update'.format(
+            source=SOURCE_URL,
+            case_number=self.deadline.case.case_number,
+        )
+
+        if self.deadline.type == Deadline.SCHEDULING_CONFERENCE:
+            required_days = SCHEDULING_ORDER_DEADLINE_DAYS
+        elif self.deadline.case.track is not None:
+            required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
+        else:
+            # Even if this code should not be reachable, this variable must be defined to something to prevent an
+            # exception
+            required_days = 0
+
+        return '''{indent}The {desc} is over {days} days from the triggering event, which may be in violation of \
+LR2-400. Please visit {url} to confirm that the judge is aware of this, or visit {update_url} to change the date.'''.format(
+            indent=INDENT,
+            desc=self.deadline_desc,
+            days=required_days,
+            url=url,
+            update_url=update_url,
+        )
+
+    def get_deadline_extension_message(self):
+        url = '{source}/remind/{pk}/extension'.format(
+            source=SOURCE_URL,
+            pk=self.deadline.pk,
+        )
+
+        update_url = '{source}/remind/{case_number}/update'.format(
+            source=SOURCE_URL,
+            case_number=self.deadline.case.case_number,
+        )
+
+        # If a track has not been set yet no deadlines will need an extension
+        # This variable must be set to something however to prevent an exception
+        if self.deadline.case.track is None:
+            required_days = 0
+        else:
+            required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
+
+        return '''{indent}The {desc} is over {days} days from the triggering event, which is permissible if an \
+extension has been filed. Please visit {url} to confirm that you have filed for an extension, or visit {update_url} to \
+change the date.'''.format(
+            indent=INDENT,
+            desc=self.deadline_desc,
+            days=required_days,
+            url=url,
+            update_url=update_url,
+        )
 
     def get_first_reminder_message(self):
-        url = '{source}/remind/{pk}/complete'.format(  # TODO Replace with actual URL
+        url = '{source}/remind/{pk}/complete'.format(
             source=SOURCE_URL,
             pk=self.deadline.pk,
         )
@@ -121,7 +171,7 @@ been completed or is not necessary in this case, please go to {url} to notify th
 problems, please notify {contact}.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
-            case=self.case,
+            case=self.case.case_number,
             date=self.deadline.datetime.date(),
             time=self.deadline.datetime.strftime('%H:%M'),
             url=url,
@@ -177,13 +227,10 @@ longer under any obligation to assist them.'''.format(
         except utils.InvalidCaseTrackException:
             conduct_pti_days = 14
 
-            # TODO Get self.case.pti_request_date here and handle a null case
-
         return '''{indent}It has been {days} days since the defense requested pretrial interviews for case \
-{case_number} on {date}. If the defense has set up and conducted their pretrial interviews, you can disregard this \
+{case_number}. If the defense has set up and conducted their pretrial interviews, you can disregard this \
 message. If they did not, this is a notification that you are no longer under any obligation to assist them.'''.format(
             indent=INDENT,
-            date=self.case.pti_request_date,  # FIXME Format sucks. Can't call strftime or date as they may be null
             days=conduct_pti_days,
             case_number=self.case.case_number,
         )

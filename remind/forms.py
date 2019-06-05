@@ -67,7 +67,7 @@ class TrialForm(Form):
 
         deadline_dict = utils.get_deadline_dict(case.track)
 
-        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date,
+        initial = utils.get_actual_deadline_from_start(case.arraignment_date,
                                                        deadline_dict[str(Deadline.TRIAL)])
         self.fields['trial_date'] = forms.DateTimeField(
             label='Date and time of the trial\'s first day',
@@ -156,7 +156,31 @@ class CompleteForm(Form):
             case=deadline.case.case_number
         )
 
-        self.fields['completed'] = forms.ChoiceField(
-            choices=TRUE_FALSE_CHOICES,
-            label=label
+        self.fields['completed'] = forms.BooleanField(
+            label=label,
+            required=False
+        )
+
+
+class ExtensionForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        deadline_pk = kwargs.pop('deadline_pk')
+        super(ExtensionForm, self).__init__(*args, **kwargs)
+
+        self.fields['extension_filed'] = forms.BooleanField(
+            label='Have you filed for an extension?',
+            required=False
+        )
+
+
+class JudgeConfirmedForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        deadline_pk = kwargs.pop('deadline_pk')
+        super(JudgeConfirmedForm, self).__init__(*args, **kwargs)
+
+        self.fields['judge_approved'] = forms.BooleanField(
+            label='Has this deadline been approved by the judge?',
+            required=False
         )

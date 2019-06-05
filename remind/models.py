@@ -61,6 +61,9 @@ class Deadline(models.Model):
     expired = models.BooleanField(default=False)
     completed = models.BooleanField(default=False)
     reminders_sent = models.IntegerField(default=0)
+    invalid_notice_sent = models.BooleanField(default=False)
+    invalid_judge_approved = models.BooleanField(default=False)
+    invalid_extension_filed = models.BooleanField(default=False)
 
 
 class Motion(models.Model):

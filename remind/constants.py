@@ -2,7 +2,7 @@ from .models import Deadline
 
 SOURCE_URL = 'http://127.0.0.1:8000'
 ADMINISTRATION_EMAIL = 'joseph.peterson@da2nd.state.nm.us'
-SUPPORT_EMAIL = 'joseph.peterson@da2nd.state.nm.us'
+SUPPORT_EMAIL = 'coders@da2nd.state.nm.us'
 
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
 

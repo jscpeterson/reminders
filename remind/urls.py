@@ -10,6 +10,7 @@ urlpatterns = [
     path('<str:case_number>/order/', views.order, name='order'),
     path('<str:case_number>/request_pti/', views.request_pti, name='request_pti'),
     path('<str:case_number>/update/', views.update, name='update'),
-    path('<int:deadline_pk>/complete/', views.complete, name='complete')
-    #path('<int:deadline_pk>/complete/', views.CompleteView.as_view(), name='complete')
+    path('<int:deadline_pk>/complete/', views.complete, name='complete'),
+    path('<int:deadline_pk>/extension/', views.extension, name='extension'),
+    path('<int:deadline_pk>/judge_confirmed/', views.judge_confirmed, name='judge_confirmed'),
 ]
