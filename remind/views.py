@@ -201,7 +201,8 @@ def update(request, *args, **kwargs):
                 if deadline.datetime != form.cleaned_data.get(key):
                     deadline.datetime = form.cleaned_data.get(key)
                     deadline.updated_by = request.user
-                    deadline.save(update_fields=['datetime', 'updated_by'])
+                    deadline.invalid_notice_sent = False
+                    deadline.save(update_fields=['datetime', 'updated_by', 'inactive_notice_sent'])
 
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
