@@ -1,5 +1,7 @@
 from datetime import timedelta
+from pytz import timezone
 import holidays
+from reminders import settings
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, SCHEDULING_ORDER_DEADLINE_DAYS, \
@@ -97,7 +99,10 @@ def get_actual_deadline_from_start(start_date, days):
         result_date = result_date + timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date = result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
+    result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
+                                      hour=LAST_DAY_HOUR,
+                                      minute=LAST_DAY_MINUTE,
+                                      second=LAST_DAY_SECOND)
 
     return result_date
 
@@ -154,7 +159,10 @@ def get_actual_deadline_from_end(end_date, days):
         result_date = result_date - timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date = result_date.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
+    result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
+                                      hour=LAST_DAY_HOUR,
+                                      minute=LAST_DAY_MINUTE,
+                                      second=LAST_DAY_SECOND)
 
     return result_date
 
