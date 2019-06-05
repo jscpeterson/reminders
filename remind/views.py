@@ -2,13 +2,17 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
+from django.views.generic.list import ListView
 from .models import Case, Deadline
+from users.models import CustomUser
+
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS
 from . import utils
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
@@ -17,6 +21,27 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('scheduling', kwargs={'case_number': self.object.case_number})
+
+
+class CaseOpenListView(LoginRequiredMixin, ListView):
+    model = Case
+
+    def get_object(self):
+        user = Q(CustomUser.object.get(prosecutor=self.request.user)) | \
+               Q(CustomUser.object.get(paralegal=self.request.user)) | \
+               Q(CustomUser.object.get(supervisor=self.request.user))
+        user.object.get()
+        return user
+
+
+class CaseClosedListView(LoginRequiredMixin, ListView):
+    model = Case
+
+    def get_object(self):
+        user = Q(CustomUser.object.get(prosecutor=self.request.user)) | \
+               Q(CustomUser.object.get(paralegal=self.request.user)) | \
+               Q(CustomUser.object.get(supervisor=self.request.user))
+        return user
 
 
 @login_required
