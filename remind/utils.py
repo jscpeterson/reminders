@@ -194,13 +194,13 @@ def is_extension_required(deadline):
                                                           deadline_dict[str(Deadline.TRIAL)])
         max_date_extension = get_actual_deadline_from_start(deadline.case.arraignment_date,
                                                             deadline_dict['trial_extended'])
-        return max_date_default <= deadline.datetime <= max_date_extension
+        return max_date_default < deadline.datetime < max_date_extension
     elif deadline.type == Deadline.SCIENTIFIC_EVIDENCE:
         max_date_default = get_actual_deadline_from_end(deadline.case.trial_date,
                                                         deadline_dict[str(Deadline.SCIENTIFIC_EVIDENCE)])
         max_date_extension = get_actual_deadline_from_end(deadline.case.trial_date,
                                                           deadline_dict['scientific_evidence_extended'])
-        return max_date_extension >= deadline.datetime >= max_date_default
+        return max_date_extension > deadline.datetime > max_date_default
 
 
 class DeadlineTypeException(Exception):

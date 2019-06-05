@@ -196,60 +196,41 @@ def complete(request, *args, **kwargs):
     return render(request, 'remind/complete_form.html', {'form': form})
 
 
+def extension(request, *args, **kwargs):
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+    if request.method == 'POST':
+        form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
+        if form.is_valid():
+            deadline.invalid_extension_filed = form.cleaned_data.get('extension_filed')
+            deadline.save(update_fields=['invalid_extension_filed'])
+            return HttpResponseRedirect(SOURCE_URL)
+        else:
+            print('why')
 
-class ExtensionView(FormView):
-    template_name = 'remind/extension_form.html'
-    form_class = ExtensionForm
+    else:
+        form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        return self.kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data()
-        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
-        context['deadline_desc'] = DEADLINE_DESCRIPTIONS[str(deadline.type)]
-        context['case_number'] = deadline.case.case_number
-        context['date'] = deadline.datetime
-        return context
-
-    def post(self, request, *args, **kwargs):
-        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
-        deadline.invalid_extension_filed = request.POST['extension_filed']
-        deadline.save(update_fields=['invalid_extension_filed'])
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return SOURCE_URL
+    return render(request, 'remind/extension_form.html', {'form': form,
+                                                          'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
+                                                          'case_number': deadline.case.case_number,
+                                                          'date': deadline.datetime})
 
 
-class JudgeConfirmedView(FormView):
-    template_name = 'remind/judge_confirmed_form.html'
-    form_class = JudgeConfirmedForm
+def judge_confirmed(request, *args, **kwargs):
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+    if request.method == 'POST':
+        form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
+        if form.is_valid():
+            deadline.invalid_judge_approved = form.cleaned_data.get('judge_approved')
+            deadline.save(update_fields=['invalid_judge_approved'])
+            return HttpResponseRedirect(SOURCE_URL)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    else:
+        form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
 
-    def get_form_kwargs(self):
-        return self.kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data()
-        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
-        context['deadline_desc'] = DEADLINE_DESCRIPTIONS[str(deadline.type)]
-        context['case_number'] = deadline.case.case_number
-        context['date'] = deadline.datetime
-        required_days = utils.get_deadline_dict(deadline.case.track)[str(deadline.type)]
-        context['required_days'] = required_days
-        return context
-
-    def post(self, request, *args, **kwargs):
-        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
-        deadline.invalid_judge_approved = request.POST['judge_approved']
-        deadline.save(update_fields=['invalid_judge_approved'])
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return SOURCE_URL
+    return render(request, 'remind/judge_confirmed_form.html', {'form': form,
+                                                          'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
+                                                          'case_number': deadline.case.case_number,
+                                                          'date': deadline.datetime,
+                                                          'required_days': utils.get_deadline_dict(deadline.case.track)
+                                                          [str(deadline.type)]})

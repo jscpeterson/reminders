@@ -166,7 +166,7 @@ class ExtensionForm(Form):
 
     def __init__(self, *args, **kwargs):
         deadline_pk = kwargs.pop('deadline_pk')
-        super().__init__()
+        super(ExtensionForm, self).__init__(*args, **kwargs)
 
         self.fields['extension_filed'] = forms.ChoiceField(
             choices=TRUE_FALSE_CHOICES,
@@ -178,7 +178,7 @@ class JudgeConfirmedForm(Form):
 
     def __init__(self, *args, **kwargs):
         deadline_pk = kwargs.pop('deadline_pk')
-        super().__init__()
+        super(JudgeConfirmedForm, self).__init__(*args, **kwargs)
 
         self.fields['judge_approved'] = forms.ChoiceField(
             choices=TRUE_FALSE_CHOICES,
