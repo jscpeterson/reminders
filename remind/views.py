@@ -7,9 +7,11 @@ from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, Re
     UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS
 from . import utils
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-class CaseCreateView(CreateView):
+class CaseCreateView(LoginRequiredMixin, CreateView):
     model = Case
     form_class = CaseForm
 
@@ -17,6 +19,7 @@ class CaseCreateView(CreateView):
         return reverse('scheduling', kwargs={'case_number': self.object.case_number})
 
 
+@login_required
 def scheduling(request, *args, **kwargs):
     if request.method == 'POST':
         form = SchedulingForm(request.POST, case_number=kwargs.get('case_number'))
@@ -40,6 +43,7 @@ def scheduling(request, *args, **kwargs):
     return render(request, 'remind/scheduling_form.html', {'form': form})
 
 
+@login_required
 def track(request, *args, **kwargs):
     if request.method == 'POST':
         form = TrackForm(request.POST, case_number=kwargs.get('case_number'))
@@ -76,6 +80,7 @@ def track(request, *args, **kwargs):
     return render(request, 'remind/track_form.html', {'form': form})
 
 
+@login_required
 def trial(request, *args, **kwargs):
     if request.method == 'POST':
         form = TrialForm(request.POST, case_number=kwargs.get('case_number'))
@@ -100,6 +105,7 @@ def trial(request, *args, **kwargs):
     return render(request, 'remind/trial_form.html', {'form': form})
 
 
+@login_required
 def order(request, *args, **kwargs):
     if request.method == 'POST':
         form = OrderForm(request.POST, case_number=kwargs.get('case_number'))
@@ -120,6 +126,7 @@ def order(request, *args, **kwargs):
     return render(request, 'remind/trial_form.html', {'form': form})
 
 
+@login_required
 def request_pti(request, *args, **kwargs):
     if request.method == 'POST':
         form = RequestPTIForm(request.POST, case_number=kwargs.get('case_number'))
@@ -148,6 +155,7 @@ def request_pti(request, *args, **kwargs):
     return render(request, 'remind/request_pti_form.html', {'form': form})
 
 
+@login_required
 def update(request, *args, **kwargs):
     if request.method == 'POST':
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
@@ -168,7 +176,7 @@ def update(request, *args, **kwargs):
     return render(request, 'remind/update_form.html', {'form': form})
 
 
-class UpdateHomeView(FormView):
+class UpdateHomeView(LoginRequiredMixin, FormView):
     template_name = 'remind/update_home_form.html'
     form_class = UpdateHomeForm
     case_number = ''
@@ -181,6 +189,7 @@ class UpdateHomeView(FormView):
         return reverse('update', kwargs={'case_number': self.case_number})
 
 
+@login_required
 def complete(request, *args, **kwargs):
     if request.method == 'POST':
         form = CompleteForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
@@ -196,6 +205,7 @@ def complete(request, *args, **kwargs):
     return render(request, 'remind/complete_form.html', {'form': form})
 
 
+@login_required
 def extension(request, *args, **kwargs):
     deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
@@ -216,6 +226,7 @@ def extension(request, *args, **kwargs):
                                                           'date': deadline.datetime})
 
 
+@login_required
 def judge_confirmed(request, *args, **kwargs):
     deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
@@ -229,8 +240,10 @@ def judge_confirmed(request, *args, **kwargs):
         form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
 
     return render(request, 'remind/judge_confirmed_form.html', {'form': form,
-                                                          'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
-                                                          'case_number': deadline.case.case_number,
-                                                          'date': deadline.datetime,
-                                                          'required_days': utils.get_deadline_dict(deadline.case.track)
-                                                          [str(deadline.type)]})
+                                                                'deadline_desc': DEADLINE_DESCRIPTIONS[
+                                                                    str(deadline.type)],
+                                                                'case_number': deadline.case.case_number,
+                                                                'date': deadline.datetime,
+                                                                'required_days':
+                                                                    utils.get_deadline_dict(deadline.case.track)
+                                                                    [str(deadline.type)]})
