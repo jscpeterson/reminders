@@ -1,6 +1,6 @@
-from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
 from .models import Case, Deadline
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
@@ -17,214 +17,155 @@ class CaseCreateView(CreateView):
         return reverse('scheduling', kwargs={'case_number': self.object.case_number})
 
 
-class SchedulingView(FormView):
-    template_name = 'remind/scheduling_form.html'
-    form_class = SchedulingForm
+def scheduling(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = SchedulingForm(request.POST, case_number=kwargs.get('case_number'))
+        if form.is_valid():
+            # Set scheduling conference for date
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+            case.scheduling_conference_date = form.cleaned_data.get('scheduling_conference_date')
+            case.save(update_fields=['scheduling_conference_date'])
 
-    def get_initial(self):
-        return super().get_initial()
-
-    def get_prefix(self):
-        return super().get_prefix()
-
-    def get_form_class(self):
-        return super().get_form_class()
-
-    def get_form(self, form_class=None):
-        return super().get_form(form_class)
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        return self.kwargs
-
-    def form_valid(self, form):
-        super(SchedulingView, self).form_valid()
-    
-    def form_invalid(self, form):
-        super(SchedulingView, self).form_invalid()
-
-    def post(self, request, *args, **kwargs):
-        # Set scheduling conference for date
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
-        case.scheduling_conference_date = request.POST['scheduling_conference_date']
-        case.save(update_fields=['scheduling_conference_date'])
-
-        # Start scheduling conference deadline timer
-        Deadline.objects.create(
-            case=case,
-            type=Deadline.SCHEDULING_CONFERENCE,
-            datetime=case.scheduling_conference_date,
-        )
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return SOURCE_URL
-
-
-class TrackView(FormView):
-    template_name = 'remind/track_form.html'
-    form_class = TrackForm
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        return self.kwargs
-
-    def post(self, request, *args, **kwargs):
-        # Update scheduling conference date
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
-        case.scheduling_conference_date = request.POST['scheduling_conference_date']
-        case.save(update_fields=['scheduling_conference_date'])
-
-        # Set track for case
-        # Defining this variable again ensures scheduling_conference_date is saved as a datetime
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
-        case.track = int(request.POST['track'])
-        case.save(update_fields=['track'])
-
-        # Complete scheduling conference deadline timer
-        scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
-        scheduling_conference_deadline.completed = True
-        scheduling_conference_deadline.save(update_fields=['completed'])
-
-        # Start Request PTI deadline timer
-        deadlines_dict = utils.get_deadline_dict(case.track)
-        day_after_request_due = deadlines_dict[str(Deadline.REQUEST_PTI)] + 1
-        Deadline.objects.create(
-            case=case,
-            type=Deadline.REQUEST_PTI,
-            datetime=utils.get_actual_deadline_from_start(case.scheduling_conference_date, day_after_request_due)
-        )
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('trial', kwargs=self.kwargs)
-
-
-class TrialView(FormView):
-    template_name = 'remind/trial_form.html'
-    form_class = TrialForm
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        return self.kwargs
-
-    def post(self, request, *args, **kwargs):
-        # Set trial date for case
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
-        case.trial_date = request.POST['trial_date']
-        case.save(update_fields=['trial_date'])
-
-        # Start trial deadline timer
-        Deadline.objects.create(
-            case=case,
-            type=Deadline.TRIAL,
-            datetime=case.trial_date,
-        )
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('order', kwargs=self.kwargs)
-
-
-class OrderView(FormView):
-    template_name = 'remind/order_form.html'
-    form_class = OrderForm
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        return self.kwargs
-
-    def post(self, request, *args, **kwargs):
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
-
-        for key in TRIAL_DEADLINES:
+            # Start scheduling conference deadline timer
             Deadline.objects.create(
                 case=case,
-                type=int(key),
-                datetime=request.POST[key],
+                type=Deadline.SCHEDULING_CONFERENCE,
+                datetime=case.scheduling_conference_date,
+            )
+            return HttpResponseRedirect(SOURCE_URL)
+
+    else:
+        form = SchedulingForm(case_number=kwargs['case_number'])
+
+    return render(request, 'remind/scheduling_form.html', {'form': form})
+
+
+def track(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = TrackForm(request.POST, case_number=kwargs.get('case_number'))
+        if form.is_valid():
+            # Set scheduling conference for date
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+            case.scheduling_conference_date = form.cleaned_data.get('scheduling_conference_date')
+            case.save(update_fields=['scheduling_conference_date'])
+
+            # Set track for case
+            # Defining this variable again ensures scheduling_conference_date is saved as a datetime
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+            case.track = int(form.cleaned_data.get('track'))
+            case.save(update_fields=['track'])
+
+            # Complete scheduling conference deadline timer
+            scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
+            scheduling_conference_deadline.completed = True
+            scheduling_conference_deadline.save(update_fields=['completed'])
+
+            # Start Request PTI deadline timer
+            deadlines_dict = utils.get_deadline_dict(case.track)
+            day_after_request_due = deadlines_dict[str(Deadline.REQUEST_PTI)] + 1
+            Deadline.objects.create(
+                case=case,
+                type=Deadline.REQUEST_PTI,
+                datetime=utils.get_actual_deadline_from_start(case.scheduling_conference_date, day_after_request_due)
             )
 
-        return HttpResponseRedirect(self.get_success_url())
+            return HttpResponseRedirect(reverse('trial', kwargs=kwargs))
+    else:
+        form = TrackForm(case_number=kwargs['case_number'])
 
-    def get_success_url(self):
-        return SOURCE_URL
-
-
-class RequestPTIView(FormView):
-    template_name = 'remind/request_pti_form.html'
-    form_class = RequestPTIForm
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def get_form_kwargs(self):
-        return self.kwargs
-
-    def post(self, request, *args, **kwargs):
-        # Set Request PTI date
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
-        case.pti_request_date = request.POST['request_pti_date']
-        case.save(update_fields=['pti_request_date'])
-
-        # Defining this variable again ensures pti_request_date is saved as a datetime
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
-
-        # Start Conduct PTI deadline timer
-        deadlines_dict = utils.get_deadline_dict(case.track)
-        day_after_request_due = deadlines_dict[str(Deadline.CONDUCT_PTI)] + 1
-        Deadline.objects.create(
-            case=case,
-            type=Deadline.CONDUCT_PTI,
-            datetime=utils.get_actual_deadline_from_start(case.pti_request_date, day_after_request_due)
-        )
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return SOURCE_URL
+    return render(request, 'remind/track_form.html', {'form': form})
 
 
-class UpdateView(FormView):
-    template_name = 'remind/update_form.html'
-    form_class = UpdateForm
+def trial(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = TrialForm(request.POST, case_number=kwargs.get('case_number'))
+        if form.is_valid():
+            # Set scheduling conference for date
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+            case.trial_date = form.cleaned_data.get('trial_date')
+            case.save(update_fields=['trial_date'])
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+            # Start trial deadline timer
+            Deadline.objects.create(
+                case=case,
+                type=Deadline.TRIAL,
+                datetime=case.trial_date,
+            )
 
-    def get_form_kwargs(self):
-        return self.kwargs
+            return HttpResponseRedirect(reverse('order', kwargs=kwargs))
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data()
-        context['case_number'] = self.kwargs['case_number']
-        return context
+    else:
+        form = TrialForm(case_number=kwargs['case_number'])
 
-    def post(self, request, *args, **kwargs):
-        case = Case.objects.get(case_number=self.kwargs['case_number'])
+    return render(request, 'remind/trial_form.html', {'form': form})
 
-        for index, deadline in enumerate(Deadline.objects.filter(case=case)):
-            key = 'deadline_{}'.format(index)
-            if deadline.datetime.strftime('%Y-%m-%d %H:%M:%S') != request.POST[key]:
-                deadline.datetime = request.POST[key]
-                deadline.save(update_fields=['datetime'])
 
-        return HttpResponseRedirect(self.get_success_url())
+def order(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = OrderForm(request.POST, case_number=kwargs.get('case_number'))
+        if form.is_valid():
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+            for key in TRIAL_DEADLINES:
+                Deadline.objects.create(
+                    case=case,
+                    type=int(key),
+                    datetime=form.cleaned_data.get(key),
+                )
 
-    def get_success_url(self):
-        return SOURCE_URL
+            return HttpResponseRedirect(SOURCE_URL)
+
+    else:
+        form = OrderForm(case_number=kwargs['case_number'])
+
+    return render(request, 'remind/trial_form.html', {'form': form})
+
+
+def request_pti(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = RequestPTIForm(request.POST, case_number=kwargs.get('case_number'))
+        if form.is_valid():
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+            case.pti_request_date = form.cleaned_data.get('request_pti_date')
+            case.save(update_fields=['pti_request_date'])
+
+            # Defining this variable again ensures pti_request_date is saved as a datetime
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+            # Start Conduct PTI deadline timer
+            deadlines_dict = utils.get_deadline_dict(case.track)
+            day_after_request_due = deadlines_dict[str(Deadline.CONDUCT_PTI)] + 1
+            Deadline.objects.create(
+                case=case,
+                type=Deadline.CONDUCT_PTI,
+                datetime=utils.get_actual_deadline_from_start(case.pti_request_date, day_after_request_due)
+            )
+
+            return HttpResponseRedirect(SOURCE_URL)
+
+    else:
+        form = RequestPTIForm(case_number=kwargs['case_number'])
+
+    return render(request, 'remind/request_pti_form.html', {'form': form})
+
+
+def update(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
+        if form.is_valid():
+            case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+            for index, deadline in enumerate(Deadline.objects.filter(case=case)):
+                key = 'deadline_{}'.format(index)
+                if deadline.datetime.strftime('%Y-%m-%d %H:%M:%S') != form.cleaned_data.get(key):
+                    deadline.datetime = form.cleaned_data.get(key)
+                    deadline.save(update_fields=['datetime'])
+
+            return HttpResponseRedirect(SOURCE_URL)
+
+    else:
+        form = UpdateForm(case_number=kwargs['case_number'])
+
+    return render(request, 'remind/update_form.html', {'form': form})
 
 
 class UpdateHomeView(FormView):
@@ -240,18 +181,17 @@ class UpdateHomeView(FormView):
         return reverse('update', kwargs={'case_number': self.case_number})
 
 
-class CompleteView(FormView):
-    template_name = 'remind/complete_form.html'
-    form_class = CompleteForm
+def complete(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = CompleteForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
+        if form.is_valid():
+            deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+            deadline.completed = form.cleaned_data.get('completed')
+            deadline.save(update_fields=['completed'])
+            return HttpResponseRedirect(SOURCE_URL)
 
-    def get_form_kwargs(self):
-        return self.kwargs
+    else:
+        form = CompleteForm(deadline_pk=kwargs.get('deadline_pk'))
 
-    def post(self, request, *args, **kwargs):
-        deadline = Deadline.objects.get(pk=self.kwargs['deadline_pk'])
-        deadline.completed = request.POST['completed']
-        deadline.save(update_fields=['completed'])
-        return HttpResponseRedirect(self.get_success_url())
+    return render(request, 'remind/complete_form.html', {'form': form})
 
-    def get_success_url(self):
-        return SOURCE_URL

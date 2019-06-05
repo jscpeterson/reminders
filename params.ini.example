@@ -1,0 +1,8 @@
+[EMAIL]
+email_host_user=
+email_host_password=
+[TEST]
+prosecutor_email=
+supervisor_email=
+paralegal_email=
+admin_email=
