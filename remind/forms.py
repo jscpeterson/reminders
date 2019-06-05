@@ -156,9 +156,9 @@ class CompleteForm(Form):
             case=deadline.case.case_number
         )
 
-        self.fields['completed'] = forms.ChoiceField(
-            choices=TRUE_FALSE_CHOICES,
-            label=label
+        self.fields['completed'] = forms.BooleanField(
+            label=label,
+            required=False
         )
 
 
@@ -168,9 +168,9 @@ class ExtensionForm(Form):
         deadline_pk = kwargs.pop('deadline_pk')
         super(ExtensionForm, self).__init__(*args, **kwargs)
 
-        self.fields['extension_filed'] = forms.ChoiceField(
-            choices=TRUE_FALSE_CHOICES,
-            label='Have you filed for an extension?'
+        self.fields['extension_filed'] = forms.BooleanField(
+            label='Have you filed for an extension?',
+            required=False
         )
 
 
@@ -180,7 +180,7 @@ class JudgeConfirmedForm(Form):
         deadline_pk = kwargs.pop('deadline_pk')
         super(JudgeConfirmedForm, self).__init__(*args, **kwargs)
 
-        self.fields['judge_approved'] = forms.ChoiceField(
-            choices=TRUE_FALSE_CHOICES,
-            label='Has this deadline been approved by the judge?'
+        self.fields['judge_approved'] = forms.BooleanField(
+            label='Has this deadline been approved by the judge?',
+            required=False
         )
