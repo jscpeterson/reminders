@@ -10,6 +10,7 @@ from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, Re
     UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS
 from . import utils
+from . import case_utils
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
@@ -24,24 +25,24 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
 
 
 class CaseOpenListView(LoginRequiredMixin, ListView):
-    model = Case
+    template_name = 'home.html'
 
-    def get_object(self):
-        user = Q(CustomUser.object.get(prosecutor=self.request.user)) | \
-               Q(CustomUser.object.get(paralegal=self.request.user)) | \
-               Q(CustomUser.object.get(supervisor=self.request.user))
-        user.object.get()
-        return user
+    def get_queryset(self):
+        cases = case_utils.get_cases(self.request.user)
+        return case_utils.get_open(cases)
 
 
 class CaseClosedListView(LoginRequiredMixin, ListView):
     model = Case
 
+    def get_closed(self, cases):
+        return Q(cases.filter(deadlines__expired=True)) | Q(cases.filter(deadlines__completed=True))
+
     def get_object(self):
-        user = Q(CustomUser.object.get(prosecutor=self.request.user)) | \
-               Q(CustomUser.object.get(paralegal=self.request.user)) | \
-               Q(CustomUser.object.get(supervisor=self.request.user))
-        return user
+        cases = Q(CustomUser.objects.get(prosecutor=self.request.user)) | \
+                Q(CustomUser.objects.get(paralegal=self.request.user)) | \
+                Q(CustomUser.objects.get(supervisor=self.request.user))
+        return self.get_closed(cases)
 
 
 @login_required
