@@ -1,10 +1,41 @@
 {% extends 'base.html' %}
+{% load material_form %}
+{% load static %}
 
 {% block title %}Login{% endblock %}
 
+{% block head %}
+    <title> ReminderBot Login </title>
+    <!--Add CSS Style-->
+    <style>
+       html{
+            background-image: url("{% static 'background.jpeg' %}");
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .login {
+            margin-top: 100px;
+        }
+        .login .card{
+            background: rgba(255, 255, 255, .8)
+        }
+        .login label{
+            font-size: 16px;
+            color:black;
+        }
+        .login input{
+            font-size: 22px;
+            color: black;
+        }
+    </style>
+
+{% endblock %}
+
 {% block content %}
 
-<div class="row">
+<div class="row login">
     <div class="col s8 offset-s2">
         <div class="card">
 

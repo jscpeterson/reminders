@@ -1,11 +1,41 @@
 {% extends 'base.html' %}
 {% load material_form %}
+{% load static %}
 
 {% block title %}Sign Up{% endblock %}
 
+{% block head %}
+    <title> ReminderBot Login </title>
+    <!--Add CSS Style-->
+    <style>
+       html{
+            background-image: url("{% static 'background.jpeg' %}");
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .signup {
+            margin-top: 100px;
+        }
+        .signup .card{
+            background: rgba(255, 255, 255, .8)
+        }
+        .signup label{
+            font-size: 16px;
+            color:black;
+        }
+        .signup input{
+            font-size: 22px;
+            color: black;
+        }
+    </style>
+
+{% endblock %}
+
 {% block content %}
 
-<div class="row">
+<div class="row signup">
     <div class="col s8 offset-s2">
         <div class="card">
 

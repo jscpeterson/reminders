@@ -5,50 +5,75 @@
 {% block title %}Home{% endblock %}
 
 {% block head %}
-    <title> ReminderBot 4000 </title>
-    <!--Add CSS Style-->
-    <style>
-       body{
+<title> ReminderBot Login Sign Up </title>
+<!--Add CSS Style-->
+<style>
+       html{
             background-image: url("{% static 'background.jpeg' %}");
-            background-size: cover;
+            height: 100%;
+            background-position: center;
             background-repeat: no-repeat;
-            color:N/A;
+            background-size: cover;
         }
 
-    </style>
+        nav{
+            background: rgba(0,0,0,.8)
+        }
+        .login {
+            margin-top: 100px;
+        }
+        .login .card{
+            background: rgba(255, 255, 255, .4)
+        }
+
+
+
+</style>
 
 {% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-    Hi {{ user.username }}!
-    <p><a href="{% url 'logout' %}">logout</a></p>
 
 <nav>
     <div class="nav-wrapper">
-        <a href="#" class="brand-logo center"><img src="{% static 'logo.png' %}"></a>
-        <ul id="nav-mobile" class="left hide-on-med-and-down">
-            <li><a href="sass.html">Sass</a></li>
-            <li><a href="badges.html">Components</a></li>
-            <li><a href="collapsible.html">JavaScript</a></li>
+        <a class="brand-logo right">{{ user }}</a>
+    </div>
+</nav>
+
+<nav>
+    <div class="nav-wrapper">
+        <ul class="right">
+            <li>|</li>
+            <li>
+            <a href="{% url 'logout' %}" class="right">
+                <button class="btn-large">logout</button>
+            </a>
+            </li>
+            <li>|</li>
+        </ul>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <ul class="hide-on-med-and-down">
+            <li>|</li>
+            <li>
+                <form action='remind/create' method='GET'>
+                    <button type='submit' class="btn-large">New</button>
+                </form>
+            </li>
+            <li>|</li>
+            <li>
+                <form action='remind/update' method='GET'>
+                    <button type='submit' class="btn-large">Update</button>
+                </form>
+            </li>
+            <li>|</li>
         </ul>
     </div>
 </nav>
 
-<h4>
-    Hi {{ user }}!
-</h4>
-
-<form action='remind/create' method='GET'>
-    <button type='submit'> Create New Case</button>
-</form>
-
-<form action='remind/update' method='GET'>
-    <button type='submit'> Update Existing Case</button>
-</form>
-
 {% else %}
-<div class="row">
+
+<div class="row login">
     <div class="col s8 offset-s2">
         <div class="card">
             <div class="card-image">
@@ -58,9 +83,14 @@
             <div class="card-content">
 
                 <div class="form-field center-align">
-                    <a href="{% url 'login' %}"><button type="submit" class="btn-large">Login</button></a>
-                    <a href="{% url 'signup' %}"><button type="submit" class="btn-large">Sign Up</button></a>
-                </div><br>
+                    <a href="{% url 'login' %}">
+                        <button type="submit" class="btn-large">Login</button>
+                    </a>
+                    <a href="{% url 'signup' %}">
+                        <button type="submit" class="btn-large">Sign Up</button>
+                    </a>
+                </div>
+                <br>
 
             </div>
         </div>
@@ -69,4 +99,3 @@
 
 {% endif %}
 {% endblock %}
-
