@@ -1,25 +1,101 @@
 {% extends 'base.html' %}
+{% load material_form %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
+{% block head %}
+<title> ReminderBot Login Sign Up </title>
+<!--Add CSS Style-->
+<style>
+       html{
+            background-image: url("{% static 'background.jpeg' %}");
+            min-height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        nav{
+            background: rgba(0,0,0,.8)
+        }
+        .login {
+            margin-top: 100px;
+        }
+        .login .card{
+            background: rgba(255, 255, 255, .4)
+        }
+
+
+
+</style>
+
+{% endblock %}
+
 {% block content %}
 {% if user.is_authenticated %}
-<p><a href="{% url 'logout' %}">logout</a></p>
 
-<h4>
-    Hi {{ user }}!
-</h4>
+<nav>
+    <div class="nav-wrapper">
+        <a class="brand-logo right">{{ user }}</a>
+    </div>
+</nav>
 
-<form action='remind/create' method='GET'>
-    <button type='submit'> Create New Case</button>
-</form>
+<nav>
+    <div class="nav-wrapper">
+        <ul class="right">
+            <li>|</li>
+            <li>
+            <a href="{% url 'logout' %}" class="right">
+                <button class="btn-large">logout</button>
+            </a>
+            </li>
+            <li>|</li>
+        </ul>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+        <ul class="hide-on-med-and-down">
+            <li>|</li>
+            <li>
+                <form action='remind/create' method='GET'>
+                    <button type='submit' class="btn-large">New</button>
+                </form>
+            </li>
+            <li>|</li>
+            <li>
+                <form action='remind/update' method='GET'>
+                    <button type='submit' class="btn-large">Update</button>
+                </form>
+            </li>
+            <li>|</li>
+        </ul>
+    </div>
+</nav>
 
-<form action='remind/update' method='GET'>
-    <button type='submit'> Update Existing Case</button>
-</form>
 {% else %}
-<p>You are not logged in</p>
-<a href="{% url 'login' %}">login</a> |
-<a href="{% url 'signup' %}">signup</a>
+
+<div class="row login">
+    <div class="col s8 offset-s2">
+        <div class="card">
+            <div class="card-image">
+                <img src="{% static 'logo.png' %}">
+            </div>
+
+            <div class="card-content">
+
+                <div class="form-field center-align">
+                    <a href="{% url 'login' %}">
+                        <button type="submit" class="btn-large">Login</button>
+                    </a>
+                    <a href="{% url 'signup' %}">
+                        <button type="submit" class="btn-large">Sign Up</button>
+                    </a>
+                </div>
+                <br>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endif %}
 {% endblock %}

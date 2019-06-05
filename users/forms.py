@@ -9,9 +9,6 @@ class CustomUserCreationForm(UserCreationForm, ModelForm):
 
         model = CustomUser
         fields = ('first_name', 'last_name', 'position', 'email', 'username')
-        # widget = {
-        #     forms.Select(choices=CustomUser.POSITION_CHOICES, attrs={'class':'mdb-select md-form'})
-        # }
 
 
 class CustomUserChangeForm(UserChangeForm):
