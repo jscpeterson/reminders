@@ -13,8 +13,7 @@ class CustomUser(AbstractUser):
     )
     first_name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
-    position = models.IntegerField(null=True)
-    # TODO: Make position a choicefield
+    position = models.IntegerField(choices=POSITION_CHOICES, null=True)
 
     def __str__(self):
         display_name = self.first_name + " " + self.last_name
