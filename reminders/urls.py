@@ -15,11 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic.base import TemplateView
 from remind import views
 
 urlpatterns = [
-    path('', views.CaseOpenListView.as_view(), name='case-open-list'),
+    path('', views.CaseOpenListView.as_view(), name='home'),
     path('remind/', include('remind.urls')),
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
