@@ -31,19 +31,12 @@ class CaseOpenListView(LoginRequiredMixin, ListView):
         cases = case_utils.get_cases(self.request.user)
         return case_utils.get_open(cases)
 
-
-class CaseClosedListView(LoginRequiredMixin, ListView):
-    model = Case
-
-    def get_closed(self, cases):
-        return Q(cases.filter(deadlines__expired=True)) | Q(cases.filter(deadlines__completed=True))
-
-    def get_object(self):
-        cases = Q(CustomUser.objects.get(prosecutor=self.request.user)) | \
-                Q(CustomUser.objects.get(paralegal=self.request.user)) | \
-                Q(CustomUser.objects.get(supervisor=self.request.user))
-        return self.get_closed(cases)
-
+    def get_context_data(self, **kwargs):
+        context = super(CaseOpenListView, self).get_context_data(**kwargs)
+        cases = case_utils.get_cases(self.request.user)
+        closed_cases = case_utils.get_closed(cases)
+        context['closed_cases'] = closed_cases
+        return context
 
 @login_required
 def scheduling(request, *args, **kwargs):

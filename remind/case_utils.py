@@ -13,3 +13,7 @@ def get_cases(user):
 
 def get_open(cases):
     return cases.filter(deadline__expired=False).filter(deadline__completed=False)
+
+
+def get_closed(cases):
+    return Q(cases.filter(deadline__expired=True)) | Q(cases.filter(deadline__completed=True))
