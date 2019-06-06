@@ -80,8 +80,8 @@ def track(request, *args, **kwargs):
 
             # Complete scheduling conference deadline timer
             scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
-            scheduling_conference_deadline.completed = True
-            scheduling_conference_deadline.save(update_fields=['completed'])
+            scheduling_conference_deadline.status = Deadline.COMPLETED
+            scheduling_conference_deadline.save(update_fields=['status'])
 
             # Start Request PTI deadline timer
             deadlines_dict = utils.get_deadline_dict(case.track)
@@ -214,8 +214,9 @@ def complete(request, *args, **kwargs):
         form = CompleteForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
             deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
-            deadline.completed = form.cleaned_data.get('completed')
-            deadline.save(update_fields=['completed'])
+            if form.cleaned_data.get('status'):
+                deadline.status = Deadline.COMPLETED
+                deadline.save(update_fields=['status'])
             return HttpResponseRedirect(SOURCE_URL)
 
     else:

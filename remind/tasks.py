@@ -28,7 +28,7 @@ def check_all_deadlines():
     now = timezone.now()
     print('Now the time is {}'.format(now.strftime('%H:%M:%S.%f')))
 
-    for deadline in Deadline.objects.filter(expired=False, completed=False):
+    for deadline in Deadline.objects.filter(status=Deadline.ACTIVE):
         days_until = deadline.datetime - now
 
         # Send notice if celery detects a deadline is invalid or requires an extension
@@ -55,8 +55,8 @@ def check_all_deadlines():
                     send_emails(Email.REQUEST_PTI, deadline)
                 elif deadline.type == Deadline.CONDUCT_PTI:
                     send_emails(Email.CONDUCT_PTI, deadline)
-                deadline.completed = True
-                deadline.save(update_fields=['completed'])
+                deadline.status = Deadline.COMPLETED
+                deadline.save(update_fields=['status'])
                 print('Deadline {} completed: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
                 continue
 
@@ -65,8 +65,8 @@ def check_all_deadlines():
             if days_until <= timedelta(days=0):
                 print('Deadline {} expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
                 send_emails(Email.DEADLINE_EXPIRED, deadline)
-                deadline.expired = True
-                deadline.save(update_fields=['expired'])
+                deadline.status = Deadline.EXPIRED
+                deadline.save(update_fields=['status'])
                 continue
             # Send second reminder if it is within the SECOND_REMINDER time and two reminders have not been sent
             elif (days_until <= timedelta(days=SECOND_REMINDER_DAYS[deadline.type])) and deadline.reminders_sent < 2:

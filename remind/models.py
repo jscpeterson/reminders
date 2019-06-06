@@ -78,11 +78,21 @@ class Deadline(TimeStampedModel):
         (TRIAL, 'Trial'),
     )
 
+    ACTIVE = 0
+    COMPLETED = 1
+    EXPIRED = 2
+
+    STATUS_CHOICES = (
+        (ACTIVE, 'Active'),
+        (COMPLETED, 'Complete'),
+        (EXPIRED, 'Expired')
+    )
+
+    status = models.IntegerField(default=0)
+
     type = models.IntegerField(choices=TYPE_CHOICES)
     case = models.ForeignKey(Case, on_delete=models.PROTECT)
     datetime = models.DateTimeField()
-    expired = models.BooleanField(default=False)
-    completed = models.BooleanField(default=False)
     reminders_sent = models.IntegerField(default=0)
     invalid_notice_sent = models.BooleanField(default=False)
     invalid_judge_approved = models.BooleanField(default=False)
