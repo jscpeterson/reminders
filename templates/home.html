@@ -97,7 +97,7 @@
             </div>
             <div class="card-action">
                 <ul class="collection">
-                    {% for case in object_list %}
+                    {% for case in closed_cases %}
                         <li class="collection-item">{{ case.case_number }}</li>
                     {% empty %}
                         <li class="collection-item">No cases yet</li>

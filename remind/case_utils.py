@@ -16,4 +16,4 @@ def get_open(cases):
 
 
 def get_closed(cases):
-    return Q(cases.filter(deadline__expired=True)) | Q(cases.filter(deadline__completed=True))
+    return cases.filter(Q(deadline__expired=True) | Q(deadline__completed=True))
