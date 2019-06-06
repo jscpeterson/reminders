@@ -16,9 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from remind import views
+from django.views.generic.base import TemplateView
 
 urlpatterns = [
-    path('', views.CaseOpenListView.as_view(), name='home'),
+    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    # path('', views.CaseOpenListView.as_view(), name='home'),
     path('remind/', include('remind.urls')),
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
