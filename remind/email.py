@@ -104,12 +104,12 @@ class Email:
         )
 
     def get_deadline_invalid_message(self):
-        url = '{source}/remind/{pk}/judge_confirmed'.format(
+        url = '{source}/remind/judge_confirmed/{pk}'.format(
             source=SOURCE_URL,
             pk=self.deadline.pk,
         )
 
-        update_url = '{source}/remind/{case_number}/update'.format(
+        update_url = '{source}/remind/update/{case_number}'.format(
             source=SOURCE_URL,
             case_number=self.deadline.case.case_number,
         )
@@ -133,12 +133,12 @@ LR2-400. Please visit {url} to confirm that the judge is aware of this, or visit
         )
 
     def get_deadline_extension_message(self):
-        url = '{source}/remind/{pk}/extension'.format(
+        url = '{source}/remind/extension/{pk}'.format(
             source=SOURCE_URL,
             pk=self.deadline.pk,
         )
 
-        update_url = '{source}/remind/{case_number}/update'.format(
+        update_url = '{source}/remind/update/{case_number}'.format(
             source=SOURCE_URL,
             case_number=self.deadline.case.case_number,
         )
@@ -161,7 +161,7 @@ change the date.'''.format(
         )
 
     def get_first_reminder_message(self):
-        url = '{source}/remind/{pk}/complete'.format(
+        url = '{source}/remind/complete/{pk}'.format(
             source=SOURCE_URL,
             pk=self.deadline.pk,
         )
@@ -188,7 +188,7 @@ Administration will be notified if the task is not completed by {date}.'''.forma
         )
 
     def get_scheduling_message(self):
-        url = '{source}/remind/{case_number}/track'.format(
+        url = '{source}/remind/track/{case_number}'.format(
             source=SOURCE_URL,
             case_number=self.case.case_number
         )
@@ -203,7 +203,7 @@ Please enter the results of the scheduling order at {url}.'''.format(
         )
 
     def get_request_pti_message(self):
-        url = '{source}/remind/{case_number}/request_pti'.format(
+        url = '{source}/remind/request_pti/{case_number}'.format(
             source=SOURCE_URL,
             case_number=self.case.case_number
         )
