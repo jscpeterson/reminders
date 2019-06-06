@@ -2,7 +2,30 @@ from django.db import models
 from users.models import CustomUser
 
 
-class Case(models.Model):
+class TimeStampedModel(models.Model):
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+
+    created_by = models.ForeignKey(
+        CustomUser,
+        related_name='created_%(class)s_items',
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True
+    )
+    updated_by = models.ForeignKey(
+        CustomUser,
+        related_name='updated_%(class)s_items',
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True
+    )
+
+    class Meta:
+        abstract = True
+
+
+class Case(TimeStampedModel):
     TRACK_CHOICES = (
         (1, '1'),
         (2, '2'),
@@ -20,7 +43,7 @@ class Case(models.Model):
     trial_date = models.DateTimeField(null=True)
 
 
-class Deadline(models.Model):
+class Deadline(TimeStampedModel):
     FFA = 0
     SCHEDULING_CONFERENCE = 1
     WITNESS_LIST = 2
@@ -55,11 +78,21 @@ class Deadline(models.Model):
         (TRIAL, 'Trial'),
     )
 
+    ACTIVE = 0
+    COMPLETED = 1
+    EXPIRED = 2
+
+    STATUS_CHOICES = (
+        (ACTIVE, 'Active'),
+        (COMPLETED, 'Complete'),
+        (EXPIRED, 'Expired')
+    )
+
+    status = models.IntegerField(default=0)
+
     type = models.IntegerField(choices=TYPE_CHOICES)
     case = models.ForeignKey(Case, on_delete=models.PROTECT)
     datetime = models.DateTimeField()
-    expired = models.BooleanField(default=False)
-    completed = models.BooleanField(default=False)
     reminders_sent = models.IntegerField(default=0)
     invalid_notice_sent = models.BooleanField(default=False)
     invalid_judge_approved = models.BooleanField(default=False)
