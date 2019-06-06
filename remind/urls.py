@@ -2,8 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.CaseOpenListView.as_view(), name='case-open-list'),
-    #path('', views.CaseClosedListView.as_view(), name='case-closed-list'),
     path('create/', views.CaseCreateView.as_view()),
     path('update/', views.UpdateHomeView.as_view()),
     path('<str:case_number>/scheduling/', views.scheduling, name='scheduling'),
