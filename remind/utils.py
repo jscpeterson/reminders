@@ -5,7 +5,7 @@ from reminders import settings
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, SCHEDULING_ORDER_DEADLINE_DAYS, \
-    TRIAL_DEADLINES
+    TRIAL_DEADLINES, WITNESS_LIST_DEADLINE_DAYS
 
 
 def clear_deadlines(case):
@@ -99,10 +99,10 @@ def get_actual_deadline_from_start(start_date, days):
         result_date = result_date + timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
-                                      hour=LAST_DAY_HOUR,
-                                      minute=LAST_DAY_MINUTE,
-                                      second=LAST_DAY_SECOND)
+    # result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
+    #                                   hour=LAST_DAY_HOUR,
+    #                                   minute=LAST_DAY_MINUTE,
+    #                                   second=LAST_DAY_SECOND)
 
     return result_date
 
@@ -159,10 +159,10 @@ def get_actual_deadline_from_end(end_date, days):
         result_date = result_date - timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
-                                      hour=LAST_DAY_HOUR,
-                                      minute=LAST_DAY_MINUTE,
-                                      second=LAST_DAY_SECOND)
+    # result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
+    #                                   hour=LAST_DAY_HOUR,
+    #                                   minute=LAST_DAY_MINUTE,
+    #                                   second=LAST_DAY_SECOND)
 
     return result_date
 
@@ -219,14 +219,21 @@ def is_deadline_invalid(deadline):
     """
     Returns True if a deadline is outside permissible limits from a triggering event.
     """
+    # These deadlines do not require a track to be set
     if deadline.type == Deadline.SCHEDULING_CONFERENCE:
         return not is_deadline_within_limits(deadline=deadline.datetime,
                                              event=deadline.case.arraignment_date,
                                              days=SCHEDULING_ORDER_DEADLINE_DAYS,
                                              future_event=False)
-    # TODO Handle WITNESS_LIST deadline
+    elif deadline.type == Deadline.WITNESS_LIST:
+        return not is_deadline_within_limits(deadline=deadline.datetime,
+                                             event=deadline.case.arraignment_date,
+                                             days=WITNESS_LIST_DEADLINE_DAYS,
+                                             future_event=False)
+
+    # These deadlines require a track. If the deadline is not handled here something has been missed.
     if deadline.case.track is None:
-        return False
+        pass
     else:
         deadline_dict = get_deadline_dict(deadline.case.track)
         if str(deadline.type) in TRIAL_DEADLINES:
@@ -236,4 +243,4 @@ def is_deadline_invalid(deadline):
                                                  days=required_days,
                                                  future_event=True)
 
-    # raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
+    raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
