@@ -28,6 +28,7 @@
 
 
 
+
 </style>
 
 {% endblock %}
@@ -46,9 +47,9 @@
         <ul class="right">
             <li>|</li>
             <li>
-            <a href="{% url 'logout' %}" class="right">
-                <button class="btn-large">logout</button>
-            </a>
+                <a href="{% url 'logout' %}" class="right">
+                    <button class="btn-large">logout</button>
+                </a>
             </li>
             <li>|</li>
         </ul>
@@ -70,6 +71,42 @@
         </ul>
     </div>
 </nav>
+
+<div class="row">
+    <div class="col m4">
+        <div class="card blue-grey darken-1">
+            <div class="card-content white-text">
+                <span class="card-title">Cases with Pending Deadlines</span>
+            </div>
+            <div class="card-action">
+                <ul class="collection">
+                    {% for case in object_list %}
+                        <li class="collection-item">{{ case.case_number }}</li>
+                    {% empty %}
+                        <li class="collection-item">No cases yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col m4">
+        <div class="card blue-grey darken-1">
+            <div class="card-content white-text">
+                <span class="card-title">Cases with Completed Deadlines</span>
+            </div>
+            <div class="card-action">
+                <ul class="collection">
+                    {% for case in closed_cases %}
+                        <li class="collection-item">{{ case.case_number }}</li>
+                    {% empty %}
+                        <li class="collection-item">No cases yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% else %}
 

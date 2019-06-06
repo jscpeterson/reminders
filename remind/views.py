@@ -2,13 +2,18 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
+from django.views.generic.list import ListView
 from .models import Case, Deadline
+from users.models import CustomUser
+
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS
 from . import utils
+from . import case_utils
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
@@ -18,6 +23,20 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse('scheduling', kwargs={'case_number': self.object.case_number})
 
+
+class CaseOpenListView(LoginRequiredMixin, ListView):
+    template_name = 'home.html'
+
+    def get_queryset(self):
+        cases = case_utils.get_cases(self.request.user)
+        return case_utils.get_open(cases)
+
+    def get_context_data(self, **kwargs):
+        context = super(CaseOpenListView, self).get_context_data(**kwargs)
+        cases = case_utils.get_cases(self.request.user)
+        closed_cases = case_utils.get_closed(cases)
+        context['closed_cases'] = closed_cases
+        return context
 
 @login_required
 def scheduling(request, *args, **kwargs):
