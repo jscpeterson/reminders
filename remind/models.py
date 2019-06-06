@@ -98,6 +98,9 @@ class Deadline(TimeStampedModel):
     invalid_judge_approved = models.BooleanField(default=False)
     invalid_extension_filed = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.TYPE_CHOICES[self.type][1]
+
 
 class Motion(models.Model):
     # type
