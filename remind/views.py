@@ -13,7 +13,7 @@ from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+from django.views.generic.base import TemplateView
 
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
@@ -24,19 +24,20 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
         return reverse('scheduling', kwargs={'case_number': self.object.case_number})
 
 
-class CaseOpenListView(LoginRequiredMixin, ListView):
-    template_name = 'home.html'
+class DashView(LoginRequiredMixin, ListView):
+    template_name = 'remind/dashboard.html'
 
     def get_queryset(self):
         cases = case_utils.get_cases(self.request.user)
         return case_utils.get_open(cases)
 
     def get_context_data(self, **kwargs):
-        context = super(CaseOpenListView, self).get_context_data(**kwargs)
+        context = super(DashView, self).get_context_data(**kwargs)
         cases = case_utils.get_cases(self.request.user)
         closed_cases = case_utils.get_closed(cases)
         context['closed_cases'] = closed_cases
         return context
+
 
 @login_required
 def scheduling(request, *args, **kwargs):

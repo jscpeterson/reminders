@@ -36,73 +36,22 @@
 {% block content %}
 {% if user.is_authenticated %}
 
-<nav>
-    <div class="nav-wrapper">
-        <a class="brand-logo right">{{ user }}</a>
-    </div>
-</nav>
-
-<nav>
-    <div class="nav-wrapper">
-        <ul class="right">
-            <li>|</li>
-            <li>
-                <a href="{% url 'logout' %}" class="right">
-                    <button class="btn-large">logout</button>
-                </a>
-            </li>
-            <li>|</li>
-        </ul>
-        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-        <ul class="hide-on-med-and-down">
-            <li>|</li>
-            <li>
-                <form action='remind/create' method='GET'>
-                    <button type='submit' class="btn-large">New</button>
-                </form>
-            </li>
-            <li>|</li>
-            <li>
-                <form action='remind/update' method='GET'>
-                    <button type='submit' class="btn-large">Update</button>
-                </form>
-            </li>
-            <li>|</li>
-        </ul>
-    </div>
-</nav>
-
-<div class="row">
-    <div class="col m4">
-        <div class="card blue-grey darken-1">
-            <div class="card-content white-text">
-                <span class="card-title">Cases with Pending Deadlines</span>
+<div class="row login">
+    <div class="col s8 offset-s2">
+        <div class="card">
+            <div class="card-image">
+                <img src="{% static 'logo.png' %}">
             </div>
-            <div class="card-action">
-                <ul class="collection">
-                    {% for case in object_list %}
-                        <li class="collection-item">{{ case.case_number }}</li>
-                    {% empty %}
-                        <li class="collection-item">No cases yet</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
 
-    <div class="col m4">
-        <div class="card blue-grey darken-1">
-            <div class="card-content white-text">
-                <span class="card-title">Cases with Completed Deadlines</span>
-            </div>
-            <div class="card-action">
-                <ul class="collection">
-                    {% for case in closed_cases %}
-                        <li class="collection-item">{{ case.case_number }}</li>
-                    {% empty %}
-                        <li class="collection-item">No cases yet</li>
-                    {% endfor %}
-                </ul>
+            <div class="card-content">
+
+                <div class="form-field center-align">
+                    <a href="{% url 'remind:dashboard' %}">
+                        <button type="submit" class="btn-large">Dashboard</button>
+                    </a>
+                </div>
+                <br>
+
             </div>
         </div>
     </div>

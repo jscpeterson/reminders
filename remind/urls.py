@@ -1,7 +1,9 @@
 from django.urls import path
 from . import views
 
+app_name = 'remind'
 urlpatterns = [
+    path('', views.DashView.as_view(), name='dashboard'),
     path('create/', views.CaseCreateView.as_view()),
     path('update/', views.UpdateHomeView.as_view()),
     path('scheduling/<str:case_number>', views.scheduling, name='scheduling'),
