@@ -77,9 +77,9 @@ class TestDeadlineCheck(TestCase):
         days = 60
         deadline = datetime(2018, 10, 1, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                             tzinfo=timezone(settings.TIME_ZONE))
-        good_deadline = datetime(2018, 10, 2, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+        good_deadline = datetime(2018, 9, 28, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                  tzinfo=timezone(settings.TIME_ZONE))
-        bad_deadline = datetime(2018, 9, 28, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+        bad_deadline = datetime(2018, 10, 2, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE))
         self.assertTrue(utils.is_deadline_within_limits(deadline=deadline, event=event, days=days, future_event=False))
         self.assertTrue(utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=False))
@@ -91,9 +91,9 @@ class TestDeadlineCheck(TestCase):
         days = 10
         deadline = datetime(2018, 8, 16, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                             tzinfo=timezone(settings.TIME_ZONE))
-        good_deadline = datetime(2018, 8, 17, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+        good_deadline = datetime(2018, 8, 15, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                  tzinfo=timezone(settings.TIME_ZONE))
-        bad_deadline = datetime(2018, 8, 15, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+        bad_deadline = datetime(2018, 8, 17, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE))
         self.assertTrue(utils.is_deadline_within_limits(deadline=deadline, event=event, days=days, future_event=False))
         self.assertTrue(utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=False))
@@ -152,7 +152,7 @@ class TestExtensionCheck(TestCase):
 
     def test_trial_deadline(self):
         case = Case.objects.create(
-            arraignment_date=datetime(2019, 1, 11,
+            arraignment_date=datetime(2019, 1, 11, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                       tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
             paralegal=self.paralegal,
@@ -161,19 +161,19 @@ class TestExtensionCheck(TestCase):
         )
         good_deadline = Deadline.objects.create(
             type=Deadline.TRIAL,
-            datetime=datetime(2019, 7, 8,
+            datetime=datetime(2019, 8, 9, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
         invalid_deadline = Deadline.objects.create(
             type=Deadline.TRIAL,
-            datetime=datetime(2019, 9, 10,
+            datetime=datetime(2019, 9, 10, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
         extension_deadline = Deadline.objects.create(
             type=Deadline.TRIAL,
-            datetime=datetime(2019, 8, 21,
+            datetime=datetime(2019, 9, 9, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
@@ -183,7 +183,7 @@ class TestExtensionCheck(TestCase):
 
     def test_scientific_deadline(self):
         case = Case.objects.create(
-            trial_date=datetime(2019, 6, 3,
+            trial_date=datetime(2019, 6, 3, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE)),
             track=2,
             paralegal=self.paralegal,
@@ -192,19 +192,19 @@ class TestExtensionCheck(TestCase):
         )
         good_deadline = Deadline.objects.create(
             type=Deadline.SCIENTIFIC_EVIDENCE,
-            datetime=datetime(2019, 2, 1,
+            datetime=datetime(2019, 2, 1, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
         invalid_deadline = Deadline.objects.create(
             type=Deadline.SCIENTIFIC_EVIDENCE,
-            datetime=datetime(2019, 4, 1,
+            datetime=datetime(2019, 4, 1, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
         extension_deadline = Deadline.objects.create(
             type=Deadline.SCIENTIFIC_EVIDENCE,
-            datetime=datetime(2019, 2, 10,
+            datetime=datetime(2019, 2, 10, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
@@ -237,7 +237,7 @@ class TestInvalidDeadlineCheck(TestCase):
 
     def test_scheduling_conference(self):
         case = Case.objects.create(
-            arraignment_date=datetime(2019, 1, 11,
+            arraignment_date=datetime(2019, 1, 11, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                       tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
             paralegal=self.paralegal,
@@ -246,13 +246,13 @@ class TestInvalidDeadlineCheck(TestCase):
         )
         good_deadline = Deadline.objects.create(
             type=Deadline.SCHEDULING_CONFERENCE,
-            datetime=datetime(2019, 2, 8,
+            datetime=datetime(2019, 2, 11, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
         invalid_deadline = Deadline.objects.create(
             type=Deadline.SCHEDULING_CONFERENCE,
-            datetime=datetime(2019, 2, 12,
+            datetime=datetime(2019, 2, 12, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
@@ -261,7 +261,7 @@ class TestInvalidDeadlineCheck(TestCase):
 
     def test_trial_deadline(self):
         case = Case.objects.create(
-            trial_date=datetime(2019, 6, 3,
+            trial_date=datetime(2019, 6, 3, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
             paralegal=self.paralegal,
@@ -270,13 +270,13 @@ class TestInvalidDeadlineCheck(TestCase):
         )
         good_deadline = Deadline.objects.create(
             type=Deadline.FINAL_WITNESS_LIST,
-            datetime=datetime(2019, 5, 17,
+            datetime=datetime(2019, 5, 17, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
         invalid_deadline = Deadline.objects.create(
             type=Deadline.FINAL_WITNESS_LIST,
-            datetime=datetime(2019, 5, 24,
+            datetime=datetime(2019, 5, 20, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                               tzinfo=timezone(settings.TIME_ZONE)),
             case=case,
         )
