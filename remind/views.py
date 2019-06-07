@@ -246,7 +246,7 @@ def complete(request, *args, **kwargs):
         form = CompleteForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
             deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
-            if form.cleaned_data.get('status'):
+            if form.cleaned_data.get('completed'):
                 deadline.status = Deadline.COMPLETED
                 deadline.updated_by = request.user
                 deadline.save(update_fields=['status', 'updated_by'])
