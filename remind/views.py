@@ -214,7 +214,7 @@ def update(request, *args, **kwargs):
                     deadline.datetime = form.cleaned_data.get(key)
                     deadline.updated_by = request.user
                     deadline.invalid_notice_sent = False
-                    deadline.save(update_fields=['datetime', 'updated_by', 'inactive_notice_sent'])
+                    deadline.save(update_fields=['datetime', 'updated_by', 'invalid_notice_sent'])
 
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
