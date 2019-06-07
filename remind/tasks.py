@@ -68,17 +68,17 @@ def check_all_deadlines():
                 deadline.status = Deadline.EXPIRED
                 deadline.save(update_fields=['status'])
                 continue
-            # Send second reminder if it is within the SECOND_REMINDER time and two reminders have not been sent
-            elif (days_until <= timedelta(days=SECOND_REMINDER_DAYS[deadline.type])) and deadline.reminders_sent < 2:
-                print('Reminder sent for deadline {} on {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
-                send_emails(Email.SECOND_REMINDER, deadline)
-                deadline.reminders_sent += 1
-                deadline.save(update_fields=['reminders_sent'])
-                continue
             # Send first reminder if it is within the FIRST_REMINDER time and no reminders have been sent
             elif (days_until <= timedelta(days=FIRST_REMINDER_DAYS[deadline.type])) and deadline.reminders_sent < 1:
                 print('Reminder sent for deadline {} on {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
                 send_emails(Email.FIRST_REMINDER, deadline)
+                deadline.reminders_sent += 1
+                deadline.save(update_fields=['reminders_sent'])
+                continue
+            # Send second reminder if it is within the SECOND_REMINDER time and two reminders have not been sent
+            elif (days_until <= timedelta(days=SECOND_REMINDER_DAYS[deadline.type])) and deadline.reminders_sent < 2:
+                print('Reminder sent for deadline {} on {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
+                send_emails(Email.SECOND_REMINDER, deadline)
                 deadline.reminders_sent += 1
                 deadline.save(update_fields=['reminders_sent'])
                 continue

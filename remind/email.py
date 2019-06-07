@@ -1,7 +1,8 @@
 from remind import utils
 from django.utils import timezone
 from .models import Deadline, Case
-from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL, SCHEDULING_ORDER_DEADLINE_DAYS
+from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL, SCHEDULING_ORDER_DEADLINE_DAYS, \
+    WITNESS_LIST_DEADLINE_DAYS
 
 INDENT = '     '
 
@@ -116,6 +117,8 @@ class Email:
 
         if self.deadline.type == Deadline.SCHEDULING_CONFERENCE:
             required_days = SCHEDULING_ORDER_DEADLINE_DAYS
+        elif self.deadline.type == Deadline.WITNESS_LIST:
+            required_days = WITNESS_LIST_DEADLINE_DAYS
         elif self.deadline.case.track is not None:
             required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
         else:
@@ -193,12 +196,20 @@ Administration will be notified if the task is not completed by {date}.'''.forma
             case_number=self.case.case_number
         )
 
+        # Need to define these values even if there is no scheduling conference date to prevent runtime error
+        if self.case.scheduling_conference_date is not None:
+            date = self.case.scheduling_conference_date.date()
+            time = self.case.scheduling_conference_date.strftime('%H:%M')
+        else:
+            date = ''
+            time = ''
+
         return '''{indent}The scheduling conference for case {case_number} was due to take place on {date} at {time}. \
 Please enter the results of the scheduling order at {url}.'''.format(
             indent=INDENT,
             case_number=self.case.case_number,
-            date=self.case.scheduling_conference_date.date(),
-            time=self.case.scheduling_conference_date.strftime('%H:%M'),
+            date=date,
+            time=time,
             url=url,
         )
 
