@@ -244,3 +244,4 @@ def is_deadline_invalid(deadline):
                                                  future_event=True)
 
     raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
+

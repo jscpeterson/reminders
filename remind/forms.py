@@ -32,14 +32,46 @@ class SchedulingForm(Form):
     scheduling_conference_date = forms.DateTimeField(
         input_formats=['%Y-%m-%d %H:%M'],
         label='Date and time of the scheduling conference',
+        required=True
+    )
+    override = forms.BooleanField(
+        label='Override invalid date?',
+        initial=False,
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):
-        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        self.case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
-        initial = utils.get_actual_deadline_from_start(case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
+        initial = utils.get_actual_deadline_from_start(self.case.arraignment_date, SCHEDULING_ORDER_DEADLINE_DAYS)
         self.fields['scheduling_conference_date'].initial = initial
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if cleaned_data.get('override'):
+            return
+
+        if 'scheduling_conference_date' in cleaned_data:
+            scheduling_conf_date = cleaned_data.get('scheduling_conference_date')
+
+            if scheduling_conf_date < self.case.arraignment_date:
+                self.add_error(
+                    'scheduling_conference_date',
+                    'Scheduling conference cannot happen before arraignment'
+                )
+
+            else:
+                if not utils.is_deadline_within_limits(
+                    deadline=scheduling_conf_date,
+                    event=self.case.arraignment_date,
+                    days=SCHEDULING_ORDER_DEADLINE_DAYS,
+                    future_event=False,
+                ):
+                    self.add_error(
+                        'scheduling_conference_date',
+                        'Scheduling conference date is past permissible limit'
+                    )
 
 
 class TrackForm(Form):
@@ -50,7 +82,7 @@ class TrackForm(Form):
 
         initial = case.scheduling_conference_date
         self.fields['scheduling_conference_date'] = forms.DateTimeField(
-            label='What did the scheduling conference actually occur?',
+            label='When did the scheduling conference actually occur?',
             initial=initial,
         )
 
