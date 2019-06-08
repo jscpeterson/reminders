@@ -1,8 +1,7 @@
 from remind import utils
 from django.utils import timezone
 from .models import Deadline, Case
-from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL, SCHEDULING_ORDER_DEADLINE_DAYS, \
-    WITNESS_LIST_DEADLINE_DAYS
+from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL
 
 INDENT = '     '
 
@@ -115,16 +114,7 @@ class Email:
             case_number=self.deadline.case.case_number,
         )
 
-        if self.deadline.type == Deadline.SCHEDULING_CONFERENCE:
-            required_days = SCHEDULING_ORDER_DEADLINE_DAYS
-        elif self.deadline.type == Deadline.WITNESS_LIST:
-            required_days = WITNESS_LIST_DEADLINE_DAYS
-        elif self.deadline.case.track is not None:
-            required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
-        else:
-            # Even if this code should not be reachable, this variable must be defined to something to prevent an
-            # exception
-            required_days = 0
+        required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
 
         return '''{indent}The {desc} is over {days} days from the triggering event, which may be in violation of \
 LR2-400. Please visit {url} to confirm that the judge is aware of this, or visit {update_url} to change the date.'''.format(
