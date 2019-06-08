@@ -4,8 +4,7 @@ import holidays
 from reminders import settings
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
-    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, SCHEDULING_ORDER_DEADLINE_DAYS, \
-    TRIAL_DEADLINES, WITNESS_LIST_DEADLINE_DAYS
+    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRIAL_DEADLINES
 
 
 def clear_deadlines(case):
@@ -219,39 +218,26 @@ def is_deadline_invalid(deadline):
     """
     Returns True if a deadline is outside permissible limits from a triggering event.
     """
-    # These deadlines do not require a track to be set
-    if deadline.type == Deadline.SCHEDULING_CONFERENCE:
+    deadline_dict = get_deadline_dict(deadline.case.track)
+    required_days = deadline_dict[str(deadline.type)]
+    # Deadlines where the triggering event is a future trial
+    if str(deadline.type) in TRIAL_DEADLINES:
+        return not is_deadline_within_limits(deadline=deadline.datetime,
+                                             event=deadline.case.trial_date,
+                                             days=required_days,
+                                             future_event=True)
+
+    # Deadlines where the triggering event is arraignment
+    elif deadline.type in [Deadline.SCHEDULING_CONFERENCE, Deadline.WITNESS_LIST, Deadline.TRIAL]:
         return not is_deadline_within_limits(deadline=deadline.datetime,
                                              event=deadline.case.arraignment_date,
-                                             days=SCHEDULING_ORDER_DEADLINE_DAYS,
-                                             future_event=False)
-    elif deadline.type == Deadline.WITNESS_LIST:
-        return not is_deadline_within_limits(deadline=deadline.datetime,
-                                             event=deadline.case.arraignment_date,
-                                             days=WITNESS_LIST_DEADLINE_DAYS,
+                                             days=required_days,
                                              future_event=False)
 
-    # These deadlines require a track. If the deadline is not handled here something has been missed.
-    if deadline.case.track is None:
-        pass
-    else:
-        deadline_dict = get_deadline_dict(deadline.case.track)
-        required_days = deadline_dict[str(deadline.type)]
-        if str(deadline.type) in TRIAL_DEADLINES:
-            return not is_deadline_within_limits(deadline=deadline.datetime,
-                                                 event=deadline.case.trial_date,
-                                                 days=required_days,
-                                                 future_event=True)
-        else:
-            if deadline.type in [Deadline.TRIAL]:
-                return not is_deadline_within_limits(deadline=deadline.datetime,
-                                                     event=deadline.case.arraignment_date,
-                                                     days=required_days,
-                                                     future_event=False)
-            # These are automatically generated and should not be incorrect.
-            elif deadline.type in [Deadline.REQUEST_PTI]:
-                return False
-            elif deadline.type in [Deadline.CONDUCT_PTI]:
-                return False
+    # These are automatically generated and should not be incorrect.
+    elif deadline.type in [Deadline.REQUEST_PTI]:
+        return False
+    elif deadline.type in [Deadline.CONDUCT_PTI]:
+        return False
 
     raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))

@@ -14,6 +14,11 @@ MIN_DAYS_FOR_DEADLINES = 11
 SATURDAY = 5
 SUNDAY = 6
 
+TRACKLESS_DEADLINE_LIMITS = {
+    str(Deadline.SCHEDULING_CONFERENCE): SCHEDULING_ORDER_DEADLINE_DAYS,  # Days after arraignment
+    str(Deadline.WITNESS_LIST): WITNESS_LIST_DEADLINE_DAYS,  # Days after arraignment
+}
+
 TRACK_ONE_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 210,
     'trial_extended': 240,
@@ -30,6 +35,7 @@ TRACK_ONE_DEADLINE_LIMITS = {
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
+TRACK_ONE_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
 TRACK_TWO_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 300,
@@ -47,6 +53,7 @@ TRACK_TWO_DEADLINE_LIMITS = {
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
+TRACK_TWO_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
 TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 455,
@@ -64,6 +71,7 @@ TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
+TRACK_THREE_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
 TRIAL_DEADLINES = (
     str(Deadline.WITNESS_PTI),
