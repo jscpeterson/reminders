@@ -35,7 +35,7 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
             created_by=self.request.user
         )
 
-        return reverse('remind:scheduling', kwargs={'case_number': self.object.case_number})
+        return reverse('remind:case_created', kwargs={'case_number': self.object.case_number})
 
 
 class DashView(LoginRequiredMixin, ListView):
@@ -54,12 +54,29 @@ class DashView(LoginRequiredMixin, ListView):
 
 
 @login_required
+def case_created(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    witness_deadline = Deadline.objects.get(case=case, type=Deadline.WITNESS_LIST)
+
+    if request.method == 'POST':
+        return HttpResponseRedirect(reverse('remind:scheduling', kwargs={'case_number': case.case_number}))
+
+    return render(request, 'remind/case_created.html',
+                  {'case_number': case.case_number,
+                   'prosecutor': case.prosecutor,
+                   'paralegal': case.paralegal,
+                   'supervisor': case.supervisor,
+                   'witness_deadline': witness_deadline.datetime})
+
+
+@login_required
 def scheduling(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+
     if request.method == 'POST':
         form = SchedulingForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
             # Set scheduling conference for date
-            case = Case.objects.get(case_number=kwargs.get('case_number'))
             case.scheduling_conference_date = form.cleaned_data.get('scheduling_conference_date')
             case.updated_by = request.user
             case.save(update_fields=['scheduling_conference_date', 'updated_by'])
