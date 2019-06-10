@@ -154,10 +154,16 @@ change the date.'''.format(
         )
 
     def get_first_reminder_message(self):
-        url = '{source}/remind/complete/{pk}'.format(
-            source=SOURCE_URL,
-            pk=self.deadline.pk,
-        )
+        if self.deadline.type == Deadline.PRETRIAL_MOTION_RESPONSE:
+            url = '{source}/remind/motion_response/{pk}'.format(
+                source=SOURCE_URL,
+                pk=self.deadline.motion.pk
+            )
+        else:
+            url = '{source}/remind/complete/{pk}'.format(
+                source=SOURCE_URL,
+                pk=self.deadline.pk,
+            )
 
         return '''{indent}This is a reminder that the {desc} for case {case} is on {date}. If this task has \
 been completed or is not necessary in this case, please go to {url} to notify the office. If you encounter any \

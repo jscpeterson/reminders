@@ -243,5 +243,9 @@ def is_deadline_invalid(deadline):
     elif deadline.type in [Deadline.CONDUCT_PTI]:
         return False
 
+    # Skipping this for not
+    if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE]:
+        return False  # TODO set up pretrial motion response logic
+
     raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
 

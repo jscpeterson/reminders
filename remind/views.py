@@ -310,6 +310,10 @@ def motion_response(request, *args, **kwargs):
         if form.is_valid():
             motion.response_filed = form.cleaned_data['response_filed']
             motion.save(update_fields=['response_filed'])
+            if motion.response_filed is not None:
+                deadline = Deadline.objects.get(motion=motion, type=Deadline.PRETRIAL_MOTION_RESPONSE)
+                deadline.status = Deadline.COMPLETED
+                deadline.save(update_fields=['status'])
             return HttpResponseRedirect(REMIND_URL)
 
     return render(request, 'remind/motion_response_form.html', {'form': form,
