@@ -159,14 +159,13 @@ change the date.'''.format(
             pk=self.deadline.pk,
         )
 
-        return '''{indent}This is a reminder that the {desc} for case {case} is on {date} at {time}. If this task has \
+        return '''{indent}This is a reminder that the {desc} for case {case} is on {date}. If this task has \
 been completed or is not necessary in this case, please go to {url} to notify the office. If you encounter any \
 problems, please notify {contact}.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
             case=self.case.case_number,
             date=self.deadline.datetime.date(),
-            time=self.deadline.datetime.strftime('%H:%M'),
             url=url,
             contact=SUPPORT_EMAIL,
         )
@@ -194,12 +193,11 @@ Administration will be notified if the task is not completed by {date}.'''.forma
             date = ''
             time = ''
 
-        return '''{indent}The scheduling conference for case {case_number} was due to take place on {date} at {time}. \
+        return '''{indent}The scheduling conference for case {case_number} was due to take place on {date}. \
 Please enter the results of the scheduling order at {url}.'''.format(
             indent=INDENT,
             case_number=self.case.case_number,
             date=date,
-            time=time,
             url=url,
         )
 
