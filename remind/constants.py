@@ -101,7 +101,7 @@ DEADLINE_DESCRIPTIONS = {
     str(Deadline.WITNESS_PTI): 'deadline to complete witness pretrial interviews',
     str(Deadline.SCIENTIFIC_EVIDENCE): 'deadline to produce the results of scientific evidence',
     str(Deadline.PRETRIAL_MOTION_FILING): 'deadline to file any pretrial motions',
-    # str(Deadline.PRETRIAL_MOTION_RESPONSE): '',
+    str(Deadline.PRETRIAL_MOTION_RESPONSE): 'deadline to file a pretrial motion response.',
     # str(Deadline.PRETRIAL_MOTION_HEARING): '',
     str(Deadline.PRETRIAL_CONFERENCE): 'date and time of the pretrial conference',
     str(Deadline.FINAL_WITNESS_LIST): 'deadline to submit a final witness list',

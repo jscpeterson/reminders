@@ -285,6 +285,15 @@ def motion_deadline(request, *args, **kwargs):
             motion.response_deadline = form.cleaned_data['response_deadline']
             motion.date_hearing = form.cleaned_data['date_hearing']
             motion.save(update_fields=['response_deadline', 'date_hearing'])
+
+            # Create motion response deadline
+            Deadline.objects.create(
+                type=Deadline.PRETRIAL_MOTION_RESPONSE,
+                case=motion.case,
+                motion=motion,
+                datetime=motion.response_deadline,
+            )
+
             return HttpResponseRedirect(REMIND_URL)
     else:
         form = MotionDateForm(motion_pk=kwargs.get('motion_pk'))
