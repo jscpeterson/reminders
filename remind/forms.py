@@ -51,11 +51,11 @@ class MotionForm(Form):
 class MotionDateForm(Form):
 
     def __init__(self, *args, **kwargs):
-        motion = Motion.objects.get(pk=kwargs.pop('motion_pk'))
+        self.motion = Motion.objects.get(pk=kwargs.pop('motion_pk'))
         super(MotionDateForm, self).__init__(*args, **kwargs)
 
-        initial_response = motion.date_received + timedelta(days=10)  # TODO make cleaner in utils function
-        initial_hearing = motion.case.trial_date - timedelta(days=35)  # TODO make cleaner, catch exception if no trial date
+        initial_response = self.motion.date_received + timedelta(days=10)  # TODO make cleaner in utils function
+        initial_hearing = self.motion.case.trial_date - timedelta(days=35)  # TODO make cleaner, catch exception if no trial date
 
         self.fields['response_deadline'] = forms.DateTimeField(
             label='Deadline to file a response',
@@ -68,7 +68,8 @@ class MotionDateForm(Form):
         )
 
         self.fields['override'] = forms.BooleanField(
-            label='Override invalid dates?'
+            label='Override invalid dates?',
+            required=False,
         )
 
     def clean(self):
@@ -78,14 +79,35 @@ class MotionDateForm(Form):
         if cleaned_data.get('override'):
             return
 
-        # if 'scheduling_conference_date' in cleaned_data:
-        #     scheduling_conf_date = cleaned_data.get('scheduling_conference_date')
-        #
-        #     if de
-        #         self.add_error(
-        #             'scheduling_conference_date',
-        #             'Scheduling conference cannot happen before arraignment'
-        #         )
+        deadline_dict = utils.get_deadline_dict(self.motion.case.track)
+
+        if 'response_deadline' in cleaned_data:
+            response_deadline = cleaned_data.get('response_deadline')
+
+            # if not utils.is_deadline_within_limits(
+            #     deadline=scheduling_conf_date,
+            #     event=self.case.arraignment_date,
+            #     days=SCHEDULING_ORDER_DEADLINE_DAYS,
+            #     future_event=False,
+            # ):
+            #     self.add_error(
+            #         'scheduling_conference_date',
+            #         'Scheduling conference date is past permissible limit'
+            #     )
+
+        if 'date_hearing' in cleaned_data:
+            date_hearing = cleaned_data.get('date_hearing')
+
+            if not utils.is_deadline_within_limits(
+                deadline=date_hearing,
+                event=self.motion.case.trial_date,
+                days=deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],
+                future_event=False,
+            ):
+                self.add_error(
+                    'date_hearing',
+                    'Hearing date is past permissible limit'
+                )
 
 
 class MotionResponseForm(Form):
