@@ -4,11 +4,14 @@
 {% block content %}
     <div class="content container">
         <div class="row">
-            <h3>Enter information about the new motion</h3>
+            <h3>Did you file a response to this motion?</h3>
         </div>
         <div class="row">
             <form method="POST">
                 {% csrf_token %}
+                Case: {{ case_number }} <br />
+                Type: {{ motion_type }} <br />
+                Filing Date: {{ date_received }} <br />
                 {% form form=form %}{% endform %}
                 <button type="submit" name="_submit" class="btn">Submit</button>
             </form>

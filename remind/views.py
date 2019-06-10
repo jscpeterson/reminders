@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import TemplateView
 
+REMIND_URL = '{}/remind'.format(SOURCE_URL)
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
     model = Case
@@ -36,30 +37,6 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
         )
 
         return reverse('remind:scheduling', kwargs={'case_number': self.object.case_number})
-
-
-class MotionSelectView(LoginRequiredMixin, FormView):
-    form_class = MotionForm
-
-    def get_success_url(self):
-        self.object.created_by = self.request.user
-        self.object.save()
-
-        return reverse('remind:motion', kwargs={'case_number': self.object.case_number})
-
-
-class MotionDateView(LoginRequiredMixin, FormView):
-    form_class = MotionDateForm
-
-    def get_success_url(self):
-        self.object.created_by = self.request.user
-        self.object.save()
-
-        return reverse('remind:motion', kwargs={'case_number': self.object.case_number})
-
-
-class MotionResponseView(LoginRequiredMixin, FormView):
-    form_class = MotionResponseForm
 
 
 class DashView(LoginRequiredMixin, ListView):
@@ -266,15 +243,51 @@ class UpdateHomeView(LoginRequiredMixin, FormView):
 
 class CreateMotionView(LoginRequiredMixin, FormView):
     template_name = 'remind/create_motion_form.html'
-    form_class = UpdateHomeForm
+    form_class = MotionForm
     case_number = ''
 
     def form_valid(self, form):
-        self.case_number = form.cleaned_data['case_number']
+        self.motion = Motion.objects.create(
+            case=Case.objects.get(case_number=form.cleaned_data['case_number']),
+            type=form.cleaned_data['motion_type'],
+            date_received=form.cleaned_data['date_filed'],
+        )
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('remind:motion', kwargs={'case_number': self.case_number})
+        return reverse('remind:motion_deadline', kwargs={'motion_pk': self.motion.pk})
+
+
+@login_required
+def motion_deadline(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = MotionDateForm(request.POST, motion_pk=kwargs.get('motion_pk'))
+        if form.is_valid():
+            motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
+            motion.response_deadline = form.cleaned_data['response_deadline']
+            motion.date_hearing = form.cleaned_data['date_hearing']
+            motion.save(update_fields=['response_deadline', 'date_hearing'])
+            return HttpResponseRedirect(REMIND_URL)
+    else:
+        form = MotionDateForm(motion_pk=kwargs.get('motion_pk'))
+
+    return render(request, 'remind/motion_date_form.html', {'form': form})
+
+
+@login_required
+def motion_response(request, *args, **kwargs):
+    motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
+    form = MotionResponseForm(request.POST)
+    if request.method == 'POST':
+        if form.is_valid():
+            motion.response_filed = form.cleaned_data['response_filed']
+            motion.save(update_fields=['response_filed'])
+            return HttpResponseRedirect(REMIND_URL)
+
+    return render(request, 'remind/motion_response_form.html', {'form': form,
+                                                                'case_number': motion.case.case_number,
+                                                                'motion_type': Motion.TYPE_CHOICES[motion.type][1],
+                                                                'date_received': motion.date_received})
 
 
 @login_required

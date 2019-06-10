@@ -13,8 +13,9 @@ urlpatterns = [
     path('order/<str:case_number>', views.order, name='order'),
     path('request_pti/<str:case_number>', views.request_pti, name='request_pti'),
     path('update/<str:case_number>', views.update, name='update'),
-    path('motion/<str:case_number>', views.MotionSelectView, name='motion'),
     path('complete/<int:deadline_pk>', views.complete, name='complete'),
     path('extension/<int:deadline_pk>', views.extension, name='extension'),
     path('judge_confirmed/<int:deadline_pk>', views.judge_confirmed, name='judge_confirmed'),
+    path('motion_deadline/<int:motion_pk>', views.motion_deadline, name='motion_deadline'),
+    path('motion_response/<int:motion_pk>', views.motion_response, name='motion_response')
 ]

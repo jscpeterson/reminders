@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm, Form
 from .models import Case, Deadline, Motion
+from datetime import timedelta
 from users.models import CustomUser
 from django import forms
 from . import utils
@@ -27,27 +28,50 @@ class CaseForm(ModelForm):
                   'arraignment_date']
 
 
-class MotionForm(ModelForm):
-    class Meta:
-        model = Motion
-        fields = ['type',
-                  'date_received',
-                  ]
+class MotionForm(Form):
+
+    case_number = forms.ModelChoiceField(
+        queryset=Case.objects.all(),
+    )
+
+    date_filed = forms.DateTimeField(
+        label='Date motion was filed'
+    )
+
+    motion_type = forms.ChoiceField(
+        choices=Motion.TYPE_CHOICES,
+        label='Type of motion'
+    )
 
 
-class MotionDateForm(ModelForm):
-    class Meta:
-        model = Motion
-        fields = ['response_deadline',
-                  'date_hearing',
-                  ]
+class MotionDateForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        motion = Motion.objects.get(pk=kwargs.pop('motion_pk'))
+        super(MotionDateForm, self).__init__(*args, **kwargs)
+
+        initial_response = motion.date_received + timedelta(days=10)  # TODO make cleaner in utils function
+        initial_hearing = motion.case.trial_date - timedelta(days=35)  # TODO make cleaner, catch exception if no trial date
+
+        self.fields['response_deadline'] = forms.DateTimeField(
+            label='Deadline to file a response',
+            initial=initial_response
+        )
+
+        self.fields['date_hearing'] = forms.DateTimeField(
+            label='Date of the hearing',
+            initial=initial_hearing
+        )
+
+    def clean(self):
+        super(MotionDateForm, self).clean()
+        # TODO Form validation
 
 
-class MotionResponseForm(ModelForm):
-    class Meta:
-        model = Motion
-        fields = ['response_filed',
-                  ]
+class MotionResponseForm(Form):
+    response_filed = forms.DateTimeField(
+        label='Date response was filed'
+    )
 
 
 class SchedulingForm(Form):
