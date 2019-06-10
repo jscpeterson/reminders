@@ -210,7 +210,7 @@ Please enter the results of the scheduling order at {url}.'''.format(
         )
         try:
             request_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.REQUEST_PTI)]
-        except utils.InvalidCaseTrackException:
+        except KeyError:  # Thrown when there is no case track (should not happen, but default necessary for this class)
             request_pti_days = 14
 
         return '''{indent}It has been {days} days since the scheduling conference for case {case_number}. If the \
@@ -225,7 +225,7 @@ longer under any obligation to assist them.'''.format(
     def get_conduct_pti_message(self):
         try:
             conduct_pti_days = utils.get_deadline_dict(self.case.track)[str(Deadline.CONDUCT_PTI)]
-        except utils.InvalidCaseTrackException:
+        except KeyError:  # Thrown when there is no case track (should not happen, but default necessary for this class)
             conduct_pti_days = 14
 
         return '''{indent}It has been {days} days since the defense requested pretrial interviews for case \

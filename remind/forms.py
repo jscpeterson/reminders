@@ -95,12 +95,12 @@ class TrackForm(Form):
 class TrialForm(Form):
 
     def __init__(self, *args, **kwargs):
-        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        self.case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        deadline_dict = utils.get_deadline_dict(case.track)
+        deadline_dict = utils.get_deadline_dict(self.case.track)
 
-        initial = utils.get_actual_deadline_from_start(case.arraignment_date,
+        initial = utils.get_actual_deadline_from_start(self.case.arraignment_date,
                                                        deadline_dict[str(Deadline.TRIAL)])
         self.fields['trial_date'] = forms.DateTimeField(
             label='Date and time of the trial\'s first day',
@@ -108,23 +108,89 @@ class TrialForm(Form):
             input_formats=['%Y-%m-%d %H:%M']
         )
 
+        self.fields['override'] = forms.BooleanField(
+            label='Override invalid date?',
+            initial=False,
+            required=False,
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if cleaned_data.get('override'):
+            return
+
+        if 'trial_date' in cleaned_data:
+            trial_date = cleaned_data.get('trial_date')
+
+            if trial_date < self.case.scheduling_conference_date:
+                self.add_error(
+                    'trial_date',
+                    'Trial cannot happen before scheduling conference'
+                )
+
+            else:
+                deadline_dict = utils.get_deadline_dict(self.case.track)
+
+                # Will raise error even if permissible with extension
+                if not utils.is_deadline_within_limits(
+                    deadline=trial_date,
+                    event=self.case.arraignment_date,
+                    days=deadline_dict[str(Deadline.TRIAL)],
+                    future_event=False
+                ):
+                    self.add_error(
+                        'trial_date',
+                        'Trial date is past permissible limit'
+                    )
+
 
 class OrderForm(Form):
 
+    case = ''
+
     def __init__(self, *args, **kwargs):
-        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        self.case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        deadline_dict = utils.get_deadline_dict(case.track)
+        deadline_dict = utils.get_deadline_dict(self.case.track)
 
         for key in TRIAL_DEADLINES:
             label = DEADLINE_DESCRIPTIONS[key].capitalize()
-            initial = utils.get_actual_deadline_from_end(case.trial_date, deadline_dict[key])
+            initial = utils.get_actual_deadline_from_end(self.case.trial_date, deadline_dict[key])
             self.fields[key] = forms.DateTimeField(
                 label=label,
                 initial=initial,
                 input_formats=['%Y-%m-%d %H:%M']
             )
+
+        self.fields['override'] = forms.BooleanField(
+            label='Override invalid dates?',
+            initial=False,
+            required=False,
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if cleaned_data.get('override'):
+            return
+
+        deadline_dict = utils.get_deadline_dict(self.case.track)
+
+        for key in TRIAL_DEADLINES:
+            deadline = cleaned_data.get(key)
+
+            if not utils.is_deadline_within_limits(
+                    deadline=deadline,
+                    event=self.case.trial_date,
+                    days=deadline_dict[key],
+                    future_event=True
+            ):
+                self.add_error(
+                    key,
+                    'Deadline is past permissible limit'
+                )
 
 
 class RequestPTIForm(Form):
