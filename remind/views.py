@@ -261,10 +261,10 @@ class UpdateHomeView(LoginRequiredMixin, FormView):
 
 @login_required
 def complete(request, *args, **kwargs):
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
         form = CompleteForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
-            deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
             if form.cleaned_data.get('completed'):
                 deadline.status = Deadline.COMPLETED
                 deadline.updated_by = request.user
@@ -274,7 +274,10 @@ def complete(request, *args, **kwargs):
     else:
         form = CompleteForm(deadline_pk=kwargs.get('deadline_pk'))
 
-    return render(request, 'remind/complete_form.html', {'form': form})
+    return render(request, 'remind/complete_form.html', {'form': form,
+                                                         'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
+                                                         'case_number': deadline.case.case_number,
+                                                         'date': deadline.datetime})
 
 
 @login_required

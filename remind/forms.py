@@ -246,10 +246,7 @@ class CompleteForm(Form):
 
         deadline = Deadline.objects.get(pk=deadline_pk)
 
-        label = 'Has the {desc} on case {case} been completed?'.format(
-            desc=DEADLINE_DESCRIPTIONS[str(deadline.type)],
-            case=deadline.case.case_number
-        )
+        label = 'Task completed'
 
         self.fields['completed'] = forms.BooleanField(
             label=label,
@@ -264,7 +261,7 @@ class ExtensionForm(Form):
         super(ExtensionForm, self).__init__(*args, **kwargs)
 
         self.fields['extension_filed'] = forms.BooleanField(
-            label='Have you filed for an extension?',
+            label='Extension filed',
             required=False
         )
 
@@ -276,6 +273,6 @@ class JudgeConfirmedForm(Form):
         super(JudgeConfirmedForm, self).__init__(*args, **kwargs)
 
         self.fields['judge_approved'] = forms.BooleanField(
-            label='Has this deadline been approved by the judge?',
+            label='Judge approved',
             required=False
         )
