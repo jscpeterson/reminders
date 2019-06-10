@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm, Form
-from .models import Case, Deadline
+from .models import Case, Deadline, Motion
+from datetime import timedelta
 from users.models import CustomUser
 from django import forms
 from . import utils
@@ -27,8 +28,53 @@ class CaseForm(ModelForm):
                   'arraignment_date']
 
 
-class SchedulingForm(Form):
+class MotionForm(Form):
 
+    case_number = forms.ModelChoiceField(
+        queryset=Case.objects.all(),
+    )
+
+    date_filed = forms.DateTimeField(
+        label='Date motion was filed'
+    )
+
+    motion_type = forms.ChoiceField(
+        choices=Motion.TYPE_CHOICES,
+        label='Type of motion'
+    )
+
+
+class MotionDateForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        motion = Motion.objects.get(pk=kwargs.pop('motion_pk'))
+        super(MotionDateForm, self).__init__(*args, **kwargs)
+
+        initial_response = motion.date_received + timedelta(days=10)  # TODO make cleaner in utils function
+        initial_hearing = motion.case.trial_date - timedelta(days=35)  # TODO make cleaner, catch exception if no trial date
+
+        self.fields['response_deadline'] = forms.DateTimeField(
+            label='Deadline to file a response',
+            initial=initial_response
+        )
+
+        self.fields['date_hearing'] = forms.DateTimeField(
+            label='Date of the hearing',
+            initial=initial_hearing
+        )
+
+    def clean(self):
+        super(MotionDateForm, self).clean()
+        # TODO Form validation
+
+
+class MotionResponseForm(Form):
+    response_filed = forms.DateTimeField(
+        label='Date response was filed'
+    )
+
+
+class SchedulingForm(Form):
     scheduling_conference_date = forms.DateTimeField(
         input_formats=['%Y-%m-%d %H:%M'],
         label='Date and time of the scheduling conference',
@@ -216,7 +262,7 @@ class UpdateForm(Form):
         case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        for index, deadline in enumerate(Deadline.objects.filter(case=case,)):
+        for index, deadline in enumerate(Deadline.objects.filter(case=case, )):
             key = 'deadline_{}'.format(index)
             label = '{expired}{completed}{deadline_desc}'.format(
                 expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',

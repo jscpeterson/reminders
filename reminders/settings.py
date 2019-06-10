@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'users.apps.UsersConfig',
+    'guardian',
 ]
 
 MIDDLEWARE = [
@@ -110,6 +111,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # default
+    'guardian.backends.ObjectPermissionBackend',
+)
 
 # Custom User model
 AUTH_USER_MODEL = 'users.CustomUser'

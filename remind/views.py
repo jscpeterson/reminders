@@ -3,12 +3,12 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
-from .models import Case, Deadline
+from .models import Case, Deadline, Motion
 from users.models import CustomUser
 from datetime import timedelta
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
-    UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
+    UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, MotionResponseForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS
 from . import utils
 from . import case_utils
@@ -257,6 +257,55 @@ class UpdateHomeView(LoginRequiredMixin, FormView):
 
     def get_success_url(self):
         return reverse('remind:update', kwargs={'case_number': self.case_number})
+
+
+class CreateMotionView(LoginRequiredMixin, FormView):
+    template_name = 'remind/create_motion_form.html'
+    form_class = MotionForm
+    case_number = ''
+
+    def form_valid(self, form):
+        self.motion = Motion.objects.create(
+            case=Case.objects.get(case_number=form.cleaned_data['case_number']),
+            type=form.cleaned_data['motion_type'],
+            date_received=form.cleaned_data['date_filed'],
+        )
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('remind:motion_deadline', kwargs={'motion_pk': self.motion.pk})
+
+
+@login_required
+def motion_deadline(request, *args, **kwargs):
+    if request.method == 'POST':
+        form = MotionDateForm(request.POST, motion_pk=kwargs.get('motion_pk'))
+        if form.is_valid():
+            motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
+            motion.response_deadline = form.cleaned_data['response_deadline']
+            motion.date_hearing = form.cleaned_data['date_hearing']
+            motion.save(update_fields=['response_deadline', 'date_hearing'])
+            return HttpResponseRedirect(REMIND_URL)
+    else:
+        form = MotionDateForm(motion_pk=kwargs.get('motion_pk'))
+
+    return render(request, 'remind/motion_date_form.html', {'form': form})
+
+
+@login_required
+def motion_response(request, *args, **kwargs):
+    motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
+    form = MotionResponseForm(request.POST)
+    if request.method == 'POST':
+        if form.is_valid():
+            motion.response_filed = form.cleaned_data['response_filed']
+            motion.save(update_fields=['response_filed'])
+            return HttpResponseRedirect(REMIND_URL)
+
+    return render(request, 'remind/motion_response_form.html', {'form': form,
+                                                                'case_number': motion.case.case_number,
+                                                                'motion_type': Motion.TYPE_CHOICES[motion.type][1],
+                                                                'date_received': motion.date_received})
 
 
 @login_required
