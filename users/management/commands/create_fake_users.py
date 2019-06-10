@@ -19,8 +19,13 @@ class Command(BaseCommand):
         test_emails = self._get_email_addresses()
 
         for position_label, position_index in positions.items():
-            first_name = faker.first_name()
-            last_name = faker.last_name()
+            if position_index == CustomUser.PROSECUTOR:
+                first_name = 'Pancho'
+                last_name = 'Villa'
+            else:
+                first_name = faker.first_name()
+                last_name = faker.last_name()
+            
             CustomUser.objects.create(
                 first_name=first_name,
                 last_name=last_name,
