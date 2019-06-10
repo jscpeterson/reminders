@@ -67,9 +67,25 @@ class MotionDateForm(Form):
             initial=initial_hearing
         )
 
+        self.fields['override'] = forms.BooleanField(
+            label='Override invalid dates?'
+        )
+
     def clean(self):
         super(MotionDateForm, self).clean()
-        # TODO Form validation
+        cleaned_data = super().clean()
+
+        if cleaned_data.get('override'):
+            return
+
+        # if 'scheduling_conference_date' in cleaned_data:
+        #     scheduling_conf_date = cleaned_data.get('scheduling_conference_date')
+        #
+        #     if de
+        #         self.add_error(
+        #             'scheduling_conference_date',
+        #             'Scheduling conference cannot happen before arraignment'
+        #         )
 
 
 class MotionResponseForm(Form):
@@ -268,11 +284,19 @@ class UpdateForm(Form):
 
         for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
             key = 'deadline_{}'.format(index)
-            label = '{expired}{completed}{deadline_desc}'.format(
-                expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
-                completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
-                deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
-            )
+            if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE, Deadline.PRETRIAL_MOTION_HEARING]:
+                label = '{expired}{completed}{deadline_desc} for {motion_title}'.format(
+                    expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
+                    completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
+                    deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
+                    motion_title=deadline.motion.title
+                )
+            else:
+                label = '{expired}{completed}{deadline_desc}'.format(
+                    expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
+                    completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
+                    deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
+                )
             initial = deadline.datetime
 
             self.fields[key] = forms.DateTimeField(
