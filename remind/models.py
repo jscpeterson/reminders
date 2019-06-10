@@ -130,5 +130,6 @@ class Motion(models.Model):
     case = models.ForeignKey(Case, on_delete=models.PROTECT)
     date_received = models.DateTimeField()
     response_deadline = models.DateTimeField()
+    date_hearing = models.DateTimeField()
     response_filed = models.DateTimeField()
     pass

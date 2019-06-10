@@ -3,12 +3,12 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
-from .models import Case, Deadline
+from .models import Case, Deadline, Motion
 from users.models import CustomUser
 from datetime import timedelta
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
-    UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
+    UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, MotionResponseForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS
 from . import utils
 from . import case_utils
@@ -36,6 +36,30 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
         )
 
         return reverse('remind:scheduling', kwargs={'case_number': self.object.case_number})
+
+
+class MotionSelectView(LoginRequiredMixin, FormView):
+    form_class = MotionForm
+
+    def get_success_url(self):
+        self.object.created_by = self.request.user
+        self.object.save()
+
+        return reverse('remind:motion', kwargs={'case_number': self.object.case_number})
+
+
+class MotionDateView(LoginRequiredMixin, FormView):
+    form_class = MotionDateForm
+
+    def get_success_url(self):
+        self.object.created_by = self.request.user
+        self.object.save()
+
+        return reverse('remind:motion', kwargs={'case_number': self.object.case_number})
+
+
+class MotionResponseView(LoginRequiredMixin, FormView):
+    form_class = MotionResponseForm
 
 
 class DashView(LoginRequiredMixin, ListView):
@@ -238,6 +262,19 @@ class UpdateHomeView(LoginRequiredMixin, FormView):
 
     def get_success_url(self):
         return reverse('remind:update', kwargs={'case_number': self.case_number})
+
+
+class CreateMotionView(LoginRequiredMixin, FormView):
+    template_name = 'remind/create_motion_form.html'
+    form_class = UpdateHomeForm
+    case_number = ''
+
+    def form_valid(self, form):
+        self.case_number = form.cleaned_data['case_number']
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('remind:motion', kwargs={'case_number': self.case_number})
 
 
 @login_required

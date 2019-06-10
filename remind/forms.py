@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm, Form
-from .models import Case, Deadline
+from .models import Case, Deadline, Motion
 from users.models import CustomUser
 from django import forms
 from . import utils
@@ -27,8 +27,30 @@ class CaseForm(ModelForm):
                   'arraignment_date']
 
 
-class SchedulingForm(Form):
+class MotionForm(ModelForm):
+    class Meta:
+        model = Motion
+        fields = ['type',
+                  'date_received',
+                  ]
 
+
+class MotionDateForm(ModelForm):
+    class Meta:
+        model = Motion
+        fields = ['response_deadline',
+                  'date_hearing',
+                  ]
+
+
+class MotionResponseForm(ModelForm):
+    class Meta:
+        model = Motion
+        fields = ['response_filed',
+                  ]
+
+
+class SchedulingForm(Form):
     scheduling_conference_date = forms.DateTimeField(
         input_formats=['%Y-%m-%d %H:%M'],
         label='Date and time of the scheduling conference',
@@ -117,7 +139,7 @@ class UpdateForm(Form):
         case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        for index, deadline in enumerate(Deadline.objects.filter(case=case,)):
+        for index, deadline in enumerate(Deadline.objects.filter(case=case, )):
             key = 'deadline_{}'.format(index)
             label = '{expired}{completed}{deadline_desc}'.format(
                 expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
@@ -135,6 +157,7 @@ class UpdateForm(Form):
 
 class UpdateHomeForm(Form):
     case_number = forms.CharField(required=True)
+
     # FIXME For some reason required=True is not working, an empty field throws a KeyError
 
     def clean(self):
