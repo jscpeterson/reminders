@@ -77,7 +77,7 @@
                     {% for deadline in object_list %}
                     <li class="collection-item">{{ deadline.datetime.date }} - {{ deadline }} on case {{ deadline.case.case_number }}</li>
                     {% empty %}
-                    <li class="collection-item">No cases yet</li>
+                    <li class="collection-item">No deadlines yet</li>
                     {% endfor %}
                 </ul>
             </div>

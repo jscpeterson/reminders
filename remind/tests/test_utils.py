@@ -1,9 +1,9 @@
 from django.test import TestCase
 from datetime import datetime
 from pytz import timezone
-from . import utils
-from .constants import LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
-from .models import Deadline, Case
+from remind import utils
+from remind.constants import LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
+from remind.models import Deadline, Case
 from reminders import settings
 from users.models import CustomUser
 

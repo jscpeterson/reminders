@@ -4,7 +4,8 @@ import holidays
 from reminders import settings
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
-    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRIAL_DEADLINES
+    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
+    TRIAL_DEADLINES
 
 
 def clear_deadlines(case):
@@ -35,7 +36,9 @@ class InvalidCaseTrackException(Exception):
 
 
 def get_deadline_dict(track):
-    if track == 1:
+    if track is None:
+        deadlines = TRACKLESS_DEADLINE_LIMITS
+    elif track == 1:
         deadlines = TRACK_ONE_DEADLINE_LIMITS
     elif track == 2:
         deadlines = TRACK_TWO_DEADLINE_LIMITS
@@ -241,3 +244,4 @@ def is_deadline_invalid(deadline):
         return False
 
     raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
+
