@@ -16,6 +16,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import TemplateView
 
+REMIND_URL = '{}/remind/'.format(SOURCE_URL)
+
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
     model = Case
@@ -88,7 +90,7 @@ def scheduling(request, *args, **kwargs):
                 datetime=case.scheduling_conference_date,
                 created_by=request.user
             )
-            return HttpResponseRedirect(SOURCE_URL)
+            return HttpResponseRedirect(REMIND_URL)
 
     else:
         form = SchedulingForm(case_number=kwargs['case_number'])
@@ -179,12 +181,12 @@ def order(request, *args, **kwargs):
                     created_by=request.user
                 )
 
-            return HttpResponseRedirect(SOURCE_URL)
+            return HttpResponseRedirect(REMIND_URL)
 
     else:
         form = OrderForm(case_number=kwargs['case_number'])
 
-    return render(request, 'remind/trial_form.html', {'form': form})
+    return render(request, 'remind/order_form.html', {'form': form})
 
 
 @login_required
@@ -210,7 +212,7 @@ def request_pti(request, *args, **kwargs):
                 created_by=request.user
             )
 
-            return HttpResponseRedirect(SOURCE_URL)
+            return HttpResponseRedirect(REMIND_URL)
 
     else:
         form = RequestPTIForm(case_number=kwargs['case_number'])
@@ -236,7 +238,7 @@ def update(request, *args, **kwargs):
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
 
-            return HttpResponseRedirect(SOURCE_URL)
+            return HttpResponseRedirect(REMIND_URL)
 
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
@@ -267,7 +269,7 @@ def complete(request, *args, **kwargs):
                 deadline.status = Deadline.COMPLETED
                 deadline.updated_by = request.user
                 deadline.save(update_fields=['status', 'updated_by'])
-            return HttpResponseRedirect(SOURCE_URL)
+            return HttpResponseRedirect(REMIND_URL)
 
     else:
         form = CompleteForm(deadline_pk=kwargs.get('deadline_pk'))
@@ -284,7 +286,7 @@ def extension(request, *args, **kwargs):
             deadline.invalid_extension_filed = form.cleaned_data.get('extension_filed')
             deadline.updated_by = request.user
             deadline.save(update_fields=['invalid_extension_filed', 'updated_by'])
-            return HttpResponseRedirect(SOURCE_URL)
+            return HttpResponseRedirect(REMIND_URL)
 
     else:
         form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
@@ -304,7 +306,7 @@ def judge_confirmed(request, *args, **kwargs):
             deadline.invalid_judge_approved = form.cleaned_data.get('judge_approved')
             deadline.updated_by = request.user
             deadline.save(update_fields=['invalid_judge_approved', 'updated_by'])
-            return HttpResponseRedirect(SOURCE_URL)
+            return HttpResponseRedirect(REMIND_URL)
 
     else:
         form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
