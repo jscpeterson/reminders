@@ -71,6 +71,7 @@ class Motion(models.Model):
         (OTHER, 'Other')
     )
 
+    title = models.CharField(max_length=255,)
     type = models.IntegerField(choices=TYPE_CHOICES)
     case = models.ForeignKey(Case, on_delete=models.PROTECT)
     date_received = models.DateTimeField()

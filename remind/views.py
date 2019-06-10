@@ -266,6 +266,7 @@ class CreateMotionView(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         self.motion = Motion.objects.create(
+            title=form.cleaned_data.get('motion_title'),
             case=Case.objects.get(case_number=form.cleaned_data['case_number']),
             type=form.cleaned_data['motion_type'],
             date_received=form.cleaned_data['date_filed'],
@@ -312,6 +313,7 @@ def motion_response(request, *args, **kwargs):
             return HttpResponseRedirect(REMIND_URL)
 
     return render(request, 'remind/motion_response_form.html', {'form': form,
+                                                                'motion_title': motion.title,
                                                                 'case_number': motion.case.case_number,
                                                                 'motion_type': Motion.TYPE_CHOICES[motion.type][1],
                                                                 'date_received': motion.date_received})

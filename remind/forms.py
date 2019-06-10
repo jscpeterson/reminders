@@ -30,6 +30,10 @@ class CaseForm(ModelForm):
 
 class MotionForm(Form):
 
+    motion_title = forms.CharField(
+        label='Title of the motion'
+    )
+
     case_number = forms.ModelChoiceField(
         queryset=Case.objects.all(),
     )

@@ -9,6 +9,7 @@
         <div class="row">
             <form method="POST">
                 {% csrf_token %}
+                Title: {{ motion_title }} <br />
                 Case: {{ case_number }} <br />
                 Type: {{ motion_type }} <br />
                 Filing Date: {{ date_received }} <br />
