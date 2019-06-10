@@ -42,6 +42,9 @@ class Case(TimeStampedModel):
     pti_request_date = models.DateTimeField(null=True)
     trial_date = models.DateTimeField(null=True)
 
+    def __str__(self):
+        return self.case_number
+
 
 class Deadline(TimeStampedModel):
     FFA = 0

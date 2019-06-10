@@ -233,13 +233,9 @@ class UpdateForm(Form):
 
 
 class UpdateHomeForm(Form):
-    case_number = forms.CharField(required=True)
-    # FIXME For some reason required=True is not working, an empty field throws a KeyError
-
-    def clean(self):
-        cd = self.cleaned_data
-        if not Case.objects.filter(case_number=cd['case_number']):
-            raise ValidationError('Case not found with this number.')
+    case_number = forms.ModelChoiceField(
+        queryset=Case.objects.all(),
+        )
 
 
 class CompleteForm(Form):
