@@ -227,7 +227,7 @@ def update(request, *args, **kwargs):
         if form.is_valid():
             case = Case.objects.get(case_number=kwargs.get('case_number'))
 
-            for index, deadline in enumerate(Deadline.objects.filter(case=case)):
+            for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
                 key = 'deadline_{}'.format(index)
                 if deadline.datetime != form.cleaned_data.get(key):
                     deadline.datetime = form.cleaned_data.get(key)

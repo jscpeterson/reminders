@@ -262,7 +262,7 @@ class UpdateForm(Form):
         case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        for index, deadline in enumerate(Deadline.objects.filter(case=case, )):
+        for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
             key = 'deadline_{}'.format(index)
             label = '{expired}{completed}{deadline_desc}'.format(
                 expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
