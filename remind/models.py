@@ -102,5 +102,33 @@ class Deadline(TimeStampedModel):
 
 
 class Motion(models.Model):
-    # type
+    INLIM = 0
+    RCOR = 1
+    SUPWIT = 2
+    SUPEVD = 3
+    SUPWITEVD = 4
+    DISMISS = 5
+    SUPDIS = 6
+    EXTDDL = 7
+    RECON = 8
+    OTHER = 9
+
+    TYPE_CHOICES = (
+        (INLIM, 'In Limine'),
+        (RCOR, 'Review Conditions of Release'),
+        (SUPWIT, 'Motion to Suppress Witness'),
+        (SUPEVD, 'Motion to Suppress Evidence'),
+        (SUPWITEVD, 'Motion to Suppress Witness and Evidence'),
+        (DISMISS, 'Motion to Dismiss'),
+        (SUPDIS, 'Motion to Suppress and Dismiss'),
+        (EXTDDL, 'Motion to Extend Deadline'),
+        (RECON, 'Motion to Reconsider'),
+        (OTHER, 'Other')
+    )
+
+    type = models.IntegerField(choices=TYPE_CHOICES)
+    case = models.ForeignKey(Case, on_delete=models.PROTECT)
+    date_received = models.DateTimeField()
+    response_deadline = models.DateTimeField()
+    response_filed = models.DateTimeField()
     pass
