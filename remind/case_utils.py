@@ -12,7 +12,7 @@ def get_cases(user):
 
 
 def get_open(cases):
-    return cases.filter(deadline__status=Deadline.ACTIVE)
+    return Deadline.objects.filter(case__in=cases, status=Deadline.ACTIVE).order_by('datetime')
 
 
 def get_closed(cases):

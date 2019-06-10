@@ -120,8 +120,8 @@ class UpdateForm(Form):
         for index, deadline in enumerate(Deadline.objects.filter(case=case,)):
             key = 'deadline_{}'.format(index)
             label = '{expired}{completed}{deadline_desc}'.format(
-                expired='(EXPIRED) ' if deadline.expired else '',
-                completed='(COMPLETED) ' if deadline.completed else '',
+                expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
+                completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
                 deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
             )
             initial = deadline.datetime
@@ -129,7 +129,7 @@ class UpdateForm(Form):
             self.fields[key] = forms.DateTimeField(
                 label=label,
                 initial=initial,
-                disabled=deadline.expired or deadline.completed
+                disabled=deadline.status != Deadline.ACTIVE
             )
 
 

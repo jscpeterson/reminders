@@ -5,6 +5,7 @@ ADMINISTRATION_EMAIL = 'joseph.peterson@da2nd.state.nm.us'
 SUPPORT_EMAIL = 'coders@da2nd.state.nm.us'
 
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
+WITNESS_LIST_DEADLINE_DAYS = 25
 
 LAST_DAY_HOUR = 23
 LAST_DAY_MINUTE = 59
@@ -13,10 +14,14 @@ MIN_DAYS_FOR_DEADLINES = 11
 SATURDAY = 5
 SUNDAY = 6
 
+TRACKLESS_DEADLINE_LIMITS = {
+    str(Deadline.SCHEDULING_CONFERENCE): SCHEDULING_ORDER_DEADLINE_DAYS,  # Days after arraignment
+    str(Deadline.WITNESS_LIST): WITNESS_LIST_DEADLINE_DAYS,  # Days after arraignment
+}
+
 TRACK_ONE_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 210,
     'trial_extended': 240,
-    str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 14,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 30,  # Days after PTI request
     str(Deadline.WITNESS_PTI): 60,  # Days before trial
@@ -30,11 +35,11 @@ TRACK_ONE_DEADLINE_LIMITS = {
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
+TRACK_ONE_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
 TRACK_TWO_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 300,
     'trial_extended': 360,
-    str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 21,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 45,  # Days after PTI request
     str(Deadline.WITNESS_PTI): 75,  # Days before trial
@@ -48,11 +53,11 @@ TRACK_TWO_DEADLINE_LIMITS = {
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
+TRACK_TWO_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
 TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.TRIAL): 455,
     'trial_extended': 545,
-    str(Deadline.WITNESS_LIST): 25,  # Days after arraignment
     str(Deadline.REQUEST_PTI): 21,  # Days after scheduling order
     str(Deadline.CONDUCT_PTI): 60,  # Days after PTI request
     str(Deadline.WITNESS_PTI): 100,  # Days before trial
@@ -66,6 +71,7 @@ TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
 }
+TRACK_THREE_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
 TRIAL_DEADLINES = (
     str(Deadline.WITNESS_PTI),

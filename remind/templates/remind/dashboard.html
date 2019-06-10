@@ -70,12 +70,12 @@
     <div class="col m4">
         <div class="card blue-grey darken-1">
             <div class="card-content white-text">
-                <span class="card-title">Cases with Pending Deadlines</span>
+                <span class="card-title">Pending Deadlines</span>
             </div>
             <div class="card-action">
                 <ul class="collection">
-                    {% for case in object_list %}
-                    <li class="collection-item">{{ case.case_number }}</li>
+                    {% for deadline in object_list %}
+                    <li class="collection-item">{{ deadline.datetime.date }} - {{ deadline }} on case {{ deadline.case.case_number }}</li>
                     {% empty %}
                     <li class="collection-item">No cases yet</li>
                     {% endfor %}

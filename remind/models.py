@@ -64,8 +64,8 @@ class Deadline(TimeStampedModel):
         (FFA, 'FFA'),
         (SCHEDULING_CONFERENCE, 'Scheduling Conference'),
         (WITNESS_LIST, 'Witness List'),
-        (REQUEST_PTI, 'Request PTIs'),
-        (CONDUCT_PTI, 'Conduct Initial PTIs'),
+        (REQUEST_PTI, 'Defense Request PTIs'),
+        (CONDUCT_PTI, 'Defense Conduct PTIs'),
         (WITNESS_PTI, 'Witness PTIs'),
         (SCIENTIFIC_EVIDENCE, 'Scientific Evidence'),
         (PRETRIAL_MOTION_FILING, 'Pretrial Motion Filing'),
@@ -88,15 +88,17 @@ class Deadline(TimeStampedModel):
         (EXPIRED, 'Expired')
     )
 
-    status = models.IntegerField(default=0)
-
     type = models.IntegerField(choices=TYPE_CHOICES)
+    status = models.IntegerField(default=ACTIVE, choices=STATUS_CHOICES)
     case = models.ForeignKey(Case, on_delete=models.PROTECT)
     datetime = models.DateTimeField()
     reminders_sent = models.IntegerField(default=0)
     invalid_notice_sent = models.BooleanField(default=False)
     invalid_judge_approved = models.BooleanField(default=False)
     invalid_extension_filed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.TYPE_CHOICES[self.type][1]
 
 
 class Motion(models.Model):

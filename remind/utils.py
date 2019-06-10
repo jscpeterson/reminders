@@ -4,8 +4,7 @@ import holidays
 from reminders import settings
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
-    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, SCHEDULING_ORDER_DEADLINE_DAYS, \
-    TRIAL_DEADLINES
+    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRIAL_DEADLINES
 
 
 def clear_deadlines(case):
@@ -99,10 +98,10 @@ def get_actual_deadline_from_start(start_date, days):
         result_date = result_date + timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
-                                      hour=LAST_DAY_HOUR,
-                                      minute=LAST_DAY_MINUTE,
-                                      second=LAST_DAY_SECOND)
+    # result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
+    #                                   hour=LAST_DAY_HOUR,
+    #                                   minute=LAST_DAY_MINUTE,
+    #                                   second=LAST_DAY_SECOND)
 
     return result_date
 
@@ -159,10 +158,10 @@ def get_actual_deadline_from_end(end_date, days):
         result_date = result_date - timedelta(days=1)
 
     # Update time to (almost) midnight of next day
-    result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
-                                      hour=LAST_DAY_HOUR,
-                                      minute=LAST_DAY_MINUTE,
-                                      second=LAST_DAY_SECOND)
+    # result_date = result_date.replace(tzinfo=timezone(settings.TIME_ZONE),
+    #                                   hour=LAST_DAY_HOUR,
+    #                                   minute=LAST_DAY_MINUTE,
+    #                                   second=LAST_DAY_SECOND)
 
     return result_date
 
@@ -183,7 +182,7 @@ def is_deadline_within_limits(deadline, event, days, future_event=False):
         return actual_deadline - deadline >= timedelta(days=0)
     else:
         actual_deadline = get_actual_deadline_from_start(event, days)
-        return deadline - actual_deadline >= timedelta(days=0)
+        return actual_deadline - deadline >= timedelta(days=0)
 
 
 def is_extension_required(deadline):
@@ -202,13 +201,13 @@ def is_extension_required(deadline):
                                                           deadline_dict[str(Deadline.TRIAL)])
         max_date_extension = get_actual_deadline_from_start(deadline.case.arraignment_date,
                                                             deadline_dict['trial_extended'])
-        return max_date_default < deadline.datetime < max_date_extension
+        return max_date_default.date() < deadline.datetime.date() <= max_date_extension.date()
     elif deadline.type == Deadline.SCIENTIFIC_EVIDENCE:
         max_date_default = get_actual_deadline_from_end(deadline.case.trial_date,
                                                         deadline_dict[str(Deadline.SCIENTIFIC_EVIDENCE)])
         max_date_extension = get_actual_deadline_from_end(deadline.case.trial_date,
                                                           deadline_dict['scientific_evidence_extended'])
-        return max_date_extension > deadline.datetime > max_date_default
+        return max_date_extension.date() >= deadline.datetime.date() > max_date_default.date()
 
 
 class DeadlineTypeException(Exception):
@@ -219,16 +218,26 @@ def is_deadline_invalid(deadline):
     """
     Returns True if a deadline is outside permissible limits from a triggering event.
     """
-    if deadline.type == Deadline.SCHEDULING_CONFERENCE:
-        return deadline.datetime.date() > get_actual_deadline_from_start(deadline.case.arraignment_date,
-                                                                         SCHEDULING_ORDER_DEADLINE_DAYS).date()
-    if deadline.case.track is None:
-        return False
-    else:
-        deadline_dict = get_deadline_dict(deadline.case.track)
-        if str(deadline.type) in TRIAL_DEADLINES:
-            required_days = deadline_dict[str(deadline.type)]
-            date = get_actual_deadline_from_end(deadline.case.trial_date, required_days)
-            return deadline.datetime.date() > date.date()
+    deadline_dict = get_deadline_dict(deadline.case.track)
+    required_days = deadline_dict[str(deadline.type)]
+    # Deadlines where the triggering event is a future trial
+    if str(deadline.type) in TRIAL_DEADLINES:
+        return not is_deadline_within_limits(deadline=deadline.datetime,
+                                             event=deadline.case.trial_date,
+                                             days=required_days,
+                                             future_event=True)
 
-    # raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
+    # Deadlines where the triggering event is arraignment
+    elif deadline.type in [Deadline.SCHEDULING_CONFERENCE, Deadline.WITNESS_LIST, Deadline.TRIAL]:
+        return not is_deadline_within_limits(deadline=deadline.datetime,
+                                             event=deadline.case.arraignment_date,
+                                             days=required_days,
+                                             future_event=False)
+
+    # These are automatically generated and should not be incorrect.
+    elif deadline.type in [Deadline.REQUEST_PTI]:
+        return False
+    elif deadline.type in [Deadline.CONDUCT_PTI]:
+        return False
+
+    raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))

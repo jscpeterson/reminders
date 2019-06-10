@@ -5,10 +5,11 @@ from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
 from .models import Case, Deadline
 from users.models import CustomUser
+from datetime import timedelta
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm
-from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS
+from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS
 from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
@@ -21,7 +22,20 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
     form_class = CaseForm
 
     def get_success_url(self):
-        return reverse('scheduling', kwargs={'case_number': self.object.case_number})
+        self.object.created_by = self.request.user
+        self.object.save()
+
+        # Start first deadline for Witness List
+        Deadline.objects.create(
+            case=self.object,
+            type=Deadline.WITNESS_LIST,
+            datetime=utils.get_actual_deadline_from_start(
+                start_date=self.object.arraignment_date,
+                days=WITNESS_LIST_DEADLINE_DAYS),
+            created_by=self.request.user
+        )
+
+        return reverse('remind:scheduling', kwargs={'case_number': self.object.case_number})
 
 
 class DashView(LoginRequiredMixin, ListView):
@@ -47,13 +61,15 @@ def scheduling(request, *args, **kwargs):
             # Set scheduling conference for date
             case = Case.objects.get(case_number=kwargs.get('case_number'))
             case.scheduling_conference_date = form.cleaned_data.get('scheduling_conference_date')
-            case.save(update_fields=['scheduling_conference_date'])
+            case.updated_by = request.user
+            case.save(update_fields=['scheduling_conference_date', 'updated_by'])
 
             # Start scheduling conference deadline timer
             Deadline.objects.create(
                 case=case,
                 type=Deadline.SCHEDULING_CONFERENCE,
                 datetime=case.scheduling_conference_date,
+                created_by=request.user
             )
             return HttpResponseRedirect(SOURCE_URL)
 
@@ -77,12 +93,14 @@ def track(request, *args, **kwargs):
             # Defining this variable again ensures scheduling_conference_date is saved as a datetime
             case = Case.objects.get(case_number=kwargs.get('case_number'))
             case.track = int(form.cleaned_data.get('track'))
-            case.save(update_fields=['track'])
+            case.updated_by = request.user
+            case.save(update_fields=['track', 'updated_by'])
 
             # Complete scheduling conference deadline timer
             scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
             scheduling_conference_deadline.status = Deadline.COMPLETED
-            scheduling_conference_deadline.save(update_fields=['status'])
+            scheduling_conference_deadline.updated_by = request.user
+            scheduling_conference_deadline.save(update_fields=['status', 'updated_by'])
 
             # Start Request PTI deadline timer
             deadlines_dict = utils.get_deadline_dict(case.track)
@@ -90,10 +108,11 @@ def track(request, *args, **kwargs):
             Deadline.objects.create(
                 case=case,
                 type=Deadline.REQUEST_PTI,
-                datetime=utils.get_actual_deadline_from_start(case.scheduling_conference_date, day_after_request_due)
+                datetime=utils.get_actual_deadline_from_start(case.scheduling_conference_date, day_after_request_due),
+                created_by=request.user
             )
 
-            return HttpResponseRedirect(reverse('trial', kwargs=kwargs))
+            return HttpResponseRedirect(reverse('remind:trial', kwargs=kwargs))
     else:
         form = TrackForm(case_number=kwargs['case_number'])
 
@@ -108,16 +127,18 @@ def trial(request, *args, **kwargs):
             # Set scheduling conference for date
             case = Case.objects.get(case_number=kwargs.get('case_number'))
             case.trial_date = form.cleaned_data.get('trial_date')
-            case.save(update_fields=['trial_date'])
+            case.updated_by = request.user
+            case.save(update_fields=['trial_date', 'updated_by'])
 
             # Start trial deadline timer
             Deadline.objects.create(
                 case=case,
                 type=Deadline.TRIAL,
                 datetime=case.trial_date,
+                created_by=request.user
             )
 
-            return HttpResponseRedirect(reverse('order', kwargs=kwargs))
+            return HttpResponseRedirect(reverse('remind:order', kwargs=kwargs))
 
     else:
         form = TrialForm(case_number=kwargs['case_number'])
@@ -131,11 +152,14 @@ def order(request, *args, **kwargs):
         form = OrderForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
             case = Case.objects.get(case_number=kwargs.get('case_number'))
+            case.updated_by = request.user
+            case.save(update_fields=['updated_by'])
             for key in TRIAL_DEADLINES:
                 Deadline.objects.create(
                     case=case,
                     type=int(key),
                     datetime=form.cleaned_data.get(key),
+                    created_by=request.user
                 )
 
             return HttpResponseRedirect(SOURCE_URL)
@@ -153,7 +177,8 @@ def request_pti(request, *args, **kwargs):
         if form.is_valid():
             case = Case.objects.get(case_number=kwargs.get('case_number'))
             case.pti_request_date = form.cleaned_data.get('request_pti_date')
-            case.save(update_fields=['pti_request_date'])
+            case.updated_by = request.user
+            case.save(update_fields=['pti_request_date', 'updated_by'])
 
             # Defining this variable again ensures pti_request_date is saved as a datetime
             case = Case.objects.get(case_number=kwargs.get('case_number'))
@@ -164,7 +189,8 @@ def request_pti(request, *args, **kwargs):
             Deadline.objects.create(
                 case=case,
                 type=Deadline.CONDUCT_PTI,
-                datetime=utils.get_actual_deadline_from_start(case.pti_request_date, day_after_request_due)
+                datetime=utils.get_actual_deadline_from_start(case.pti_request_date, day_after_request_due),
+                created_by=request.user
             )
 
             return HttpResponseRedirect(SOURCE_URL)
@@ -184,9 +210,14 @@ def update(request, *args, **kwargs):
 
             for index, deadline in enumerate(Deadline.objects.filter(case=case)):
                 key = 'deadline_{}'.format(index)
-                if deadline.datetime.strftime('%Y-%m-%d %H:%M:%S') != form.cleaned_data.get(key):
+                if deadline.datetime != form.cleaned_data.get(key):
                     deadline.datetime = form.cleaned_data.get(key)
-                    deadline.save(update_fields=['datetime'])
+                    deadline.updated_by = request.user
+                    deadline.invalid_notice_sent = False
+                    deadline.save(update_fields=['datetime', 'updated_by', 'invalid_notice_sent'])
+
+            case.updated_by = request.user
+            case.save(update_fields=['updated_by'])
 
             return HttpResponseRedirect(SOURCE_URL)
 
@@ -206,7 +237,7 @@ class UpdateHomeView(LoginRequiredMixin, FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('update', kwargs={'case_number': self.case_number})
+        return reverse('remind:update', kwargs={'case_number': self.case_number})
 
 
 @login_required
@@ -215,9 +246,10 @@ def complete(request, *args, **kwargs):
         form = CompleteForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
             deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
-            if form.cleaned_data.get('status'):
+            if form.cleaned_data.get('completed'):
                 deadline.status = Deadline.COMPLETED
-                deadline.save(update_fields=['status'])
+                deadline.updated_by = request.user
+                deadline.save(update_fields=['status', 'updated_by'])
             return HttpResponseRedirect(SOURCE_URL)
 
     else:
@@ -233,10 +265,9 @@ def extension(request, *args, **kwargs):
         form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
             deadline.invalid_extension_filed = form.cleaned_data.get('extension_filed')
-            deadline.save(update_fields=['invalid_extension_filed'])
+            deadline.updated_by = request.user
+            deadline.save(update_fields=['invalid_extension_filed', 'updated_by'])
             return HttpResponseRedirect(SOURCE_URL)
-        else:
-            print('why')
 
     else:
         form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
@@ -254,7 +285,8 @@ def judge_confirmed(request, *args, **kwargs):
         form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
             deadline.invalid_judge_approved = form.cleaned_data.get('judge_approved')
-            deadline.save(update_fields=['invalid_judge_approved'])
+            deadline.updated_by = request.user
+            deadline.save(update_fields=['invalid_judge_approved', 'updated_by'])
             return HttpResponseRedirect(SOURCE_URL)
 
     else:
