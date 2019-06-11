@@ -35,7 +35,7 @@ class MotionForm(Form):
     )
 
     case_number = forms.ModelChoiceField(
-        queryset=Case.objects.all(),
+        queryset=Case.objects.exclude(trial_date__isnull=True),
     )
 
     date_filed = forms.DateTimeField(
@@ -54,8 +54,8 @@ class MotionDateForm(Form):
         self.motion = Motion.objects.get(pk=kwargs.pop('motion_pk'))
         super(MotionDateForm, self).__init__(*args, **kwargs)
 
-        initial_response = self.motion.date_received + timedelta(days=10)  # TODO make cleaner in utils function
-        initial_hearing = self.motion.case.trial_date - timedelta(days=35)  # TODO make cleaner, catch exception if no trial date
+        initial_response = utils.get_actual_deadline_from_start(self.motion.date_received, 10)
+        initial_hearing = utils.get_actual_deadline_from_end(self.motion.case.trial_date, 35)
 
         self.fields['response_deadline'] = forms.DateTimeField(
             label='Deadline to file a response',
@@ -102,7 +102,7 @@ class MotionDateForm(Form):
                 deadline=date_hearing,
                 event=self.motion.case.trial_date,
                 days=deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],
-                future_event=False,
+                future_event=True,
             ):
                 self.add_error(
                     'date_hearing',
