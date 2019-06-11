@@ -103,14 +103,14 @@ def track(request, *args, **kwargs):
     if request.method == 'POST':
         form = TrackForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
-            # Set scheduling conference for date
             case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+            # Set scheduling conference for date
             case.scheduling_conference_date = form.cleaned_data.get('scheduling_conference_date')
             case.save(update_fields=['scheduling_conference_date'])
 
             # Set track for case
             # Defining this variable again ensures scheduling_conference_date is saved as a datetime
-            case = Case.objects.get(case_number=kwargs.get('case_number'))
             case.track = int(form.cleaned_data.get('track'))
             case.updated_by = request.user
             case.save(update_fields=['track', 'updated_by'])
@@ -243,7 +243,7 @@ def update(request, *args, **kwargs):
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
 
-    return render(request, 'remind/update_form.html', {'form': form})
+    return render(request, 'remind/update_form.html', {'form': form, })
 
 
 class UpdateHomeView(LoginRequiredMixin, FormView):
