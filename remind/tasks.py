@@ -62,7 +62,7 @@ def check_all_deadlines():
 
         else:
             # If it is past the deadline, send expiry emails and flag the deadline as expired
-            if days_until <= timedelta(days=0):
+            if days_until < timedelta(days=0):
                 print('Deadline {} expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
                 send_emails(Email.DEADLINE_EXPIRED, deadline)
                 deadline.status = Deadline.EXPIRED
