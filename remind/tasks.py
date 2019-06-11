@@ -87,7 +87,7 @@ def check_all_deadlines():
         print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
 
 
-@shared_task()
+@shared_task
 def send_emails(email_type, deadline):
 
     # https://docs.djangoproject.com/en/2.2/topics/email/#sending-multiple-emails

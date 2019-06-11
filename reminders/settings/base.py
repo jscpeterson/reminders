@@ -17,6 +17,8 @@ import dotenv
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = up(up(up(os.path.abspath(__file__))))
 
+dotenv.read_dotenv(os.path.join(BASE_DIR, '.env'))
+
 ALLOWED_HOSTS = []
 
 # Application definition
