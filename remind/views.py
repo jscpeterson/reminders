@@ -300,7 +300,7 @@ def motion_deadline(request, *args, **kwargs):
                 type=Deadline.PRETRIAL_MOTION_HEARING,
                 case=motion.case,
                 motion=motion,
-                datetime=motion.date_received
+                datetime=motion.date_hearing
             )
 
             return HttpResponseRedirect(REMIND_URL)
