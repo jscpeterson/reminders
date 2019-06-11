@@ -39,6 +39,7 @@ class MotionForm(Form):
     )
 
     date_filed = forms.DateTimeField(
+        input_formats=['%Y-%m-%d'],
         label='Date motion was filed'
     )
 
@@ -61,11 +62,13 @@ class MotionDateForm(Form):
                                                              deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],)
 
         self.fields['response_deadline'] = forms.DateTimeField(
+            input_formats=['%Y-%m-%d'],
             label='Deadline to file a response',
             initial=initial_response
         )
 
         self.fields['date_hearing'] = forms.DateTimeField(
+            input_formats=['%Y-%m-%d %H:%M'],
             label='Date of the hearing',
             initial=initial_hearing
         )
@@ -115,6 +118,7 @@ class MotionDateForm(Form):
 
 class MotionResponseForm(Form):
     response_filed = forms.DateTimeField(
+        input_formats=['%Y-%m-%d %H:%M'],
         label='Date response was filed'
     )
 
@@ -173,6 +177,7 @@ class TrackForm(Form):
 
         initial = case.scheduling_conference_date
         self.fields['scheduling_conference_date'] = forms.DateTimeField(
+            input_formats=['%Y-%m-%d %H:%M'],
             label='When did the scheduling conference actually occur?',
             initial=initial,
         )
@@ -325,6 +330,7 @@ class UpdateForm(Form):
             initial = deadline.datetime
 
             self.fields[key] = forms.DateTimeField(
+                input_formats=['%Y-%m-%d %H:%M'],
                 label=label,
                 initial=initial,
                 disabled=deadline.status != Deadline.ACTIVE
