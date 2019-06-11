@@ -222,11 +222,11 @@ def request_pti(request, *args, **kwargs):
 
 @login_required
 def update(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+
     if request.method == 'POST':
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
-            case = Case.objects.get(case_number=kwargs.get('case_number'))
-
             for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
                 key = 'deadline_{}'.format(index)
                 if deadline.datetime != form.cleaned_data.get(key):
@@ -243,7 +243,7 @@ def update(request, *args, **kwargs):
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
 
-    return render(request, 'remind/update_form.html', {'form': form, })
+    return render(request, 'remind/update_form.html', {'form': form, 'case_number': case.case_number})
 
 
 class UpdateHomeView(LoginRequiredMixin, FormView):
