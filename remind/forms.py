@@ -175,7 +175,7 @@ class TrackForm(Form):
         case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        initial = case.scheduling_conference_date
+        initial = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE).datetime
         self.fields['scheduling_conference_date'] = forms.DateTimeField(
             input_formats=['%Y-%m-%d %H:%M'],
             label='When did the scheduling conference actually occur?',
