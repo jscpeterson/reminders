@@ -1,8 +1,10 @@
 from .models import Deadline
+from django.conf import settings
 
-SOURCE_URL = 'http://127.0.0.1:8000'
-ADMINISTRATION_EMAIL = 'joseph.peterson@da2nd.state.nm.us'
-SUPPORT_EMAIL = 'coders@da2nd.state.nm.us'
+
+SOURCE_URL = settings.BASE_URL
+ADMINISTRATION_EMAIL = settings.ADMINISTRATION_EMAIL
+SUPPORT_EMAIL = settings.SUPPORT_EMAIL
 
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
 WITNESS_LIST_DEADLINE_DAYS = 25
