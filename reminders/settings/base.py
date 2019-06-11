@@ -119,3 +119,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
+
+BASE_URL = os.environ.get('BASE_URL')
+ADMINISTRATION_EMAIL = os.environ.get('ADMINISTRATION_EMAIL')
+SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL')
