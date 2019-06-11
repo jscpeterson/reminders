@@ -295,6 +295,14 @@ def motion_deadline(request, *args, **kwargs):
                 datetime=motion.response_deadline,
             )
 
+            # Create motion hearing deadline
+            Deadline.objects.create(
+                type=Deadline.PRETRIAL_MOTION_HEARING,
+                case=motion.case,
+                motion=motion,
+                datetime=motion.date_received
+            )
+
             return HttpResponseRedirect(REMIND_URL)
     else:
         form = MotionDateForm(motion_pk=kwargs.get('motion_pk'))

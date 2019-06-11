@@ -89,7 +89,8 @@ EVENT_DEADLINES = (
     Deadline.PRETRIAL_CONFERENCE,
     Deadline.TRIAL,
     Deadline.REQUEST_PTI,
-    Deadline.CONDUCT_PTI
+    Deadline.CONDUCT_PTI,
+    Deadline.PRETRIAL_MOTION_HEARING
 )
 
 DEADLINE_DESCRIPTIONS = {

@@ -54,8 +54,11 @@ class MotionDateForm(Form):
         self.motion = Motion.objects.get(pk=kwargs.pop('motion_pk'))
         super(MotionDateForm, self).__init__(*args, **kwargs)
 
+        deadline_dict = utils.get_deadline_dict(self.motion.case.track)
+
         initial_response = utils.get_actual_deadline_from_start(self.motion.date_received, 10)
-        initial_hearing = utils.get_actual_deadline_from_end(self.motion.case.trial_date, 35)
+        initial_hearing = utils.get_actual_deadline_from_end(self.motion.case.trial_date,
+                                                             deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],)
 
         self.fields['response_deadline'] = forms.DateTimeField(
             label='Deadline to file a response',
