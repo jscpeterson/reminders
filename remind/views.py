@@ -68,7 +68,7 @@ def case_created(request, *args, **kwargs):
                    'prosecutor': case.prosecutor,
                    'paralegal': case.paralegal,
                    'supervisor': case.supervisor,
-                   'witness_deadline': witness_deadline.datetime})
+                   'witness_deadline': witness_deadline.datetime.date()})
 
 
 @login_required
