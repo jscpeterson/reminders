@@ -5,7 +5,7 @@ from datetime import timedelta
 from users.models import CustomUser
 from django import forms
 from . import utils
-from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS
+from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, JUDGES
 
 TRUE_FALSE_CHOICES = (
     (True, 'Yes'),
@@ -18,10 +18,15 @@ class CaseForm(ModelForm):
     prosecutor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=2), empty_label=None)
     secretary = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
     arraignment_date = forms.DateTimeField(input_formats=['%Y-%m-%d %H:%M'])
+    case_number = forms.CharField(label='CR#')
+    judge = forms.ChoiceField(choices=JUDGES, )
 
     class Meta:
         model = Case
         fields = ['case_number',
+                  'defendant',
+                  'judge',
+                  'defense_attorney',
                   'supervisor',
                   'prosecutor',
                   'secretary',
