@@ -32,10 +32,16 @@ class Case(TimeStampedModel):
         (3, '3')
     )
 
+    defendant = models.CharField(max_length=120)
+    case_number = models.CharField(max_length=20, unique=True)  # This is the CR#
+    judge = models.CharField(max_length=60, null=True, blank=True)
+    defense = models.CharField(max_length=120, null=True, blank=True)
+    notes = models.CharField(null=True, blank=True)
+    
     prosecutor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='prosecutor')
     secretary = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='secretary')
     supervisor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='supervisor')
-    case_number = models.CharField(max_length=20, unique=True)
+#
     track = models.IntegerField(choices=TRACK_CHOICES, null=True)
     arraignment_date = models.DateTimeField(null=True)
     scheduling_conference_date = models.DateTimeField(null=True)
