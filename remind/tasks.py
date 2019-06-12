@@ -62,7 +62,7 @@ def check_all_deadlines():
 
         else:
             # If it is past the deadline, send expiry emails and flag the deadline as expired
-            if days_until <= timedelta(days=0):
+            if days_until < timedelta(days=0):
                 print('Deadline {} expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
                 send_emails(Email.DEADLINE_EXPIRED, deadline)
                 deadline.status = Deadline.EXPIRED
@@ -87,14 +87,14 @@ def check_all_deadlines():
         print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
 
 
-@shared_task()
+@shared_task
 def send_emails(email_type, deadline):
 
     # https://docs.djangoproject.com/en/2.2/topics/email/#sending-multiple-emails
 
     recipient_emails = [
         deadline.case.prosecutor.email,
-        deadline.case.paralegal.email,
+        deadline.case.secretary.email,
     ]
 
     if email_type == Email.SECOND_REMINDER:

@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:9.6.5
+    env_file:
+     - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "$POSTGRES_PORT:$POSTGRES_PORT"
+
+  redis:
+    image: "redis:alpine"
+
+  web:
+    build: .
+    command: bash -c "python /code/manage.py migrate --noinput && python /code/manage.py runserver 0.0.0.0:80"
+    env_file:
+     - .env
+    volumes:
+      - .:/code
+    ports:
+      - "80:80"
+    depends_on:
+      - db
+      - redis
+
+  celery:
+    build: .
+    command: celery -A reminders worker -l info
+    env_file:
+     - .env
+    volumes: 
+      - .:/code
+    depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build: .
+    command: celery -A reminders beat -l info
+    env_file:
+     - .env
+    volumes: 
+      - .:/code
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:

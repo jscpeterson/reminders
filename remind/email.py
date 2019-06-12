@@ -218,7 +218,7 @@ Please enter the results of the scheduling order at {url}.'''.format(
             request_pti_days = 14
 
         return '''{indent}It has been {days} days since the scheduling conference for case {case_number}. If the \
-defense requested pretrial interviews, please enter the date they did so at {url}. If they did not, you are under no \
+defense requested pretrial interviews, please enter the date they did so at {url}. If they did not, you are no \
 longer under any obligation to assist them.'''.format(
             indent=INDENT,
             days=request_pti_days,

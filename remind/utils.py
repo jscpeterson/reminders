@@ -224,7 +224,7 @@ def is_deadline_invalid(deadline):
     deadline_dict = get_deadline_dict(deadline.case.track)
     required_days = deadline_dict[str(deadline.type)]
     # Deadlines where the triggering event is a future trial
-    if str(deadline.type) in TRIAL_DEADLINES:
+    if str(deadline.type) in TRIAL_DEADLINES or deadline.type == Deadline.PRETRIAL_MOTION_HEARING:
         return not is_deadline_within_limits(deadline=deadline.datetime,
                                              event=deadline.case.trial_date,
                                              days=required_days,

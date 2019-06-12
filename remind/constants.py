@@ -1,8 +1,9 @@
 from .models import Deadline
+from django.conf import settings
 
-SOURCE_URL = 'http://127.0.0.1:8000'
-ADMINISTRATION_EMAIL = 'joseph.peterson@da2nd.state.nm.us'
-SUPPORT_EMAIL = 'coders@da2nd.state.nm.us'
+SOURCE_URL = settings.BASE_URL
+ADMINISTRATION_EMAIL = settings.ADMINISTRATION_EMAIL
+SUPPORT_EMAIL = settings.SUPPORT_EMAIL
 
 SCHEDULING_ORDER_DEADLINE_DAYS = 30
 WITNESS_LIST_DEADLINE_DAYS = 25
@@ -89,7 +90,8 @@ EVENT_DEADLINES = (
     Deadline.PRETRIAL_CONFERENCE,
     Deadline.TRIAL,
     Deadline.REQUEST_PTI,
-    Deadline.CONDUCT_PTI
+    Deadline.CONDUCT_PTI,
+    Deadline.PRETRIAL_MOTION_HEARING
 )
 
 DEADLINE_DESCRIPTIONS = {
@@ -102,7 +104,7 @@ DEADLINE_DESCRIPTIONS = {
     str(Deadline.SCIENTIFIC_EVIDENCE): 'deadline to produce the results of scientific evidence',
     str(Deadline.PRETRIAL_MOTION_FILING): 'deadline to file any pretrial motions',
     str(Deadline.PRETRIAL_MOTION_RESPONSE): 'deadline to file a response to a pretrial motion',
-    # str(Deadline.PRETRIAL_MOTION_HEARING): '',
+    str(Deadline.PRETRIAL_MOTION_HEARING): 'date of a pretrial motion hearing',
     str(Deadline.PRETRIAL_CONFERENCE): 'date and time of the pretrial conference',
     str(Deadline.FINAL_WITNESS_LIST): 'deadline to submit a final witness list',
     str(Deadline.NEED_FOR_INTERPRETER): 'deadline to file notice for language access services',
@@ -120,7 +122,7 @@ FIRST_REMINDER_DAYS = {
     Deadline.SCIENTIFIC_EVIDENCE: 5,
     Deadline.PRETRIAL_MOTION_FILING: 5,
     Deadline.PRETRIAL_MOTION_RESPONSE: 5,
-    # Deadline.PRETRIAL_MOTION_HEARING: '',
+    Deadline.PRETRIAL_MOTION_HEARING: 5,
     Deadline.PRETRIAL_CONFERENCE: 5,
     Deadline.FINAL_WITNESS_LIST: 5,
     Deadline.NEED_FOR_INTERPRETER: 5,
@@ -138,7 +140,7 @@ SECOND_REMINDER_DAYS = {
     Deadline.SCIENTIFIC_EVIDENCE: 2,
     Deadline.PRETRIAL_MOTION_FILING: 2,
     Deadline.PRETRIAL_MOTION_RESPONSE: 2,
-    # Deadline.PRETRIAL_MOTION_HEARING: '',
+    Deadline.PRETRIAL_MOTION_HEARING: 2,
     Deadline.PRETRIAL_CONFERENCE: 2,
     Deadline.FINAL_WITNESS_LIST: 2,
     Deadline.NEED_FOR_INTERPRETER: 2,

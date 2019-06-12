@@ -5,7 +5,7 @@ from django.db.models import Q
 def get_cases(user):
     cases = Case.objects.filter(
         Q(prosecutor=user) |
-        Q(paralegal=user) |
+        Q(secretary=user) |
         Q(supervisor=user)
     )
     return cases

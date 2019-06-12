@@ -140,3 +140,6 @@ model_pickles/
 
 # Parameter files
 *.ini
+
+# Process ID files
+*.pid

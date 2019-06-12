@@ -66,9 +66,9 @@ def case_created(request, *args, **kwargs):
     return render(request, 'remind/case_created.html',
                   {'case_number': case.case_number,
                    'prosecutor': case.prosecutor,
-                   'paralegal': case.paralegal,
+                   'secretary': case.secretary,
                    'supervisor': case.supervisor,
-                   'witness_deadline': witness_deadline.datetime})
+                   'witness_deadline': witness_deadline.datetime.date()})
 
 
 @login_required
@@ -103,14 +103,14 @@ def track(request, *args, **kwargs):
     if request.method == 'POST':
         form = TrackForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
-            # Set scheduling conference for date
             case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+            # Set scheduling conference for date
             case.scheduling_conference_date = form.cleaned_data.get('scheduling_conference_date')
             case.save(update_fields=['scheduling_conference_date'])
 
             # Set track for case
             # Defining this variable again ensures scheduling_conference_date is saved as a datetime
-            case = Case.objects.get(case_number=kwargs.get('case_number'))
             case.track = int(form.cleaned_data.get('track'))
             case.updated_by = request.user
             case.save(update_fields=['track', 'updated_by'])
@@ -222,11 +222,11 @@ def request_pti(request, *args, **kwargs):
 
 @login_required
 def update(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+
     if request.method == 'POST':
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
-            case = Case.objects.get(case_number=kwargs.get('case_number'))
-
             for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
                 key = 'deadline_{}'.format(index)
                 if deadline.datetime != form.cleaned_data.get(key):
@@ -243,7 +243,7 @@ def update(request, *args, **kwargs):
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
 
-    return render(request, 'remind/update_form.html', {'form': form})
+    return render(request, 'remind/update_form.html', {'form': form, 'case_number': case.case_number})
 
 
 class UpdateHomeView(LoginRequiredMixin, FormView):
@@ -293,6 +293,14 @@ def motion_deadline(request, *args, **kwargs):
                 case=motion.case,
                 motion=motion,
                 datetime=motion.response_deadline,
+            )
+
+            # Create motion hearing deadline
+            Deadline.objects.create(
+                type=Deadline.PRETRIAL_MOTION_HEARING,
+                case=motion.case,
+                motion=motion,
+                datetime=motion.date_hearing
             )
 
             return HttpResponseRedirect(REMIND_URL)

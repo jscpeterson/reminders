@@ -16,7 +16,7 @@ TRUE_FALSE_CHOICES = (
 class CaseForm(ModelForm):
     supervisor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=1), empty_label=None)
     prosecutor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=2), empty_label=None)
-    paralegal = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
+    secretary = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
     arraignment_date = forms.DateTimeField(input_formats=['%Y-%m-%d %H:%M'])
 
     class Meta:
@@ -24,7 +24,7 @@ class CaseForm(ModelForm):
         fields = ['case_number',
                   'supervisor',
                   'prosecutor',
-                  'paralegal',
+                  'secretary',
                   'arraignment_date']
 
 
@@ -35,10 +35,11 @@ class MotionForm(Form):
     )
 
     case_number = forms.ModelChoiceField(
-        queryset=Case.objects.all(),
+        queryset=Case.objects.exclude(trial_date__isnull=True),
     )
 
     date_filed = forms.DateTimeField(
+        input_formats=['%Y-%m-%d'],
         label='Date motion was filed'
     )
 
@@ -51,29 +52,73 @@ class MotionForm(Form):
 class MotionDateForm(Form):
 
     def __init__(self, *args, **kwargs):
-        motion = Motion.objects.get(pk=kwargs.pop('motion_pk'))
+        self.motion = Motion.objects.get(pk=kwargs.pop('motion_pk'))
         super(MotionDateForm, self).__init__(*args, **kwargs)
 
-        initial_response = motion.date_received + timedelta(days=10)  # TODO make cleaner in utils function
-        initial_hearing = motion.case.trial_date - timedelta(days=35)  # TODO make cleaner, catch exception if no trial date
+        deadline_dict = utils.get_deadline_dict(self.motion.case.track)
+
+        initial_response = utils.get_actual_deadline_from_start(self.motion.date_received, 10)
+        initial_hearing = utils.get_actual_deadline_from_end(self.motion.case.trial_date,
+                                                             deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],)
 
         self.fields['response_deadline'] = forms.DateTimeField(
+            input_formats=['%Y-%m-%d'],
             label='Deadline to file a response',
             initial=initial_response
         )
 
         self.fields['date_hearing'] = forms.DateTimeField(
+            input_formats=['%Y-%m-%d %H:%M'],
             label='Date of the hearing',
             initial=initial_hearing
         )
 
+        self.fields['override'] = forms.BooleanField(
+            label='Override invalid dates?',
+            required=False,
+        )
+
     def clean(self):
         super(MotionDateForm, self).clean()
-        # TODO Form validation
+        cleaned_data = super().clean()
+
+        if cleaned_data.get('override'):
+            return
+
+        deadline_dict = utils.get_deadline_dict(self.motion.case.track)
+
+        if 'response_deadline' in cleaned_data:
+            response_deadline = cleaned_data.get('response_deadline')
+
+            # if not utils.is_deadline_within_limits(
+            #     deadline=scheduling_conf_date,
+            #     event=self.case.arraignment_date,
+            #     days=SCHEDULING_ORDER_DEADLINE_DAYS,
+            #     future_event=False,
+            # ):
+            #     self.add_error(
+            #         'scheduling_conference_date',
+            #         'Scheduling conference date is past permissible limit'
+            #     )
+
+        if 'date_hearing' in cleaned_data:
+            date_hearing = cleaned_data.get('date_hearing')
+
+            if not utils.is_deadline_within_limits(
+                deadline=date_hearing,
+                event=self.motion.case.trial_date,
+                days=deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],
+                future_event=True,
+            ):
+                self.add_error(
+                    'date_hearing',
+                    'Hearing date is past permissible limit'
+                )
 
 
 class MotionResponseForm(Form):
     response_filed = forms.DateTimeField(
+        input_formats=['%Y-%m-%d %H:%M'],
         label='Date response was filed'
     )
 
@@ -130,8 +175,9 @@ class TrackForm(Form):
         case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        initial = case.scheduling_conference_date
+        initial = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE).datetime
         self.fields['scheduling_conference_date'] = forms.DateTimeField(
+            input_formats=['%Y-%m-%d %H:%M'],
             label='When did the scheduling conference actually occur?',
             initial=initial,
         )
@@ -268,14 +314,23 @@ class UpdateForm(Form):
 
         for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
             key = 'deadline_{}'.format(index)
-            label = '{expired}{completed}{deadline_desc}'.format(
-                expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
-                completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
-                deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
-            )
+            if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE, Deadline.PRETRIAL_MOTION_HEARING]:
+                label = '{expired}{completed}{deadline_desc} for {motion_title}'.format(
+                    expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
+                    completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
+                    deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
+                    motion_title=deadline.motion.title
+                )
+            else:
+                label = '{expired}{completed}{deadline_desc}'.format(
+                    expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
+                    completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
+                    deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
+                )
             initial = deadline.datetime
 
             self.fields[key] = forms.DateTimeField(
+                input_formats=['%Y-%m-%d %H:%M'],
                 label=label,
                 initial=initial,
                 disabled=deadline.status != Deadline.ACTIVE
