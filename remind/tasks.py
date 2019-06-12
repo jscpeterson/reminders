@@ -94,7 +94,7 @@ def send_emails(email_type, deadline):
 
     recipient_emails = [
         deadline.case.prosecutor.email,
-        deadline.case.paralegal.email,
+        deadline.case.secretary.email,
     ]
 
     if email_type == Email.SECOND_REMINDER:

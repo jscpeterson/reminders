@@ -16,7 +16,7 @@ TRUE_FALSE_CHOICES = (
 class CaseForm(ModelForm):
     supervisor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=1), empty_label=None)
     prosecutor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=2), empty_label=None)
-    paralegal = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
+    secretary = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
     arraignment_date = forms.DateTimeField(input_formats=['%Y-%m-%d %H:%M'])
 
     class Meta:
@@ -24,7 +24,7 @@ class CaseForm(ModelForm):
         fields = ['case_number',
                   'supervisor',
                   'prosecutor',
-                  'paralegal',
+                  'secretary',
                   'arraignment_date']
 
 

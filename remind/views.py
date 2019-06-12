@@ -66,7 +66,7 @@ def case_created(request, *args, **kwargs):
     return render(request, 'remind/case_created.html',
                   {'case_number': case.case_number,
                    'prosecutor': case.prosecutor,
-                   'paralegal': case.paralegal,
+                   'secretary': case.secretary,
                    'supervisor': case.supervisor,
                    'witness_deadline': witness_deadline.datetime.date()})
 
