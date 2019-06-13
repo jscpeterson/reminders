@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'users.apps.UsersConfig',
+    'corsheaders',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +127,5 @@ EMAIL_PORT = 587
 BASE_URL = os.environ.get('BASE_URL')
 ADMINISTRATION_EMAIL = os.environ.get('ADMINISTRATION_EMAIL')
 SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL')
+
+

@@ -38,3 +38,6 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+CORS_ORIGIN_WHITELIST = (
+    'https://localhost:3000',
+)

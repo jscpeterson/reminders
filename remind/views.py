@@ -15,8 +15,20 @@ from . import case_utils
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import TemplateView
+from rest_framework import viewsets
+from .serializers import DeadlineSerializer, CaseSerializer
 
 REMIND_URL = '{}/remind/'.format(SOURCE_URL)
+
+
+class DeadlineViewSet(viewsets.ModelViewSet):
+    serializer_class = DeadlineSerializer
+    queryset = Deadline.objects.all()
+
+
+class CaseViewSet(viewsets.ModelViewSet):
+    serializer_class = CaseSerializer
+    queryset = Case.objects.all()
 
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
