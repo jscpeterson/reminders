@@ -147,3 +147,14 @@ SECOND_REMINDER_DAYS = {
     Deadline.PLEA_AGREEMENT: 2,
     Deadline.TRIAL: 2,
 }
+
+# TODO Not sure what the best way to get this data is
+JUDGES = (
+    (1, 'Ramcyzk'),
+    (2, 'Jaramillo'),
+    (3, 'Hart'),
+    (4, 'Loveless'),
+    (5, 'Gallegos'),
+    (6, 'Brown'),
+    (7, 'Flores'),
+)
