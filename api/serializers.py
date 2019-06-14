@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Deadline, Case
+from remind.models import Deadline, Case
 
 
 class DeadlineSerializer(serializers.ModelSerializer):

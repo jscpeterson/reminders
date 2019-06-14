@@ -4,8 +4,6 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
 from .models import Case, Deadline, Motion
-from users.models import CustomUser
-from datetime import timedelta
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, MotionResponseForm
@@ -14,21 +12,8 @@ from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.base import TemplateView
-from rest_framework import viewsets
-from .serializers import DeadlineSerializer, CaseSerializer
 
 REMIND_URL = '{}/remind/'.format(SOURCE_URL)
-
-
-class DeadlineViewSet(viewsets.ModelViewSet):
-    serializer_class = DeadlineSerializer
-    queryset = Deadline.objects.all()
-
-
-class CaseViewSet(viewsets.ModelViewSet):
-    serializer_class = CaseSerializer
-    queryset = Case.objects.all()
 
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
