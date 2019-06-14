@@ -39,6 +39,7 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
 
 class DashView(LoginRequiredMixin, ListView):
     template_name = 'remind/dashboard.html'
+    component = 'test.js'
 
     def get_queryset(self):
         cases = case_utils.get_cases(self.request.user)
@@ -46,9 +47,7 @@ class DashView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(DashView, self).get_context_data(**kwargs)
-        cases = case_utils.get_cases(self.request.user)
-        closed_cases = case_utils.get_closed(cases)
-        context['closed_cases'] = closed_cases
+        context['component'] = self.component
         return context
 
 
