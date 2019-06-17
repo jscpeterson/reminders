@@ -8,7 +8,7 @@ from users.models import CustomUser
 from datetime import timedelta
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
-    UpdateHomeForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, MotionResponseForm
+    UpdateHomeForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, MotionResponseForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS
 from . import utils
 from . import case_utils
@@ -394,3 +394,16 @@ def judge_confirmed(request, *args, **kwargs):
                                                                 'required_days':
                                                                     utils.get_deadline_dict(deadline.case.track)
                                                                     [str(deadline.type)]})
+
+
+class UpdateTrackView(LoginRequiredMixin, FormView):
+    template_name = 'remind/update_track_form.html'
+    form_class = UpdateTrackForm
+    case_number = ''
+
+    def form_valid(self, form):
+        self.case_number = form.cleaned_data['case_number']
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('remind:track', kwargs={'case_number': self.case_number})
