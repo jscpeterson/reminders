@@ -19,7 +19,7 @@ class TestSchedulingForm(TestCase):
 
         case = Case.objects.create(
             case_number='0001',
-            secretary=users[positions[CustomUser.SECRETARY]],
+            paralegal=users[positions[CustomUser.PARALEGAL]],
             prosecutor=users[positions[CustomUser.PROSECUTOR]],
             supervisor=users[positions[CustomUser.SUPERVISOR]],
             arraignment_date=datetime.now(tz=timezone(settings.TIME_ZONE)),
@@ -41,7 +41,7 @@ class TestSchedulingForm(TestCase):
         arraignment_date = datetime(2019, 5, 30, 22, 20)
         case = Case.objects.create(
             case_number='0001',
-            secretary=users[positions[CustomUser.SECRETARY]],
+            paralegal=users[positions[CustomUser.PARALEGAL]],
             prosecutor=users[positions[CustomUser.PROSECUTOR]],
             supervisor=users[positions[CustomUser.SUPERVISOR]],
             arraignment_date=arraignment_date,
@@ -69,7 +69,7 @@ class TestSchedulingForm(TestCase):
 
         case = Case.objects.create(
             case_number='0001',
-            secretary=users[positions[CustomUser.SECRETARY]],
+            paralegal=users[positions[CustomUser.PARALEGAL]],
             prosecutor=users[positions[CustomUser.PROSECUTOR]],
             supervisor=users[positions[CustomUser.SUPERVISOR]],
             arraignment_date=datetime.now(tz=timezone(settings.TIME_ZONE)),
@@ -90,7 +90,7 @@ class TestSchedulingForm(TestCase):
 
         case = Case.objects.create(
             case_number='0001',
-            secretary=users[positions[CustomUser.SECRETARY]],
+            paralegal=users[positions[CustomUser.PARALEGAL]],
             prosecutor=users[positions[CustomUser.PROSECUTOR]],
             supervisor=users[positions[CustomUser.SUPERVISOR]],
             arraignment_date=datetime.now(tz=timezone(settings.TIME_ZONE)),
@@ -114,7 +114,7 @@ class TestSchedulingForm(TestCase):
 
         case = Case.objects.create(
             case_number='0001',
-            secretary=users[positions[CustomUser.SECRETARY]],
+            paralegal=users[positions[CustomUser.PARALEGAL]],
             prosecutor=users[positions[CustomUser.PROSECUTOR]],
             supervisor=users[positions[CustomUser.SUPERVISOR]],
             arraignment_date=datetime.now(tz=timezone(settings.TIME_ZONE)),
@@ -135,7 +135,7 @@ class TestSchedulingForm(TestCase):
 
         case = Case.objects.create(
             case_number='0001',
-            secretary=users[positions[CustomUser.SECRETARY]],
+            paralegal=users[positions[CustomUser.PARALEGAL]],
             prosecutor=users[positions[CustomUser.PROSECUTOR]],
             supervisor=users[positions[CustomUser.SUPERVISOR]],
             arraignment_date=datetime.now(tz=timezone(settings.TIME_ZONE)),
@@ -155,7 +155,7 @@ class TestSchedulingForm(TestCase):
 
         case = Case.objects.create(
             case_number='0001',
-            secretary=users[positions[CustomUser.SECRETARY]],
+            paralegal=users[positions[CustomUser.PARALEGAL]],
             prosecutor=users[positions[CustomUser.PROSECUTOR]],
             supervisor=users[positions[CustomUser.SUPERVISOR]],
             arraignment_date=datetime.now(tz=timezone(settings.TIME_ZONE)),

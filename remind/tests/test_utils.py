@@ -131,10 +131,10 @@ class TestDeadlineCheck(TestCase):
 class TestExtensionCheck(TestCase):
 
     def setUp(self):
-        self.secretary = CustomUser.objects.create(
+        self.paralegal = CustomUser.objects.create(
             first_name='Bart',
             last_name='Simpson',
-            position=CustomUser.SECRETARY,
+            position=CustomUser.PARALEGAL,
             username='plegal',
         )
         self.prosecutor = CustomUser.objects.create(
@@ -155,7 +155,7 @@ class TestExtensionCheck(TestCase):
             arraignment_date=datetime(2019, 1, 11, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                       tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
-            secretary=self.secretary,
+            paralegal=self.paralegal,
             prosecutor=self.prosecutor,
             supervisor=self.supervisor,
         )
@@ -186,7 +186,7 @@ class TestExtensionCheck(TestCase):
             trial_date=datetime(2019, 6, 3, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE)),
             track=2,
-            secretary=self.secretary,
+            paralegal=self.paralegal,
             prosecutor=self.prosecutor,
             supervisor=self.supervisor,
         )
@@ -216,10 +216,10 @@ class TestExtensionCheck(TestCase):
 class TestInvalidDeadlineCheck(TestCase):
 
     def setUp(self):
-        self.secretary = CustomUser.objects.create(
+        self.paralegal = CustomUser.objects.create(
             first_name='Bart',
             last_name='Simpson',
-            position=CustomUser.SECRETARY,
+            position=CustomUser.PARALEGAL,
             username='plegal',
         )
         self.prosecutor = CustomUser.objects.create(
@@ -240,7 +240,7 @@ class TestInvalidDeadlineCheck(TestCase):
             arraignment_date=datetime(2019, 1, 11, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                       tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
-            secretary=self.secretary,
+            paralegal=self.paralegal,
             prosecutor=self.prosecutor,
             supervisor=self.supervisor,
         )
@@ -264,7 +264,7 @@ class TestInvalidDeadlineCheck(TestCase):
             trial_date=datetime(2019, 6, 3, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
-            secretary=self.secretary,
+            paralegal=self.paralegal,
             prosecutor=self.prosecutor,
             supervisor=self.supervisor,
         )
