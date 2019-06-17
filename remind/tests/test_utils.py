@@ -4,7 +4,7 @@ from pytz import timezone
 from remind import utils
 from remind.constants import LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
 from remind.models import Deadline, Case
-from reminders import settings
+from django.conf import settings
 from users.models import CustomUser
 
 

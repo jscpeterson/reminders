@@ -34,7 +34,6 @@ class CaseForm(ModelForm):
 
 
 class MotionForm(Form):
-
     motion_title = forms.CharField(
         label='Title of the motion'
     )
@@ -64,7 +63,7 @@ class MotionDateForm(Form):
 
         initial_response = utils.get_actual_deadline_from_start(self.motion.date_received, 10)
         initial_hearing = utils.get_actual_deadline_from_end(self.motion.case.trial_date,
-                                                             deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],)
+                                                             deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)], )
 
         self.fields['response_deadline'] = forms.DateTimeField(
             input_formats=['%Y-%m-%d'],
@@ -110,10 +109,10 @@ class MotionDateForm(Form):
             date_hearing = cleaned_data.get('date_hearing')
 
             if not utils.is_deadline_within_limits(
-                deadline=date_hearing,
-                event=self.motion.case.trial_date,
-                days=deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],
-                future_event=True,
+                    deadline=date_hearing,
+                    event=self.motion.case.trial_date,
+                    days=deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],
+                    future_event=True,
             ):
                 self.add_error(
                     'date_hearing',
@@ -163,10 +162,10 @@ class SchedulingForm(Form):
 
             else:
                 if not utils.is_deadline_within_limits(
-                    deadline=scheduling_conf_date,
-                    event=self.case.arraignment_date,
-                    days=SCHEDULING_ORDER_DEADLINE_DAYS,
-                    future_event=False,
+                        deadline=scheduling_conf_date,
+                        event=self.case.arraignment_date,
+                        days=SCHEDULING_ORDER_DEADLINE_DAYS,
+                        future_event=False,
                 ):
                     self.add_error(
                         'scheduling_conference_date',
@@ -235,10 +234,10 @@ class TrialForm(Form):
 
                 # Will raise error even if permissible with extension
                 if not utils.is_deadline_within_limits(
-                    deadline=trial_date,
-                    event=self.case.arraignment_date,
-                    days=deadline_dict[str(Deadline.TRIAL)],
-                    future_event=False
+                        deadline=trial_date,
+                        event=self.case.arraignment_date,
+                        days=deadline_dict[str(Deadline.TRIAL)],
+                        future_event=False
                 ):
                     self.add_error(
                         'trial_date',
@@ -247,7 +246,6 @@ class TrialForm(Form):
 
 
 class OrderForm(Form):
-
     case = ''
 
     def __init__(self, *args, **kwargs):
@@ -345,7 +343,7 @@ class UpdateForm(Form):
 class UpdateHomeForm(Form):
     case_number = forms.ModelChoiceField(
         queryset=Case.objects.all(),
-        )
+    )
 
 
 class CompleteForm(Form):
@@ -386,3 +384,9 @@ class JudgeConfirmedForm(Form):
             label='Judge approved',
             required=False
         )
+
+
+class UpdateTrackForm(Form):
+    case_number = forms.ModelChoiceField(
+        queryset=Case.objects.all(),
+    )
