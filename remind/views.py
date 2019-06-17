@@ -4,17 +4,17 @@ from django.shortcuts import render
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
 from .models import Case, Deadline, Motion
-from users.models import CustomUser
-from datetime import timedelta
+from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
-    UpdateHomeForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, MotionResponseForm
+    UpdateHomeForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
+    MotionResponseForm
 from .constants import TRIAL_DEADLINES, SOURCE_URL, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS
 from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.base import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from guardian.shortcuts import assign_perm
 
 REMIND_URL = '{}/remind/'.format(SOURCE_URL)
 
@@ -26,6 +26,9 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
     def get_success_url(self):
         self.object.created_by = self.request.user
         self.object.save()
+        assign_perm('change_case', self.object.prosecutor, self.object)
+        assign_perm('change_case', self.object.secretary, self.object)
+        assign_perm('change_case', self.object.supervisor, self.object)
 
         # Start first deadline for Witness List
         Deadline.objects.create(
@@ -100,6 +103,10 @@ def scheduling(request, *args, **kwargs):
 
 @login_required
 def track(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
+
     if request.method == 'POST':
         form = TrackForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
@@ -223,6 +230,8 @@ def request_pti(request, *args, **kwargs):
 @login_required
 def update(request, *args, **kwargs):
     case = Case.objects.get(case_number=kwargs.get('case_number'))
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
 
     if request.method == 'POST':
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
@@ -274,11 +283,18 @@ class CreateMotionView(LoginRequiredMixin, FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('remind:motion_deadline', kwargs={'motion_pk': self.motion.pk})
+        return reverse('remind:motion_deadline',
+                       kwargs={'motion_pk': self.motion.pk})
 
 
 @login_required
 def motion_deadline(request, *args, **kwargs):
+    # TODO: Make Permission required
+    motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
+    case = motion.case
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
+
     if request.method == 'POST':
         form = MotionDateForm(request.POST, motion_pk=kwargs.get('motion_pk'))
         if form.is_valid():
@@ -312,6 +328,10 @@ def motion_deadline(request, *args, **kwargs):
 
 @login_required
 def motion_response(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
+
     motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
     form = MotionResponseForm(request.POST)
     if request.method == 'POST':
@@ -333,6 +353,10 @@ def motion_response(request, *args, **kwargs):
 
 @login_required
 def complete(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
+
     deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
         form = CompleteForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
@@ -354,6 +378,10 @@ def complete(request, *args, **kwargs):
 
 @login_required
 def extension(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
+
     deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
         form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
@@ -374,6 +402,10 @@ def extension(request, *args, **kwargs):
 
 @login_required
 def judge_confirmed(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
+
     deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
         form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
