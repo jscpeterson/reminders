@@ -17,12 +17,12 @@ def get_test_user_data():
     """ Returns dict for use in user creation function """
     test_emails = get_email_addresses()
     return {
-        CustomUser.get_position_display(CustomUser.PARALEGAL): {
+        CustomUser.get_position_display(CustomUser.SECRETARY): {
             'username': 'palegal',
             'first_name': 'Pear',
             'last_name': 'Alegal',
-            'position': CustomUser.PARALEGAL,
-            'email': test_emails.get(CustomUser.get_position_display(CustomUser.PARALEGAL)),
+            'position': CustomUser.SECRETARY,
+            'email': test_emails.get(CustomUser.get_position_display(CustomUser.SECRETARY)),
         },
         CustomUser.get_position_display(CustomUser.PROSECUTOR): {
             'username': 'pvilla',

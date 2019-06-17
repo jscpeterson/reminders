@@ -42,7 +42,7 @@ class CaseFactory:
         """
         return Case.objects.create(
             prosecutor=UserFactory.create(CustomUser.PROSECUTOR),
-            paralegal=UserFactory.create(CustomUser.PARALEGAL),
+            secretary=UserFactory.create(CustomUser.SECRETARY),
             supervisor=UserFactory.create(CustomUser.SUPERVISOR),
             case_number=fake.uuid4()[:8],
             arraignment_date=fake.date(),

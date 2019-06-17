@@ -4,7 +4,7 @@ from pytz import timezone
 from remind import utils
 from remind.constants import LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
 from remind.models import Deadline, Case
-from reminders import settings
+from django.conf import settings
 from users.models import CustomUser
 
 
@@ -131,10 +131,10 @@ class TestDeadlineCheck(TestCase):
 class TestExtensionCheck(TestCase):
 
     def setUp(self):
-        self.paralegal = CustomUser.objects.create(
+        self.secretary = CustomUser.objects.create(
             first_name='Bart',
             last_name='Simpson',
-            position=CustomUser.PARALEGAL,
+            position=CustomUser.SECRETARY,
             username='plegal',
         )
         self.prosecutor = CustomUser.objects.create(
@@ -155,7 +155,7 @@ class TestExtensionCheck(TestCase):
             arraignment_date=datetime(2019, 1, 11, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                       tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
-            paralegal=self.paralegal,
+            secretary=self.secretary,
             prosecutor=self.prosecutor,
             supervisor=self.supervisor,
         )
@@ -186,7 +186,7 @@ class TestExtensionCheck(TestCase):
             trial_date=datetime(2019, 6, 3, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE)),
             track=2,
-            paralegal=self.paralegal,
+            secretary=self.secretary,
             prosecutor=self.prosecutor,
             supervisor=self.supervisor,
         )
@@ -216,10 +216,10 @@ class TestExtensionCheck(TestCase):
 class TestInvalidDeadlineCheck(TestCase):
 
     def setUp(self):
-        self.paralegal = CustomUser.objects.create(
+        self.secretary = CustomUser.objects.create(
             first_name='Bart',
             last_name='Simpson',
-            position=CustomUser.PARALEGAL,
+            position=CustomUser.SECRETARY,
             username='plegal',
         )
         self.prosecutor = CustomUser.objects.create(
@@ -240,7 +240,7 @@ class TestInvalidDeadlineCheck(TestCase):
             arraignment_date=datetime(2019, 1, 11, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                       tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
-            paralegal=self.paralegal,
+            secretary=self.secretary,
             prosecutor=self.prosecutor,
             supervisor=self.supervisor,
         )
@@ -264,7 +264,7 @@ class TestInvalidDeadlineCheck(TestCase):
             trial_date=datetime(2019, 6, 3, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE)),
             track=1,
-            paralegal=self.paralegal,
+            secretary=self.secretary,
             prosecutor=self.prosecutor,
             supervisor=self.supervisor,
         )
