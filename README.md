@@ -73,6 +73,10 @@ To start the project in a development setting, do the following:
 
 To deploy in a production environment, do the following steps.
 
+* Ensure that you have Docker and Docker Compose installed.
+  * [Installation instructions for Docker on Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+  * [Installation instructions for Docker Compose on Ubuntu](https://linuxize.com/post/how-to-install-and-use-docker-compose-on-ubuntu-18-04/)
+
 * Make a copy of .env to hold your environment variables.
 
   `cp .env.prod.example .env`
