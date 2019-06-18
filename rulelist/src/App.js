@@ -51,8 +51,15 @@ class App extends React.Component {
     }
   }
 
+  testFetch() {
+    console.log(fetch("http://127.0.0.1:8000/api/deadlines/2/").then(response => response.json()))
+    return fetch("http://127.0.0.1:8000/api/deadlines/2/").then(response => response.json())
+  }
+
   render() {
+    this.testFetch()
     return (
+      
       <MaterialTable
         title="Rule List"
         columns={this.state.columns}
