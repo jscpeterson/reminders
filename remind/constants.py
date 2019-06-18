@@ -1,6 +1,7 @@
 from .models import Deadline
 from django.conf import settings
 
+
 SOURCE_URL = settings.BASE_URL
 ADMINISTRATION_EMAIL = settings.ADMINISTRATION_EMAIL
 SUPPORT_EMAIL = settings.SUPPORT_EMAIL
