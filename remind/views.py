@@ -16,8 +16,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from guardian.shortcuts import assign_perm
 
-REMIND_URL = '{}/remind/'.format(SOURCE_URL)
-
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
     model = Case
@@ -93,7 +91,7 @@ def scheduling(request, *args, **kwargs):
                 datetime=case.scheduling_conference_date,
                 created_by=request.user
             )
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = SchedulingForm(case_number=kwargs['case_number'])
@@ -188,7 +186,7 @@ def order(request, *args, **kwargs):
                     created_by=request.user
                 )
 
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = OrderForm(case_number=kwargs['case_number'])
@@ -219,7 +217,7 @@ def request_pti(request, *args, **kwargs):
                 created_by=request.user
             )
 
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = RequestPTIForm(case_number=kwargs['case_number'])
@@ -247,7 +245,7 @@ def update(request, *args, **kwargs):
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
 
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
@@ -319,7 +317,7 @@ def motion_deadline(request, *args, **kwargs):
                 datetime=motion.date_hearing
             )
 
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
     else:
         form = MotionDateForm(motion_pk=kwargs.get('motion_pk'))
 
@@ -342,7 +340,7 @@ def motion_response(request, *args, **kwargs):
                 deadline = Deadline.objects.get(motion=motion, type=Deadline.PRETRIAL_MOTION_RESPONSE)
                 deadline.status = Deadline.COMPLETED
                 deadline.save(update_fields=['status'])
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
 
     return render(request, 'remind/motion_response_form.html', {'form': form,
                                                                 'motion_title': motion.title,
@@ -365,7 +363,7 @@ def complete(request, *args, **kwargs):
                 deadline.status = Deadline.COMPLETED
                 deadline.updated_by = request.user
                 deadline.save(update_fields=['status', 'updated_by'])
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = CompleteForm(deadline_pk=kwargs.get('deadline_pk'))
@@ -389,7 +387,7 @@ def extension(request, *args, **kwargs):
             deadline.invalid_extension_filed = form.cleaned_data.get('extension_filed')
             deadline.updated_by = request.user
             deadline.save(update_fields=['invalid_extension_filed', 'updated_by'])
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
@@ -413,7 +411,7 @@ def judge_confirmed(request, *args, **kwargs):
             deadline.invalid_judge_approved = form.cleaned_data.get('judge_approved')
             deadline.updated_by = request.user
             deadline.save(update_fields=['invalid_judge_approved', 'updated_by'])
-            return HttpResponseRedirect(REMIND_URL)
+            return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
