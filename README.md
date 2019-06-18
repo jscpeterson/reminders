@@ -41,6 +41,12 @@ To start the project in a development setting, do the following:
 
   `python manage.py migrate`
 
+* (Optional) For ease of development, create fake users
+  * Make a copy of params.ini to hold the email addresses for your fake users.
+  
+    `cp params.ini.example params.ini`
+  * Enter the email addresses for your fake users in params.ini. The emails should be real accounts you can check.
+
 * Run the server. 
 
   `python manage.py runserver`
@@ -66,6 +72,10 @@ To start the project in a development setting, do the following:
 ## Deployment
 
 To deploy in a production environment, do the following steps.
+
+* Ensure that you have Docker and Docker Compose installed.
+  * [Installation instructions for Docker on Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
+  * [Installation instructions for Docker Compose on Ubuntu](https://linuxize.com/post/how-to-install-and-use-docker-compose-on-ubuntu-18-04/)
 
 * Make a copy of .env to hold your environment variables.
 
@@ -96,7 +106,7 @@ To deploy in a production environment, do the following steps.
 
 ## License
 
-All rights reserved.
+All rights reserved by the Bernalillo County District Attorney's Office.
 
 ## Acknowledgments
 
