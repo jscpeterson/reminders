@@ -41,6 +41,12 @@ To start the project in a development setting, do the following:
 
   `python manage.py migrate`
 
+* (Optional) For ease of development, create fake users
+  * Make a copy of params.ini to hold the email addresses for your fake users.
+  
+    `cp params.ini.example params.ini`
+  * Enter the email addresses for your fake users in params.ini. The emails should be real accounts you can check.
+
 * Run the server. 
 
   `python manage.py runserver`
