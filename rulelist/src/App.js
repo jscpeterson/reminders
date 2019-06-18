@@ -7,18 +7,46 @@ class App extends React.Component {
     super(props);
     this.state = {
       columns: [
-        { title: 'Name', field: 'name' },
-        { title: 'Surname', field: 'surname' },
-        { title: 'Birth Year', field: 'birthYear', type: 'numeric' },
-        {
-          title: 'Birth Place',
-          field: 'birthCity',
-          lookup: { 34: 'İstanbul', 63: 'Şanlıurfa' },
-        },
+        { title: 'Defendant', field: 'defendant' },
+        { title: 'CR#', field: 'case_number' },
+        { title: 'Judge', field: 'judge' },
+        { title: 'Defense', field: 'defense' },
+
+        { title: 'Notes', field: 'notes' },
+        
+        { title: 'Witness List', field: '1', type: 'date'},
+        { title: 'Scheduling Conference', field: '2', type: 'date'},
+        { title: 'Request PTIs', field: '3', type: 'date'},
+        { title: 'Conduct PTIs', field: '4', type: 'date'},
+        { title: 'Witness PTIs', field: '5', type: 'date'},
+        { title: 'Scientific Evidence', field: '6', type: 'date'},
+        { title: 'Pretrial Conference', field: '7', type: 'date'},
+        { title: 'Final Witness List', field: '8', type: 'date'},
+        { title: 'Need for Interpreter', field: '9', type: 'date'},
+        { title: 'Plea Agreement', field: '10', type: 'date'},
+        { title: 'Trial', field: '11', type: 'date'},
+
       ],
       data: [
-        { name: 'Mehmet', surname: 'Baran', birthYear: 1987, birthCity: 63 },
-        { name: 'Zerya Betül', surname: 'Baran', birthYear: 2017, birthCity: 34 },
+        { defendant: 'Scruff McGruff', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz', 
+          1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
+      },
+
+      { defendant: 'Scruff McGruff', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz', 
+          1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
+      },
+
+      { defendant: 'Scruff McGruff', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz', 
+          1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
+      },
+
+      { defendant: 'Scruff McGruff', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz', 
+          1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
+      },
+
+      { defendant: 'Scruff McGruff', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz', 
+          1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
+      },
       ]
     }
   }
@@ -26,7 +54,7 @@ class App extends React.Component {
   render() {
     return (
       <MaterialTable
-        title="Editable Preview"
+        title="Rule List"
         columns={this.state.columns}
         data={this.state.data}
         editable={{
