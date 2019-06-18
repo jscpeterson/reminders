@@ -106,7 +106,7 @@ To deploy in a production environment, do the following steps.
 
 ## License
 
-All rights reserved.
+All rights reserved by the Bernalillo County District Attorney's Office.
 
 ## Acknowledgments
 
