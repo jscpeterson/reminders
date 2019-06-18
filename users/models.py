@@ -5,11 +5,11 @@ from django.db import models
 class CustomUser(AbstractUser):
     SUPERVISOR = 1
     PROSECUTOR = 2
-    PARALEGAL = 3
+    SECRETARY = 3
     POSITION_CHOICES = (
         (SUPERVISOR, 'Supervisor'),
         (PROSECUTOR, 'Prosecutor'),
-        (PARALEGAL, 'Paralegal')
+        (SECRETARY, 'Secretary')
     )
     first_name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)

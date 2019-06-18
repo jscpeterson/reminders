@@ -91,7 +91,8 @@ EVENT_DEADLINES = (
     Deadline.PRETRIAL_CONFERENCE,
     Deadline.TRIAL,
     Deadline.REQUEST_PTI,
-    Deadline.CONDUCT_PTI
+    Deadline.CONDUCT_PTI,
+    Deadline.PRETRIAL_MOTION_HEARING
 )
 
 DEADLINE_DESCRIPTIONS = {
@@ -103,8 +104,8 @@ DEADLINE_DESCRIPTIONS = {
     str(Deadline.WITNESS_PTI): 'deadline to complete witness pretrial interviews',
     str(Deadline.SCIENTIFIC_EVIDENCE): 'deadline to produce the results of scientific evidence',
     str(Deadline.PRETRIAL_MOTION_FILING): 'deadline to file any pretrial motions',
-    # str(Deadline.PRETRIAL_MOTION_RESPONSE): '',
-    # str(Deadline.PRETRIAL_MOTION_HEARING): '',
+    str(Deadline.PRETRIAL_MOTION_RESPONSE): 'deadline to file a response to a pretrial motion',
+    str(Deadline.PRETRIAL_MOTION_HEARING): 'date of a pretrial motion hearing',
     str(Deadline.PRETRIAL_CONFERENCE): 'date and time of the pretrial conference',
     str(Deadline.FINAL_WITNESS_LIST): 'deadline to submit a final witness list',
     str(Deadline.NEED_FOR_INTERPRETER): 'deadline to file notice for language access services',
@@ -121,8 +122,8 @@ FIRST_REMINDER_DAYS = {
     Deadline.WITNESS_PTI: 5,
     Deadline.SCIENTIFIC_EVIDENCE: 5,
     Deadline.PRETRIAL_MOTION_FILING: 5,
-    # Deadline.PRETRIAL_MOTION_RESPONSE: '',
-    # Deadline.PRETRIAL_MOTION_HEARING: '',
+    Deadline.PRETRIAL_MOTION_RESPONSE: 5,
+    Deadline.PRETRIAL_MOTION_HEARING: 5,
     Deadline.PRETRIAL_CONFERENCE: 5,
     Deadline.FINAL_WITNESS_LIST: 5,
     Deadline.NEED_FOR_INTERPRETER: 5,
@@ -139,11 +140,22 @@ SECOND_REMINDER_DAYS = {
     Deadline.WITNESS_PTI: 2,
     Deadline.SCIENTIFIC_EVIDENCE: 2,
     Deadline.PRETRIAL_MOTION_FILING: 2,
-    # Deadline.PRETRIAL_MOTION_RESPONSE: '',
-    # Deadline.PRETRIAL_MOTION_HEARING: '',
+    Deadline.PRETRIAL_MOTION_RESPONSE: 2,
+    Deadline.PRETRIAL_MOTION_HEARING: 2,
     Deadline.PRETRIAL_CONFERENCE: 2,
     Deadline.FINAL_WITNESS_LIST: 2,
     Deadline.NEED_FOR_INTERPRETER: 2,
     Deadline.PLEA_AGREEMENT: 2,
     Deadline.TRIAL: 2,
 }
+
+# TODO Not sure what the best way to get this data is
+JUDGES = (
+    (1, 'Ramcyzk'),
+    (2, 'Jaramillo'),
+    (3, 'Hart'),
+    (4, 'Loveless'),
+    (5, 'Gallegos'),
+    (6, 'Brown'),
+    (7, 'Flores'),
+)

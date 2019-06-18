@@ -154,19 +154,24 @@ change the date.'''.format(
         )
 
     def get_first_reminder_message(self):
-        url = '{source}/remind/complete/{pk}'.format(
-            source=SOURCE_URL,
-            pk=self.deadline.pk,
-        )
+        if self.deadline.type == Deadline.PRETRIAL_MOTION_RESPONSE:
+            url = '{source}/remind/motion_response/{pk}'.format(
+                source=SOURCE_URL,
+                pk=self.deadline.motion.pk
+            )
+        else:
+            url = '{source}/remind/complete/{pk}'.format(
+                source=SOURCE_URL,
+                pk=self.deadline.pk,
+            )
 
-        return '''{indent}This is a reminder that the {desc} for case {case} is on {date} at {time}. If this task has \
+        return '''{indent}This is a reminder that the {desc} for case {case} is on {date}. If this task has \
 been completed or is not necessary in this case, please go to {url} to notify the office. If you encounter any \
 problems, please notify {contact}.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
             case=self.case.case_number,
             date=self.deadline.datetime.date(),
-            time=self.deadline.datetime.strftime('%H:%M'),
             url=url,
             contact=SUPPORT_EMAIL,
         )
@@ -194,12 +199,11 @@ Administration will be notified if the task is not completed by {date}.'''.forma
             date = ''
             time = ''
 
-        return '''{indent}The scheduling conference for case {case_number} was due to take place on {date} at {time}. \
+        return '''{indent}The scheduling conference for case {case_number} was due to take place on {date}. \
 Please enter the results of the scheduling order at {url}.'''.format(
             indent=INDENT,
             case_number=self.case.case_number,
             date=date,
-            time=time,
             url=url,
         )
 
@@ -214,7 +218,7 @@ Please enter the results of the scheduling order at {url}.'''.format(
             request_pti_days = 14
 
         return '''{indent}It has been {days} days since the scheduling conference for case {case_number}. If the \
-defense requested pretrial interviews, please enter the date they did so at {url}. If they did not, you are under no \
+defense requested pretrial interviews, please enter the date they did so at {url}. If they did not, you are no \
 longer under any obligation to assist them.'''.format(
             indent=INDENT,
             days=request_pti_days,

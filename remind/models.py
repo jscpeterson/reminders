@@ -32,10 +32,16 @@ class Case(TimeStampedModel):
         (3, '3')
     )
 
+    defendant = models.CharField(max_length=120)
+    case_number = models.CharField(max_length=20, unique=True)  # This is the CR#
+    judge = models.CharField(max_length=60, null=True, blank=True)
+    defense_attorney = models.CharField(max_length=120, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+
     prosecutor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='prosecutor')
-    paralegal = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='paralegal')
+    secretary = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='secretary')
     supervisor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='supervisor')
-    case_number = models.CharField(max_length=20, unique=True)
+#
     track = models.IntegerField(choices=TRACK_CHOICES, null=True)
     arraignment_date = models.DateTimeField(null=True)
     scheduling_conference_date = models.DateTimeField(null=True)
@@ -44,6 +50,40 @@ class Case(TimeStampedModel):
 
     def __str__(self):
         return self.case_number
+
+
+class Motion(models.Model):
+    INLIM = 0
+    RCOR = 1
+    SUPWIT = 2
+    SUPEVD = 3
+    SUPWITEVD = 4
+    DISMISS = 5
+    SUPDIS = 6
+    EXTDDL = 7
+    RECON = 8
+    OTHER = 9
+
+    TYPE_CHOICES = (
+        (INLIM, 'In Limine'),
+        (RCOR, 'Review Conditions of Release'),
+        (SUPWIT, 'Motion to Suppress Witness'),
+        (SUPEVD, 'Motion to Suppress Evidence'),
+        (SUPWITEVD, 'Motion to Suppress Witness and Evidence'),
+        (DISMISS, 'Motion to Dismiss'),
+        (SUPDIS, 'Motion to Suppress and Dismiss'),
+        (EXTDDL, 'Motion to Extend Deadline'),
+        (RECON, 'Motion to Reconsider'),
+        (OTHER, 'Other')
+    )
+
+    title = models.CharField(max_length=255,)
+    type = models.IntegerField(choices=TYPE_CHOICES)
+    case = models.ForeignKey(Case, on_delete=models.PROTECT)
+    date_received = models.DateTimeField()
+    response_deadline = models.DateTimeField(null=True, blank=True)
+    date_hearing = models.DateTimeField(null=True, blank=True)
+    response_filed = models.DateTimeField(null=True, blank=True)
 
 
 class Deadline(TimeStampedModel):
@@ -94,6 +134,7 @@ class Deadline(TimeStampedModel):
     type = models.IntegerField(choices=TYPE_CHOICES)
     status = models.IntegerField(default=ACTIVE, choices=STATUS_CHOICES)
     case = models.ForeignKey(Case, on_delete=models.PROTECT)
+    motion = models.ForeignKey(Motion, on_delete=models.PROTECT, null=True, blank=True)
     datetime = models.DateTimeField()
     reminders_sent = models.IntegerField(default=0)
     invalid_notice_sent = models.BooleanField(default=False)
@@ -102,8 +143,3 @@ class Deadline(TimeStampedModel):
 
     def __str__(self):
         return self.TYPE_CHOICES[self.type][1]
-
-
-class Motion(models.Model):
-    # type
-    pass
