@@ -59,13 +59,11 @@ class App extends React.Component {
       }
      ]
 
-    dataArray = []
+    // dataArray = []
 
     json.forEach(function(x){
-      if (true) { // TODO Check if case has user assigned
         // TODO Get deadlines for this case
-        console.log(x['defendant']); // TODO Append data to data array
-      }
+        console.log(x); // TODO Append data to data array
     });
 
     this.setState(
@@ -80,7 +78,7 @@ class App extends React.Component {
   }
 
   render() {
-    this.fetchJson() // TODO Something needs to be done with this Promise or it's just spamming a display
+    this.fetchJson(); // TODO Something needs to be done with this Promise or it's just spamming requests to the server
     return (
       
       <MaterialTable
@@ -90,6 +88,7 @@ class App extends React.Component {
         // TODO Set default to 10 rows or infinite
           // TODO Remove trash can icon
           // TODO Remove ability to add rows
+          // TODO Make notes field bigger
         editable={{
             isDeletable: rowData => null, // no rows should be deletable
           onRowAdd: newData =>
