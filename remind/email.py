@@ -1,6 +1,5 @@
 from remind import utils
-from django.utils import timezone
-from .models import Deadline, Case
+from .models import Deadline
 from .constants import SOURCE_URL, DEADLINE_DESCRIPTIONS, SUPPORT_EMAIL
 
 INDENT = '     '
@@ -177,6 +176,7 @@ problems, please notify {contact}.'''.format(
         )
 
     def get_second_reminder_message(self):
+        #TODO: Looks like we need to handle case for pretrial motion response
         return self.get_first_reminder_message() + '''\n\n{indent}{supervisor} has received a copy of this message. \
 Administration will be notified if the task is not completed by {date}.'''.format(
             indent=INDENT,
@@ -192,6 +192,7 @@ Administration will be notified if the task is not completed by {date}.'''.forma
         )
 
         # Need to define these values even if there is no scheduling conference date to prevent runtime error
+        # TODO: Can we get rid of time?
         if self.case.scheduling_conference_date is not None:
             date = self.case.scheduling_conference_date.date()
             time = self.case.scheduling_conference_date.strftime('%H:%M')

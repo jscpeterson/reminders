@@ -7,14 +7,35 @@ from .models import Case, Deadline, Motion
 from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
-    UpdateHomeForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
+    UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
     MotionResponseForm
 from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS
 from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from guardian.shortcuts import assign_perm
+
+
+class DashView(LoginRequiredMixin, ListView):
+    """ Dashboard view for user """
+
+    template_name = 'remind/dashboard.html'
+
+    def get_queryset(self):
+        cases = case_utils.get_cases(self.request.user)
+        return case_utils.get_open(cases)
+
+    def get_context_data(self, **kwargs):
+        context = super(DashView, self).get_context_data(**kwargs)
+        cases = case_utils.get_cases(self.request.user)
+        closed_cases = case_utils.get_closed(cases)
+        context['closed_cases'] = closed_cases
+        return context
+
+
+################################################################################
+# Create Case Sequence
 
 
 class CaseCreateView(LoginRequiredMixin, CreateView):
@@ -41,22 +62,6 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
 
         return reverse('remind:case_created', kwargs={'case_number': self.object.case_number})
 
-
-class DashView(LoginRequiredMixin, ListView):
-    """ Dashboard view for user """
-
-    template_name = 'remind/dashboard.html'
-
-    def get_queryset(self):
-        cases = case_utils.get_cases(self.request.user)
-        return case_utils.get_open(cases)
-
-    def get_context_data(self, **kwargs):
-        context = super(DashView, self).get_context_data(**kwargs)
-        cases = case_utils.get_cases(self.request.user)
-        closed_cases = case_utils.get_closed(cases)
-        context['closed_cases'] = closed_cases
-        return context
 
 
 @login_required
@@ -106,6 +111,25 @@ def scheduling(request, *args, **kwargs):
         form = SchedulingForm(case_number=kwargs['case_number'])
 
     return render(request, 'remind/scheduling_form.html', {'form': form})
+
+
+################################################################################
+# Populate Scheduling Order Sequence
+
+
+class UpdateTrackView(LoginRequiredMixin, FormView):
+    """ This page allows the user to select a case to update its track (deadlines) """
+
+    template_name = 'remind/update_track_form.html'
+    form_class = UpdateTrackForm
+    case_number = ''
+
+    def form_valid(self, form):
+        self.case_number = form.cleaned_data['case_number']
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('remind:track', kwargs={'case_number': self.case_number})
 
 
 @login_required
@@ -190,8 +214,9 @@ def trial(request, *args, **kwargs):
 @login_required
 def order(request, *args, **kwargs):
     """
-    The user enter the dates for multiple deadlines for the case on this page.
-    A deadline is created for each one.
+    The user populates the scheduling order by entering the dates for
+    multiple deadlines for the case on this page. A deadline is created
+    for each one.
     """
     if request.method == 'POST':
         form = OrderForm(request.POST, case_number=kwargs.get('case_number'))
@@ -213,6 +238,10 @@ def order(request, *args, **kwargs):
         form = OrderForm(case_number=kwargs['case_number'])
 
     return render(request, 'remind/order_form.html', {'form': form})
+
+
+################################################################################
+# Request PTI Sequence
 
 
 @login_required
@@ -250,6 +279,24 @@ def request_pti(request, *args, **kwargs):
     return render(request, 'remind/request_pti_form.html', {'form': form})
 
 
+################################################################################
+# Update Case Deadlines Sequence
+
+
+class UpdateCaseView(LoginRequiredMixin, FormView):
+    """ This form asks the user what case they want to update """
+    template_name = 'remind/update_case_form.html'
+    form_class = UpdateCaseForm
+    case_number = ''
+
+    def form_valid(self, form):
+        self.case_number = form.cleaned_data['case_number']
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('remind:update', kwargs={'case_number': self.case_number})
+
+
 @login_required
 def update(request, *args, **kwargs):
     """ The user can update all the deadlines for a case here. """
@@ -279,18 +326,8 @@ def update(request, *args, **kwargs):
     return render(request, 'remind/update_form.html', {'form': form, 'case_number': case.case_number})
 
 
-class UpdateHomeView(LoginRequiredMixin, FormView):
-    """ This form asks the user what case they want to update """
-    template_name = 'remind/update_home_form.html'
-    form_class = UpdateHomeForm
-    case_number = ''
-
-    def form_valid(self, form):
-        self.case_number = form.cleaned_data['case_number']
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('remind:update', kwargs={'case_number': self.case_number})
+################################################################################
+# Create Motion Sequence
 
 
 class CreateMotionView(LoginRequiredMixin, FormView):
@@ -357,6 +394,10 @@ def motion_deadline(request, *args, **kwargs):
     return render(request, 'remind/motion_date_form.html', {'form': form})
 
 
+################################################################################
+# Motion Response Reminder
+
+
 @login_required
 def motion_response(request, *args, **kwargs):
     """
@@ -392,6 +433,10 @@ def motion_response(request, *args, **kwargs):
     )
 
 
+################################################################################
+# Complete Deadline view
+
+
 @login_required
 def complete(request, *args, **kwargs):
     """
@@ -424,6 +469,10 @@ def complete(request, *args, **kwargs):
             'date': deadline.datetime
         }
     )
+
+
+################################################################################
+# Invalid deadline views
 
 
 @login_required
@@ -491,16 +540,3 @@ def judge_confirmed(request, *args, **kwargs):
     )
 
 
-class UpdateTrackView(LoginRequiredMixin, FormView):
-    """ This page allows the user to select a case to update its track (deadlines) """
-
-    template_name = 'remind/update_track_form.html'
-    form_class = UpdateTrackForm
-    case_number = ''
-
-    def form_valid(self, form):
-        self.case_number = form.cleaned_data['case_number']
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('remind:track', kwargs={'case_number': self.case_number})
