@@ -7,24 +7,24 @@ class App extends React.Component {
     super(props);
     this.state = {
       columns: [
-        { title: 'Defendant', field: 'defendant' },
-        { title: 'CR#', field: 'case_number' },
-        { title: 'Judge', field: 'judge' },
-        { title: 'Defense', field: 'defense' },
+        { title: 'Defendant', field: 'defendant', editable: 'never' },
+        { title: 'CR#', field: 'case_number', editable: 'never' },
+        { title: 'Judge', field: 'judge' , editable: 'onUpdate'},
+        { title: 'Defense', field: 'defense' , editable: 'onUpdate' },
 
-        { title: 'Notes', field: 'notes' },
+        { title: 'Notes', field: 'notes', editable: 'onUpdate' },
         
-        { title: 'Witness List', field: '1', type: 'date'},
-        { title: 'Scheduling Conference', field: '2', type: 'date'},
-        { title: 'Request PTIs', field: '3', type: 'date'},
-        { title: 'Conduct PTIs', field: '4', type: 'date'},
-        { title: 'Witness PTIs', field: '5', type: 'date'},
-        { title: 'Scientific Evidence', field: '6', type: 'date'},
-        { title: 'Pretrial Conference', field: '7', type: 'date'},
-        { title: 'Final Witness List', field: '8', type: 'date'},
-        { title: 'Need for Interpreter', field: '9', type: 'date'},
-        { title: 'Plea Agreement', field: '10', type: 'date'},
-        { title: 'Trial', field: '11', type: 'date'},
+        { title: 'Witness List', field: '1', type: 'date', editable: 'never' },
+        { title: 'Scheduling Conference', field: '2', type: 'date', editable: 'never' },
+        { title: 'Request PTIs', field: '3', type: 'date', editable: 'never' },
+        { title: 'Conduct PTIs', field: '4', type: 'date', editable: 'never' },
+        { title: 'Witness PTIs', field: '5', type: 'date', editable: 'never' },
+        { title: 'Scientific Evidence', field: '6', type: 'date', editable: 'never' },
+        { title: 'Pretrial Conference', field: '7', type: 'date', editable: 'never' },
+        { title: 'Final Witness List', field: '8', type: 'date', editable: 'never' },
+        { title: 'Need for Interpreter', field: '9', type: 'date', editable: 'never' },
+        { title: 'Plea Agreement', field: '10', type: 'date', editable: 'never' },
+        { title: 'Trial', field: '11', type: 'date', editable: 'never' },
 
       ],
       data: [
@@ -52,8 +52,9 @@ class App extends React.Component {
   }
 
   testFetch() {
-    console.log(fetch("http://127.0.0.1:8000/api/deadlines/2/").then(response => response.json()))
-    return fetch("http://127.0.0.1:8000/api/deadlines/2/").then(response => response.json())
+    return fetch("http://127.0.0.1:8000/api/deadlines/2/")
+          .then(response => response.json())
+          .then(json => console.log(json['datetime']))
   }
 
   render() {
@@ -65,6 +66,7 @@ class App extends React.Component {
         columns={this.state.columns}
         data={this.state.data}
         editable={{
+            isDeletable: rowData => null, // no rows should be deletable
           onRowAdd: newData =>
             new Promise((resolve, reject) => {
               setTimeout(() => {
