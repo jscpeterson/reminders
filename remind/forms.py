@@ -340,7 +340,7 @@ class UpdateForm(Form):
             )
 
 
-class UpdateHomeForm(Form):
+class UpdateCaseForm(Form):
     case_number = forms.ModelChoiceField(
         queryset=Case.objects.all(),
     )
