@@ -8,6 +8,10 @@
 <title> ReminderBot Dashboard </title>
 
 <style>
+       html{
+           background: darkcyan;
+        }
+
         nav{
             background: rgba(0,0,0,.8)
         }
@@ -22,50 +26,20 @@
 {% endblock %}
 
 {% block content %}
-<nav>
-    <div class="nav-wrapper">
-        <a class="brand-logo right">{{ user }}</a>
-    </div>
-</nav>
 
 <nav>
     <div class="nav-wrapper">
-        <ul class="right">
-            <li>|</li>
-            <li>
-                <a href="{% url 'logout' %}" class="right">
-                    <button class="btn-large">logout</button>
-                </a>
-            </li>
-            <li>|</li>
-        </ul>
         <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-        <ul class="hide-on-med-and-down">
-            <li>|</li>
-            <li>
-                <form action='create' method='GET'>
-                    <button type='submit' class="btn-large">New Case</button>
-                </form>
-            </li>
-            <li>|</li>
-            <li>
-                <form action='motion' method='GET'>
-                    <button type='submit' class="btn-large">New Motion</button>
-                </form>
-            </li>
-            <li>|</li>
-            <li>
-                <form action='update' method='GET'>
-                    <button type='submit' class="btn-large">Update Case Deadlines</button>
-                </form>
-            </li>
-            <li>|</li>
-            <li>
-                <form action='track' method='GET'>
-                    <button type='submit' class="btn-large">Enter Scheduling Order</button>
-                </form>
-            </li>
-            <li>|</li>
+        <ul class="left hide-on-med-and-down">
+            <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
+            <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
+            <li><a href="{% url 'remind:update-case' %}">Update Case Deadlines</a></li>
+            <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
+        </ul>
+        <ul class="right">
+            <li><i class="material-icons">account_circle</i></li>
+            <li><a class="disabled">{{ user }}</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
         </ul>
     </div>
 </nav>
@@ -78,6 +52,29 @@
         <!-- Contents get replaced by mounted React.Component -->
         <i class="fa fa-lg fa-spinner fa-spin"></i><br><br>
         <i class="pending">Loading components...</i><br><br>
+<ul class="sidenav" id="mobile-demo">
+    <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
+    <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
+    <li><a href="{% url 'remind:update-case' %}">Update Case Deadlines</a></li>
+    <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
+</ul>
+
+<div class="row">
+    <div class="col m4">
+        <div class="card blue-grey">
+            <div class="card-content white-text">
+                <span class="card-title">Pending Deadlines</span>
+            </div>
+            <div class="card-action">
+                <ul class="collection">
+                    {% for deadline in object_list %}
+                        <li class="collection-item">{{ deadline.datetime.date }} - {{ deadline }} on case {{ deadline.case.case_number }}</li>
+                    {% empty %}
+                        <li class="collection-item">No deadlines yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -86,4 +83,11 @@
     </script>
     <script src="/static/src/{{component}}"></script>
 
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('.sidenav').sidenav();
+    });
+</script>
 {% endblock %}
