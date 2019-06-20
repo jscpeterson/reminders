@@ -65,7 +65,7 @@ class App extends React.Component {
         let row = {};
         row['defendant'] = json['defendant'];
         row['case_number'] = json['case_number'];
-        row['judge'] = json['judge']; // TODO Need to get correct judge
+        row['judge'] = json['judge'];
         row['defense_attorney'] = json['defense_attorney'];
         row['notes'] = json['notes'];
         dataArray.push(row);

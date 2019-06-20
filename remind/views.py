@@ -9,7 +9,7 @@ from django.core.exceptions import PermissionDenied
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
     MotionResponseForm
-from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS
+from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, JUDGES
 from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
@@ -45,6 +45,8 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         self.object.created_by = self.request.user
+        judges_dict = dict(JUDGES)
+        self.object.judge = judges_dict[int(self.object.judge)]
         self.object.save()
         assign_perm('change_case', self.object.prosecutor, self.object)
         assign_perm('change_case', self.object.secretary, self.object)
