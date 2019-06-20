@@ -60,22 +60,6 @@
 </ul>
 
 <div class="row">
-    <div class="col m4">
-        <div class="card blue-grey">
-            <div class="card-content white-text">
-                <span class="card-title">Pending Deadlines</span>
-            </div>
-            <div class="card-action">
-                <ul class="collection">
-                    {% for deadline in object_list %}
-                        <li class="collection-item">{{ deadline.datetime.date }} - {{ deadline }} on case {{ deadline.case.case_number }}</li>
-                    {% empty %}
-                        <li class="collection-item">No deadlines yet</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
 
     <script>
         {#window.props = {{props|json}};  // make sure to escape your props to prevent XSS! See here for the source for the json filter: https://gist.github.com/pirate/c18bfe4fd96008ffa0aef25001a2e88f#}
