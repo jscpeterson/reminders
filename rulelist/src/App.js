@@ -77,10 +77,12 @@ class App extends React.Component {
           .then(json => this.populateJson(json))
   }
 
+  componentDidMount() {
+    this.fetchJson();
+  }
+
   render() {
-    this.fetchJson(); // TODO Something needs to be done with this Promise or it's just spamming requests to the server
     return (
-      
       <MaterialTable
         title="Rule List"
         columns={this.state.columns}
@@ -103,7 +105,8 @@ class App extends React.Component {
               }, 1000)
             }),
           onRowUpdate: (newData, oldData) =>
-            new Promise((resolve, reject) => {
+              // TODO Updating the row should PATCH to case data
+              new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
                   const data = this.state.data;
