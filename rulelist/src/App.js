@@ -1,10 +1,17 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 import MaterialTable from 'material-table'
+import Cookies from 'js-cookie'
 
 class App extends React.Component {
   constructor(props) {
     super(props);
+
+    // EDITABLE FIELDS TODO move to constants.js later
+      // Judge
+      // Defense
+      // Notes
+
     this.state = {
       columns: [
         { title: 'Defendant',
@@ -74,19 +81,24 @@ class App extends React.Component {
             editable: 'never' },
       ],
 
-      data: []
+      tableData: [],
+
+      jsonData: []
 
     }
   }
 
   populateJson(cases) {
 
+    // Save JSON Data
+    this.setState({jsonData : cases});
+
     let dataArray = [];
 
     cases.forEach(function(casejson){
         let row = {};
 
-        // Populate basic data
+        // Populate basic data for table
         row['defendant'] = casejson['defendant'];
         row['case_number'] = casejson['case_number'];
         row['judge'] = casejson['judge'];
@@ -94,15 +106,14 @@ class App extends React.Component {
         row['notes'] = casejson['notes'];
 
         // Send request to api for case deadlines
-        let url =`/api/deadlines?case=${casejson['case_number']}`; // TODO This is only the dev URL
-        console.log(url);
+        let url =`/api/deadlines?case=${casejson['case_number']}`;
         fetch(url)
             .then(response => response.json())
             .then(deadlines => {
                 deadlines.forEach(function(deadline){
                     const type = deadline['type'];
                     let key = '';
-                    switch (type) {
+                    switch (type) { // TODO move to constants.js later
                         case 1:
                             key = 'scheduling_conf';
                             break;
@@ -148,14 +159,27 @@ class App extends React.Component {
     });
 
     this.setState(
-        {data: dataArray}
+        {tableData: dataArray}
     )
   }
 
   fetchJson() {
-    return fetch("/api/cases/") // TODO This is only the dev URL
+    return fetch("/api/cases/")
           .then(response => response.json())
           .then(cases => this.populateJson(cases))
+  }
+
+  updateData(data) {
+      let pk = data['id'];
+      let url = `/api/cases/${pk}/`;
+      return fetch(url, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': Cookies.get('csrftoken')
+          }
+    })
   }
 
   componentDidMount() {
@@ -167,7 +191,7 @@ class App extends React.Component {
       <MaterialTable
         title="Rule List"
         columns={this.state.columns}
-        data={this.state.data}
+        data={this.state.tableData}
         options={{
             pageSize: 10
         }}
@@ -178,7 +202,7 @@ class App extends React.Component {
             new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
-                  const data = this.state.data;
+                  const data = this.state.tableData;
                   data.push(newData);
                   this.setState({ data }, () => resolve());
                 }
@@ -186,13 +210,26 @@ class App extends React.Component {
               }, 1000)
             }),
           onRowUpdate: (newData, oldData) =>
-              // TODO Updating the row should POST/PUT/PATCH to case data
               new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
-                  const data = this.state.data;
+                  // standard row update behavior
+                  const data = this.state.tableData;
                   const index = data.indexOf(oldData);
                   data[index] = newData;
+
+                  // update json data from newData
+                  let json = this.state.jsonData[index];
+                  // EDITABLE FIELDS TODO move to constants.js later
+                    // Judge
+                    // Defense
+                    // Notes
+                  json['judge'] = newData['judge'];
+                  json['defense_attorney'] = newData['defense_attorney'];
+                  json['notes'] = newData['notes'];
+                  this.updateData(json);
+
+                  // final part of standard row update behavior
                   this.setState({ data }, () => resolve());
                 }
                 resolve()
@@ -203,7 +240,7 @@ class App extends React.Component {
             new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
-                  let data = this.state.data;
+                  let data = this.state.tableData;
                   const index = data.indexOf(oldData);
                   data.splice(index, 1);
                   this.setState({ data }, () => resolve());

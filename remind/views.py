@@ -1,6 +1,7 @@
 from django.http import HttpResponseRedirect
+from django.template import RequestContext
 from django.urls import reverse
-from django.shortcuts import render
+from django.shortcuts import render, render_to_response
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
 from .models import Case, Deadline, Motion
