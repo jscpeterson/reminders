@@ -43,3 +43,5 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 10,
     }
 }
+
+# TODO Add production whitelist

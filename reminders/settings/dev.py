@@ -38,3 +38,12 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
+CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ORIGIN_WHITELIST = (
+    "http://127.0.0.1",
+)
+
+CSRF_TRUSTED_ORIGINS = (
+    "http://127.0.0.1",
+)

@@ -4,10 +4,10 @@ from . import views
 app_name = 'remind'
 urlpatterns = [
     path('', views.DashView.as_view(), name='dashboard'),
-    path('create/', views.CaseCreateView.as_view()),
-    path('motion/', views.CreateMotionView.as_view()),
-    path('update/', views.UpdateCaseView.as_view()),
-    path('track/', views.UpdateTrackView.as_view()),
+    path('create/', views.CaseCreateView.as_view(), name='create-case'),
+    path('motion/', views.CreateMotionView.as_view(), name='create-motion'),
+    path('update/', views.UpdateCaseView.as_view(), name='update-case'),
+    path('track/', views.UpdateTrackView.as_view(), name='enter-sched'),
     path('case_created/<str:case_number>', views.case_created, name='case_created'),
     path('scheduling/<str:case_number>', views.scheduling, name='scheduling'),
     path('track/<str:case_number>', views.track, name='track'),

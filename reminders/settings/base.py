@@ -33,11 +33,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'remind',
+    'api',
     'material',
     'django_celery_beat',
     'django_celery_results',
     'users.apps.UsersConfig',
     'guardian',
+    'corsheaders',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
