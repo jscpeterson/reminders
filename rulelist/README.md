@@ -1,3 +1,24 @@
+##Prerequisites
+
+* Install node<br>
+  `brew install node` <br>
+  (on Mac)
+
+* Install yarn<br>
+  `npm install yarn -g`
+  
+* Install webpack and webpack-cli<br>
+  `npm install webpack -g`<br>
+  `npm install webpack-cli -g`
+   
+##Development
+
+* Install project dependencies<br>
+  `npm install`
+
+* After making changes to the files in `src`, run webpack with this script<br>
+  `bash transpile.sh`
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
