@@ -12,8 +12,10 @@ class App extends React.Component {
         { title: 'Judge', field: 'judge' , editable: 'onUpdate'},
         { title: 'Defense', field: 'defense_attorney' , editable: 'onUpdate' },
 
+          // TODO Notes cell should be larger
         { title: 'Notes', field: 'notes', editable: 'onUpdate' },
 
+          // TODO Deadline cell data isn't visible at first
         { title: 'Witness List', field: 'witness_list', type:'date', editable: 'never' },
         { title: 'Scheduling Conference', field: 'scheduling_conf', type: 'date', editable: 'never' },
         { title: 'Request PTIs', field: '3', type: 'request_pti', editable: 'never' },
@@ -25,52 +27,13 @@ class App extends React.Component {
         { title: 'Final Witness List', field: 'final_witness_list', type: 'date', editable: 'never' },
         { title: 'Need for Interpreter', field: 'need_for_interpreter', type: 'date', editable: 'never' },
         { title: 'Plea Agreement', field: 'plea_agreement', type: 'date', editable: 'never' },
-        { title: 'Trial', field: '11', type: 'trial', editable: 'never' },
-
+        { title: 'Trial', field: 'trial', type: 'date', editable: 'never' },
       ],
       data: []
     }
   }
 
-    // witness_list
-    // scheduling_conf
-    // request_pti
-    // conduct_pti
-    // witness_pti
-    // scientific_evidence
-    // pretrial_motion_filing
-    // pretrial_conf
-    // final_witness_list
-    // need_for_interpreter
-    // plea_agreement
-    // trial
-
   populateJson(cases) {
-    // let dataArray = [
-    //     { defendant: 'Scruff McGruff', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz',
-    //       1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
-    //   },
-    //
-    //   { defendant: 'Mitch Connor', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz',
-    //       1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
-    //   },
-    //
-    //   { defendant: 'Scruff McGruff', case_number: '2019-00000', judge: 'Joe Brown', defense: 'Lionel Hutz',
-    //       1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
-    //   },
-    //
-    //   { defendant: 'Billy the Kid', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz',
-    //       1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
-    //   },
-    //
-    //   { defendant: 'Scruff McGruff', case_number: '2019-00000', judge: 'Judy', defense: 'Lionel Hutz',
-    //       1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
-    //   },
-    //   {
-    //     defendant: 'Hulk Hogan', case_number: '2019-00001', judge: 'Maury', defense: 'Saul Goodman',
-    //     1: '2019/07/04', 2:'2019/07/04', 3: '2019/07/04', 4:'2019/07/04', 5:'2019/07/04', 6:'2019/07/04', 7:'2019/07/04' ,8: '2019/07/04',9: '2019/07/04',10:'2019/07/04', 11:'2019/07/04',
-    //   }
-    //  ]
 
     let dataArray = [];
 
@@ -84,8 +47,8 @@ class App extends React.Component {
         row['defense_attorney'] = casejson['defense_attorney'];
         row['notes'] = casejson['notes'];
 
-        // Set up call for deadlines
-        let url =`http://127.0.0.1:8000/api/deadlines?case=${casejson['case_number']}`;
+        // Send request to api for case deadlines
+        let url =`http://127.0.0.1:8000/api/deadlines?case=${casejson['case_number']}`; // TODO This is only the dev URL
         console.log(url);
         fetch(url)
             .then(response => response.json())
@@ -144,7 +107,7 @@ class App extends React.Component {
   }
 
   fetchJson() {
-    return fetch("http://127.0.0.1:8000/api/cases/")
+    return fetch("http://127.0.0.1:8000/api/cases/") // TODO This is only the dev URL
           .then(response => response.json())
           .then(cases => this.populateJson(cases))
   }
@@ -160,14 +123,12 @@ class App extends React.Component {
         columns={this.state.columns}
         data={this.state.data}
         options={{
-            pageSize: 14
+            pageSize: 10
         }}
-          // TODO Remove trash can icon
-          // TODO Remove ability to add rows
-          // TODO Make notes field bigger
         editable={{
-            isDeletable: rowData => null, // no rows should be deletable
+            isDeletable: rowData => null, // TODO this prevents rows from being deleted but trash can icon is still there
           onRowAdd: newData =>
+            // TODO User should not be able to add rows
             new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
@@ -179,7 +140,7 @@ class App extends React.Component {
               }, 1000)
             }),
           onRowUpdate: (newData, oldData) =>
-              // TODO Updating the row should PATCH to case data
+              // TODO Updating the row should POST/PUT/PATCH to case data
               new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
@@ -192,6 +153,7 @@ class App extends React.Component {
               }, 1000)
             }),
           onRowDelete: oldData =>
+            // TODO User should not be able to delete rows
             new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
