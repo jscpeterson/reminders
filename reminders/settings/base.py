@@ -21,7 +21,7 @@ dotenv.read_dotenv(os.path.join(BASE_DIR, '.env'))
 
 BASE_URL = os.environ.get('BASE_URL')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 
