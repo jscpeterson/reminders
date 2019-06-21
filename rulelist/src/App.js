@@ -48,7 +48,7 @@ class App extends React.Component {
         row['notes'] = casejson['notes'];
 
         // Send request to api for case deadlines
-        let url =`/api/deadlines?case=${casejson['case_number']}/`; // TODO This is only the dev URL
+        let url =`/api/deadlines?case=${casejson['case_number']}`; // TODO This is only the dev URL
         console.log(url);
         fetch(url)
             .then(response => response.json())
