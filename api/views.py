@@ -11,12 +11,14 @@ class DeadlineViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         case_number = self.request.query_params.get('case', None)
 
-        if case_number is None or not Case.objects.filter(case_number=case_number).exists():
+        if case_number is None:
             return super().get_queryset().filter(
                 Q(case__supervisor=self.request.user) |
                 Q(case__prosecutor=self.request.user) |
                 Q(case__secretary=self.request.user)
             )
+        elif not Case.objects.filter(case_number=case_number).exists():
+            return []
         else:
             case_pk = Case.objects.get(case_number=case_number).pk
             return super().get_queryset().filter(case=case_pk).filter(
