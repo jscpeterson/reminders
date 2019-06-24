@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
-import MaterialTable from 'material-table'
+import MaterialTable, {MTableCell} from 'material-table'
 import Cookies from 'js-cookie'
 
 class App extends React.Component {
@@ -28,13 +28,12 @@ class App extends React.Component {
             editable: 'onUpdate' },
 
           // TODO Notes cell should be larger
-        { title: 'Notes', field: 'notes', editable: 'onUpdate' },
+        { title: 'Notes', field: 'notes', editable: 'onUpdate',},
 
           // TODO Deadline cell data isn't visible until a column is selected
         { title: 'Witness List',
             field: 'witness_list',
-            type:'date',
-            editable: 'never' },
+            type:'datetime',},
         { title: 'Scheduling Conference',
             field: 'scheduling_conf',
             type: 'date',
@@ -49,7 +48,7 @@ class App extends React.Component {
             editable: 'never' },
         { title: 'Witness PTIs',
             field: 'witness_pti',
-            type: 'date',
+            type: 'datetime',
             editable: 'never' },
         { title: 'Scientific Evidence',
             field: 'scientific_evidence',
@@ -78,7 +77,7 @@ class App extends React.Component {
         { title: 'Trial',
             field: 'trial',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate'},
       ],
 
       tableData: [],
@@ -89,6 +88,8 @@ class App extends React.Component {
   }
 
   populateJson(cases) {
+
+      console.log(cases)
 
     // Save JSON Data
     this.setState({jsonData : cases});
@@ -148,7 +149,26 @@ class App extends React.Component {
                         key = 'trial';
                         break;
                 }
-                row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
+
+                let divStyle = {
+                    backgroundColor: 'yellow',
+                };
+                if (deadline['id'] % 2 === 0) {
+                    divStyle = {
+                        backgroundColor: 'blue',
+                    };
+                }
+                else {
+                    divStyle = {
+                        backgroundColor: 'red',
+                    };
+                }
+
+            row[key] = <span style={divStyle}>
+                {deadline['datetime'].slice(0, 10)}
+                </span>;
+            // row[key] = deadline['datetime'].slice(0, 10);
+            console.log(typeof row[key])
             });
 
         dataArray.push(row);
@@ -183,6 +203,9 @@ class App extends React.Component {
   }
 
   render() {
+                //       const divStyle = {
+                //     backgroundColor: 'blue',
+                // };
     return (
       <MaterialTable
         title="Rule List"
@@ -191,6 +214,11 @@ class App extends React.Component {
         options={{
             pageSize: 10
         }}
+        // components={{
+        //     Cell: props => (
+        //           <MTableCell style={divStyle} {...props}/>
+        //     )
+        // }}
         editable={{
           onRowUpdate: (newData, oldData) =>
               new Promise((resolve, reject) => {
