@@ -105,54 +105,50 @@ class App extends React.Component {
         row['defense_attorney'] = casejson['defense_attorney'];
         row['notes'] = casejson['notes'];
 
-        // Send request to api for case deadlines
-        let url =`/api/deadlines?case=${casejson['case_number']}`;
-        fetch(url)
-            .then(response => response.json())
-            .then(deadlines => {
-                deadlines.forEach(function(deadline){
-                    const type = deadline['type'];
-                    let key = '';
-                    switch (type) { // TODO move to constants.js later
-                        case 1:
-                            key = 'scheduling_conf';
-                            break;
-                        case 2:
-                            key = 'witness_list';
-                            break;
-                        case 3:
-                            key = 'request_pti';
-                            break;
-                        case 4:
-                            key = 'conduct_pti';
-                            break;
-                        case 5:
-                            key = 'witness_pti';
-                            break;
-                        case 6:
-                            key = 'scientific_evidence';
-                            break;
-                        case 7:
-                            key = 'pretrial_motion_filing';
-                            break;
-                        case 10:
-                            key = 'pretrial_conf';
-                            break;
-                        case 11:
-                            key = 'final_witness_list';
-                            break;
-                        case 12:
-                            key = 'need_for_interpreter';
-                            break;
-                        case 13:
-                            key = 'plea_agreement';
-                            break;
-                        case 14:
-                            key = 'trial';
-                            break;
-                    }
-                    row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
-                });
+        const deadlines = casejson['deadline_set']
+        
+        deadlines.forEach(function(deadline){
+                const type = deadline['type'];
+                let key = '';
+                switch (type) { // TODO move to constants.js later
+                    case 1:
+                        key = 'scheduling_conf';
+                        break;
+                    case 2:
+                        key = 'witness_list';
+                        break;
+                    case 3:
+                        key = 'request_pti';
+                        break;
+                    case 4:
+                        key = 'conduct_pti';
+                        break;
+                    case 5:
+                        key = 'witness_pti';
+                        break;
+                    case 6:
+                        key = 'scientific_evidence';
+                        break;
+                    case 7:
+                        key = 'pretrial_motion_filing';
+                        break;
+                    case 10:
+                        key = 'pretrial_conf';
+                        break;
+                    case 11:
+                        key = 'final_witness_list';
+                        break;
+                    case 12:
+                        key = 'need_for_interpreter';
+                        break;
+                    case 13:
+                        key = 'plea_agreement';
+                        break;
+                    case 14:
+                        key = 'trial';
+                        break;
+                }
+                row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
             });
 
         dataArray.push(row);

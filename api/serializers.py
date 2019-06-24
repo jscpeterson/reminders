@@ -9,6 +9,8 @@ class DeadlineSerializer(serializers.ModelSerializer):
 
 
 class CaseSerializer(serializers.ModelSerializer):
+    deadline_set = DeadlineSerializer(many=True)
+
     class Meta:
         model = Case
         fields = '__all__'
