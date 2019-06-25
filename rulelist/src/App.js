@@ -192,19 +192,6 @@ class App extends React.Component {
             pageSize: 10
         }}
         editable={{
-            isDeletable: rowData => null, // TODO this prevents rows from being deleted but trash can icon is still there
-          onRowAdd: newData =>
-            // TODO User should not be able to add rows
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  const data = this.state.tableData;
-                  data.push(newData);
-                  this.setState({ data }, () => resolve());
-                }
-                resolve()
-              }, 1000)
-            }),
           onRowUpdate: (newData, oldData) =>
               new Promise((resolve, reject) => {
               setTimeout(() => {
@@ -226,19 +213,6 @@ class App extends React.Component {
                   this.updateData(json);
 
                   // final part of standard row update behavior
-                  this.setState({ data }, () => resolve());
-                }
-                resolve()
-              }, 1000)
-            }),
-          onRowDelete: oldData =>
-            // TODO User should not be able to delete rows
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  let data = this.state.tableData;
-                  const index = data.indexOf(oldData);
-                  data.splice(index, 1);
                   this.setState({ data }, () => resolve());
                 }
                 resolve()
