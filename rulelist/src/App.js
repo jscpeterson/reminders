@@ -31,54 +31,93 @@ class App extends React.Component {
         { title: 'Witness List',
           field: 'witness-list',
           type:'date',
+          render: rowData => <span>{this.displayDate(rowData['witness-list'])}</span>,
           editable: 'onUpdate' },
         { title: 'Scheduling Conference',
           field: 'scheduling-conference',
           type: 'date',
-          editable: 'onUpdate' },
+          render: rowData => <span>{this.displayDate(rowData['scheduling-conference'])}</span>,
+          editable: 'onUpdate'
+        },
         { title: 'Request PTIs',
           field: 'defense-request-ptis',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['defense-request-ptis'])}</span>,
           editable: 'onUpdate' },
         { title: 'Conduct PTIs',
           field: 'defense-conduct-ptis',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['defense-conduct-ptis'])}</span>,
           editable: 'onUpdate' },
         { title: 'Witness PTIs',
           field: 'witness-ptis',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['witness-ptis'])}</span>,
           editable: 'onUpdate' },
         { title: 'Scientific Evidence',
           field: 'scientific-evidence',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['scientific-evidence'])}</span>,
           editable: 'onUpdate' },
         { title: 'Pretrial Motion Filing',
           field: 'pretrial-motion-filing',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['pretrial-motion-filing'])}</span>,
           editable: 'onUpdate' },
         { title: 'Pretrial Conference',
           field: 'pretrial-conference',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['pretrial-conference'])}</span>,
           editable: 'onUpdate' },
         { title: 'Final Witness List',
           field: 'final-witness-list',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['final-witness-list'])}</span>,
           editable: 'onUpdate' },
         { title: 'Need for Interpreter',
           field: 'need-for-interpreter',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['need-for-interpreter'])}</span>,
           editable: 'onUpdate' },
         { title: 'Plea Agreement',
           field: 'plea-agreement',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['plea-agreement'])}</span>,
           editable: 'onUpdate' },
         { title: 'Trial',
           field: 'trial',
           type: 'date',
+          render: rowData => <span>{this.displayDate(rowData['trial'])}</span>,
           editable: 'onUpdate' },
       ],
       tableData: [],
       jsonData: []
+    }
+  }
+
+  displayDate(date) {
+    /* Displays a date as M/D/YYYY.
+    * param date: either Date or string
+    * */
+
+    let realDate = new Date();
+    if (date) {
+      if (typeof(date) === 'string') {
+        realDate = new Date(date);
+      } else {
+        realDate = date;
+      }
+
+      // Could use Moment.js here instead...
+      const day = realDate.getDate().toString();
+      const month = (realDate.getMonth() + 1).toString();
+      const year = realDate.getFullYear().toString();
+
+      const dateString = month.concat('/', day, '/', year)
+
+      return dateString;
+    } else {
+      return '';
     }
   }
 
@@ -105,7 +144,7 @@ class App extends React.Component {
       deadlines.forEach(function(deadline){
         const key = deadline['type'];
         // row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
-        row[key] = new Date(deadline['datetime']);  // TODO: This is not recommended. Better to use moment.js or roll our own
+        row[key] = new Date(deadline['datetime']);  // TODO: This is not recommended. Better to use Moment.js or roll our own
       });
 
       dataArray.push(row);
@@ -124,8 +163,8 @@ class App extends React.Component {
   }
 
   putData(data) {
-    console.log('Data sent to /api/cases/ for update');
-    console.log(data);
+    // console.log('Data sent to /api/cases/ for update');
+    // console.log(data);
     let pk = data['id'];
     let url = `/api/cases/${pk}/`;
     return fetch(url, {
@@ -156,6 +195,8 @@ class App extends React.Component {
             new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
+                  // console.log('Update called');
+
                   // standard row update behavior
                   const data = this.state.tableData;
                   const index = data.indexOf(oldData);
@@ -176,18 +217,12 @@ class App extends React.Component {
                   dataToSend['notes'] = newData['notes'];
 
 
-                  console.log('dataToSend');
-                  console.log(dataToSend);
-
-
-                  /* TODO: The date changes format when update hit again after date is changed.
-                        On the first update, it changes from YYYY-MM-DD to M/D/YYYY.
-                        On second update, it changes to YYYY-MM-DDT00:00:00.000Z
-                   */
+                  // console.log('dataToSend');
+                  // console.log(dataToSend);
 
                   // Copy dates from deadlines to data that will be sent in request
                   this.state.columns.forEach(function(data) {
-                    console.log(data);
+                    // console.log(data);
                     if (data.type === 'date' && data.editable === 'onUpdate') {
                       const deadlineIndex = dataToSend.deadline_set.findIndex(item => {
                         return item.type === data.field
@@ -197,11 +232,8 @@ class App extends React.Component {
                           This will be a problem when we want to enter a deadline that is currently blank.
                       */
                       if (deadlineIndex >= 0) {
-                        // console.log('dt');
-                        // console.log(dt);
                         if (oldData[data.field] !== newData[data.field]) {
-                          const dt = newData[data.field];
-                          dataToSend.deadline_set[deadlineIndex].datetime = dt;
+                          dataToSend.deadline_set[deadlineIndex].datetime = newData[data.field];
                         }
                       }
                     }
