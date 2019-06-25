@@ -140,19 +140,6 @@ class App extends React.Component {
     })
   }
 
-  updateDeadline(data) {
-      let pk = data['id'];
-      let url = `/api/deadlines/${pk}/`;
-      return fetch(url, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': Cookies.get('csrftoken')
-          }
-    })
-  }
-
   getDeadlineIdFromType(data, caseNumber, type) {
       // Returns deadline ID in database given the deadline type
       // ('scheduling-conference') =>
@@ -170,6 +157,7 @@ class App extends React.Component {
   componentDidMount() {
     this.fetchJson();
   }
+
 
   render() {
     return (
@@ -191,39 +179,51 @@ class App extends React.Component {
                   data[index] = newData;
 
                   // update json data from newData
-                  //let json = this.state.jsonData[index];
-                    let json = {};
+                  let json = this.state.jsonData[index];
                   // EDITABLE FIELDS TODO move to constants.js later
                     // Judge
                     // Defense
                     // Notes
 
-                    json['id'] = this.state.jsonData[index]['id'];
                   json['judge'] = newData['judge'];
                   json['defense_attorney'] = newData['defense-attorney'];
                   json['notes'] = newData['notes'];
+
+
+                  console.log('json');
+                  console.log(json);
+
+                  // Copy dates from deadlines to data that will be sent in request
+                  this.state.columns.forEach(function(data) {
+                      console.log(data);
+                      if (data.type === 'date' && data.editable === 'onUpdate') {
+                          const deadlineIndex = json.deadline_set.findIndex(item => {
+                              return item.type === data.field
+                          });
+
+                          // console.log('deadlineIndex');
+                          // console.log(deadlineIndex);
+
+                          // Will not update deadline not found because it was not included in state.jsonData
+                          // This will be a problem when we want to enter a deadline that is currently blank
+                          if (deadlineIndex >= 0) {
+                              // const dt = newData[data.field];
+                              // console.log('dt');
+                              // console.log(dt);
+                              // const dtNew = dt.slice(0, -4).concat('Z');
+
+                              // Problem for unedited dates
+                              // console.log('dt');
+                              // console.log(dt);
+                              if (oldData[data.field] !== newData[data.field]) {
+                                  const dt = newData[data.field];
+                                  json.deadline_set[deadlineIndex].datetime = dt;
+                              }
+                          }
+                      }
+                  });
+
                   this.updateData(json);
-
-                  // update deadlines
-                    console.log('newData');
-                    console.log(newData);
-
-                    console.log('oldData');
-                    console.log(oldData);
-
-                    console.log('jsonData');
-                    console.log(this.state.jsonData);
-
-                    if (oldData['scheduling-conference'] !== newData['scheduling-conference']) {
-                        const deadlineData = {};
-                        deadlineData['id'] = this.getDeadlineIdFromType(
-                            this.state.jsonData,
-                            newData['case-number'],
-                            'scheduling-conference'
-                        );
-                        deadlineData['datetime'] = newData['scheduling-conference']
-                        this.updateDeadline(deadlineData)
-                    }
 
                   // final part of standard row update behavior
                   this.setState({ data }, () => resolve());
