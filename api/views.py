@@ -38,3 +38,4 @@ class CaseViewSet(viewsets.ModelViewSet):
             Q(prosecutor=self.request.user) |
             Q(secretary=self.request.user)
         )
+

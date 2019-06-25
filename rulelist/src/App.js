@@ -1,5 +1,4 @@
-import React, { Component } from 'react'
-import ReactDOM from 'react-dom'
+import React from 'react'
 import MaterialTable from 'material-table'
 import Cookies from 'js-cookie'
 
@@ -18,13 +17,13 @@ class App extends React.Component {
             field: 'defendant',
             editable: 'never' },
         { title: 'CR#',
-            field: 'case_number',
+            field: 'case-number',
             editable: 'never' },
         { title: 'Judge',
             field: 'judge' ,
             editable: 'onUpdate'},
         { title: 'Defense',
-            field: 'defense_attorney' ,
+            field: 'defense-attorney' ,
             editable: 'onUpdate' },
 
           // TODO Notes cell should be larger
@@ -32,53 +31,53 @@ class App extends React.Component {
 
           // TODO Deadline cell data isn't visible until a column is selected
         { title: 'Witness List',
-            field: 'witness_list',
+            field: 'witness-list',
             type:'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Scheduling Conference',
-            field: 'scheduling_conf',
+            field: 'scheduling-conference',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Request PTIs',
-            field: 'request_pti',
+            field: 'defense-request-ptis',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Conduct PTIs',
-            field: 'conduct_pti',
+            field: 'defense-conduct-ptis',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Witness PTIs',
-            field: 'witness_pti',
+            field: 'witness-ptis',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Scientific Evidence',
-            field: 'scientific_evidence',
+            field: 'scientific-evidence',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Pretrial Motion Filing',
-            field: 'pretrial_motion_filing',
+            field: 'pretrial-motion-filing',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Pretrial Conference',
-            field: 'pretrial_conf',
+            field: 'pretrial-conference',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Final Witness List',
-            field: 'final_witness_list',
+            field: 'final-witness-list',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Need for Interpreter',
-            field: 'need_for_interpreter',
+            field: 'need-for-interpreter',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Plea Agreement',
-            field: 'plea_agreement',
+            field: 'plea-agreement',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
         { title: 'Trial',
             field: 'trial',
             type: 'date',
-            editable: 'never' },
+            editable: 'onUpdate' },
       ],
 
       tableData: [],
@@ -108,46 +107,7 @@ class App extends React.Component {
         const deadlines = casejson['deadline_set']
         
         deadlines.forEach(function(deadline){
-                const type = deadline['type'];
-                let key = '';
-                switch (type) { // TODO move to constants.js later
-                    case 1:
-                        key = 'scheduling_conf';
-                        break;
-                    case 2:
-                        key = 'witness_list';
-                        break;
-                    case 3:
-                        key = 'request_pti';
-                        break;
-                    case 4:
-                        key = 'conduct_pti';
-                        break;
-                    case 5:
-                        key = 'witness_pti';
-                        break;
-                    case 6:
-                        key = 'scientific_evidence';
-                        break;
-                    case 7:
-                        key = 'pretrial_motion_filing';
-                        break;
-                    case 10:
-                        key = 'pretrial_conf';
-                        break;
-                    case 11:
-                        key = 'final_witness_list';
-                        break;
-                    case 12:
-                        key = 'need_for_interpreter';
-                        break;
-                    case 13:
-                        key = 'plea_agreement';
-                        break;
-                    case 14:
-                        key = 'trial';
-                        break;
-                }
+                const key = deadline['type'];
                 row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
             });
 
@@ -166,6 +126,8 @@ class App extends React.Component {
   }
 
   updateData(data) {
+      console.log('Data sent to /api/cases/ for update');
+      console.log(data);
       let pk = data['id'];
       let url = `/api/cases/${pk}/`;
       return fetch(url, {
@@ -176,6 +138,33 @@ class App extends React.Component {
               'X-CSRFToken': Cookies.get('csrftoken')
           }
     })
+  }
+
+  updateDeadline(data) {
+      let pk = data['id'];
+      let url = `/api/deadlines/${pk}/`;
+      return fetch(url, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': Cookies.get('csrftoken')
+          }
+    })
+  }
+
+  getDeadlineIdFromType(data, caseNumber, type) {
+      // Returns deadline ID in database given the deadline type
+      // ('scheduling-conference') =>
+
+      const theCase = data.find(item => {
+          return item.case_number === caseNumber
+      });
+
+      const deadline = theCase.deadline_set.find(item => {
+          return item.type === type
+      });
+      return deadline.id;
   }
 
   componentDidMount() {
@@ -192,19 +181,6 @@ class App extends React.Component {
             pageSize: 10
         }}
         editable={{
-            isDeletable: rowData => null, // TODO this prevents rows from being deleted but trash can icon is still there
-          onRowAdd: newData =>
-            // TODO User should not be able to add rows
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  const data = this.state.tableData;
-                  data.push(newData);
-                  this.setState({ data }, () => resolve());
-                }
-                resolve()
-              }, 1000)
-            }),
           onRowUpdate: (newData, oldData) =>
               new Promise((resolve, reject) => {
               setTimeout(() => {
@@ -215,30 +191,41 @@ class App extends React.Component {
                   data[index] = newData;
 
                   // update json data from newData
-                  let json = this.state.jsonData[index];
+                  //let json = this.state.jsonData[index];
+                    let json = {};
                   // EDITABLE FIELDS TODO move to constants.js later
                     // Judge
                     // Defense
                     // Notes
+
+                    json['id'] = this.state.jsonData[index]['id'];
                   json['judge'] = newData['judge'];
-                  json['defense_attorney'] = newData['defense_attorney'];
+                  json['defense_attorney'] = newData['defense-attorney'];
                   json['notes'] = newData['notes'];
                   this.updateData(json);
 
+                  // update deadlines
+                    console.log('newData');
+                    console.log(newData);
+
+                    console.log('oldData');
+                    console.log(oldData);
+
+                    console.log('jsonData');
+                    console.log(this.state.jsonData);
+
+                    if (oldData['scheduling-conference'] !== newData['scheduling-conference']) {
+                        const deadlineData = {};
+                        deadlineData['id'] = this.getDeadlineIdFromType(
+                            this.state.jsonData,
+                            newData['case-number'],
+                            'scheduling-conference'
+                        );
+                        deadlineData['datetime'] = newData['scheduling-conference']
+                        this.updateDeadline(deadlineData)
+                    }
+
                   // final part of standard row update behavior
-                  this.setState({ data }, () => resolve());
-                }
-                resolve()
-              }, 1000)
-            }),
-          onRowDelete: oldData =>
-            // TODO User should not be able to delete rows
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  let data = this.state.tableData;
-                  const index = data.indexOf(oldData);
-                  data.splice(index, 1);
                   this.setState({ data }, () => resolve());
                 }
                 resolve()
