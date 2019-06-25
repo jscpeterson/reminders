@@ -7,157 +7,140 @@ class App extends React.Component {
     super(props);
 
     // EDITABLE FIELDS TODO move to constants.js later
-      // Judge
-      // Defense
-      // Notes
+    // Judge
+    // Defense
+    // Notes
 
     this.state = {
       columns: [
         { title: 'Defendant',
-            field: 'defendant',
-            editable: 'never' },
+          field: 'defendant',
+          editable: 'never' },
         { title: 'CR#',
-            field: 'case-number',
-            editable: 'never' },
+          field: 'case-number',
+          editable: 'never' },
         { title: 'Judge',
-            field: 'judge' ,
-            editable: 'onUpdate'},
+          field: 'judge' ,
+          editable: 'onUpdate'},
         { title: 'Defense',
-            field: 'defense-attorney' ,
-            editable: 'onUpdate' },
+          field: 'defense-attorney' ,
+          editable: 'onUpdate' },
 
-          // TODO Notes cell should be larger
+        // TODO Notes cell should be larger
         { title: 'Notes', field: 'notes', editable: 'onUpdate' },
-
-          // TODO Deadline cell data isn't visible until a column is selected
         { title: 'Witness List',
-            field: 'witness-list',
-            type:'date',
-            editable: 'onUpdate' },
+          field: 'witness-list',
+          type:'date',
+          editable: 'onUpdate' },
         { title: 'Scheduling Conference',
-            field: 'scheduling-conference',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'scheduling-conference',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Request PTIs',
-            field: 'defense-request-ptis',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'defense-request-ptis',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Conduct PTIs',
-            field: 'defense-conduct-ptis',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'defense-conduct-ptis',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Witness PTIs',
-            field: 'witness-ptis',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'witness-ptis',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Scientific Evidence',
-            field: 'scientific-evidence',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'scientific-evidence',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Pretrial Motion Filing',
-            field: 'pretrial-motion-filing',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'pretrial-motion-filing',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Pretrial Conference',
-            field: 'pretrial-conference',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'pretrial-conference',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Final Witness List',
-            field: 'final-witness-list',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'final-witness-list',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Need for Interpreter',
-            field: 'need-for-interpreter',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'need-for-interpreter',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Plea Agreement',
-            field: 'plea-agreement',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'plea-agreement',
+          type: 'date',
+          editable: 'onUpdate' },
         { title: 'Trial',
-            field: 'trial',
-            type: 'date',
-            editable: 'onUpdate' },
+          field: 'trial',
+          type: 'date',
+          editable: 'onUpdate' },
       ],
-
       tableData: [],
-
       jsonData: []
-
     }
   }
 
-  populateJson(cases) {
+  populateTable(cases) {
 
-    // Save JSON Data
+    // Save JSON Data to state
     this.setState({jsonData : cases});
 
+    // Populate table with data
     let dataArray = [];
+    cases.forEach(function(caseJSON){
+      let row = {};
 
-    cases.forEach(function(casejson){
-        let row = {};
+      // Populate basic case data
+      row['defendant'] = caseJSON['defendant'];
+      row['case_number'] = caseJSON['case_number'];
+      row['judge'] = caseJSON['judge'];
+      row['defense_attorney'] = caseJSON['defense_attorney'];
+      row['notes'] = caseJSON['notes'];
 
-        // Populate basic data for table
-        row['defendant'] = casejson['defendant'];
-        row['case_number'] = casejson['case_number'];
-        row['judge'] = casejson['judge'];
-        row['defense_attorney'] = casejson['defense_attorney'];
-        row['notes'] = casejson['notes'];
 
-        const deadlines = casejson['deadline_set']
-        
-        deadlines.forEach(function(deadline){
-                const key = deadline['type'];
-                row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
-            });
+      // Populate deadlines for case
+      const deadlines = caseJSON['deadline_set']
+      deadlines.forEach(function(deadline){
+        const key = deadline['type'];
+        // row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
+        row[key] = new Date(deadline['datetime']);  // TODO: This is not recommended. Better to use moment.js or roll our own
+      });
 
-        dataArray.push(row);
+      dataArray.push(row);
     });
 
+    // Save table data to state
     this.setState(
-        {tableData: dataArray}
+      {tableData: dataArray}
     )
   }
 
-  fetchJson() {
+  fetchCases() {
     return fetch("/api/cases/")
-          .then(response => response.json())
-          .then(cases => this.populateJson(cases))
+      .then(response => response.json())
+      .then(cases => this.populateTable(cases))
   }
 
-  updateData(data) {
-      console.log('Data sent to /api/cases/ for update');
-      console.log(data);
-      let pk = data['id'];
-      let url = `/api/cases/${pk}/`;
-      return fetch(url, {
-          method: 'PUT',
-          body: JSON.stringify(data),
-          headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': Cookies.get('csrftoken')
-          }
+  putData(data) {
+    console.log('Data sent to /api/cases/ for update');
+    console.log(data);
+    let pk = data['id'];
+    let url = `/api/cases/${pk}/`;
+    return fetch(url, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': Cookies.get('csrftoken')
+      }
     })
   }
 
-  getDeadlineIdFromType(data, caseNumber, type) {
-      // Returns deadline ID in database given the deadline type
-      // ('scheduling-conference') =>
-
-      const theCase = data.find(item => {
-          return item.case_number === caseNumber
-      });
-
-      const deadline = theCase.deadline_set.find(item => {
-          return item.type === type
-      });
-      return deadline.id;
-  }
-
   componentDidMount() {
-    this.fetchJson();
+    this.fetchCases();
   }
-
 
   render() {
     return (
@@ -166,11 +149,11 @@ class App extends React.Component {
         columns={this.state.columns}
         data={this.state.tableData}
         options={{
-            pageSize: 10
+          pageSize: 10
         }}
         editable={{
           onRowUpdate: (newData, oldData) =>
-              new Promise((resolve, reject) => {
+            new Promise((resolve, reject) => {
               setTimeout(() => {
                 {
                   // standard row update behavior
@@ -178,55 +161,54 @@ class App extends React.Component {
                   const index = data.indexOf(oldData);
                   data[index] = newData;
 
+                  // final part of standard row update behavior
+                  this.setState({ data }, () => resolve());
+
                   // update json data from newData
-                  let json = this.state.jsonData[index];
+                  let dataToSend = this.state.jsonData[index];
                   // EDITABLE FIELDS TODO move to constants.js later
-                    // Judge
-                    // Defense
-                    // Notes
+                  // Judge
+                  // Defense
+                  // Notes
 
-                  json['judge'] = newData['judge'];
-                  json['defense_attorney'] = newData['defense-attorney'];
-                  json['notes'] = newData['notes'];
+                  dataToSend['judge'] = newData['judge'];
+                  dataToSend['defense_attorney'] = newData['defense-attorney'];
+                  dataToSend['notes'] = newData['notes'];
 
 
-                  console.log('json');
-                  console.log(json);
+                  console.log('dataToSend');
+                  console.log(dataToSend);
+
+
+                  /* TODO: The date changes format when update hit again after date is changed.
+                        On the first update, it changes from YYYY-MM-DD to M/D/YYYY.
+                        On second update, it changes to YYYY-MM-DDT00:00:00.000Z
+                   */
 
                   // Copy dates from deadlines to data that will be sent in request
                   this.state.columns.forEach(function(data) {
-                      console.log(data);
-                      if (data.type === 'date' && data.editable === 'onUpdate') {
-                          const deadlineIndex = json.deadline_set.findIndex(item => {
-                              return item.type === data.field
-                          });
+                    console.log(data);
+                    if (data.type === 'date' && data.editable === 'onUpdate') {
+                      const deadlineIndex = dataToSend.deadline_set.findIndex(item => {
+                        return item.type === data.field
+                      });
 
-                          // console.log('deadlineIndex');
-                          // console.log(deadlineIndex);
-
-                          // Will not update deadline not found because it was not included in state.jsonData
-                          // This will be a problem when we want to enter a deadline that is currently blank
-                          if (deadlineIndex >= 0) {
-                              // const dt = newData[data.field];
-                              // console.log('dt');
-                              // console.log(dt);
-                              // const dtNew = dt.slice(0, -4).concat('Z');
-
-                              // Problem for unedited dates
-                              // console.log('dt');
-                              // console.log(dt);
-                              if (oldData[data.field] !== newData[data.field]) {
-                                  const dt = newData[data.field];
-                                  json.deadline_set[deadlineIndex].datetime = dt;
-                              }
-                          }
+                      /* TODO: Will not update deadline not found because it was not included in state.jsonData
+                          This will be a problem when we want to enter a deadline that is currently blank.
+                      */
+                      if (deadlineIndex >= 0) {
+                        // console.log('dt');
+                        // console.log(dt);
+                        if (oldData[data.field] !== newData[data.field]) {
+                          const dt = newData[data.field];
+                          dataToSend.deadline_set[deadlineIndex].datetime = dt;
+                        }
                       }
+                    }
                   });
 
-                  this.updateData(json);
+                  this.putData(dataToSend);
 
-                  // final part of standard row update behavior
-                  this.setState({ data }, () => resolve());
                 }
                 resolve()
               }, 1000)
