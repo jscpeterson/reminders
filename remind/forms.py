@@ -316,7 +316,7 @@ class UpdateForm(Form):
         super().__init__(*args, **kwargs)
 
         for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
-            key = 'deadline_{}'.format(index)
+            key = '{}'.format(index)
             if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE, Deadline.PRETRIAL_MOTION_HEARING]:
                 label = '{expired}{completed}{deadline_desc} for {motion_title}'.format(
                     expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
@@ -337,6 +337,9 @@ class UpdateForm(Form):
                 label=label,
                 initial=initial,
                 disabled=deadline.status != Deadline.ACTIVE
+            )
+            self.fields[key+'_completed'] = forms.BooleanField(
+                label="Completed?"
             )
 
 

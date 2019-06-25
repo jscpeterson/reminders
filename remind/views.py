@@ -324,7 +324,7 @@ def update(request, *args, **kwargs):
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
             for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
-                key = 'deadline_{}'.format(index)
+                key = '{}'.format(index)
                 if deadline.datetime != form.cleaned_data.get(key):
                     deadline.datetime = form.cleaned_data.get(key)
                     deadline.updated_by = request.user
