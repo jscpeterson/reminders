@@ -337,7 +337,7 @@ class UpdateForm(Form):
                 input_formats=['%Y-%m-%d %H:%M'],
                 label=label,
                 initial=initial,
-                disabled=deadline.status != Deadline.ACTIVE,
+                disabled=(deadline.status != Deadline.ACTIVE),
                 required=False
             )
             self.fields[key+'_completed'] = forms.BooleanField(

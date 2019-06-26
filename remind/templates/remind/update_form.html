@@ -17,12 +17,21 @@
                 {{field.label}}
             </div>
             <div class="row">
-                <dmc-datetime>
-                    <div class="input-field col s6">
-                        <input data-date-format="Y-m-d H:i" data-form-control="datetime" data-lang="en"
-                               id={{field.id_for_label}} name={{field.name}} type="text" value="{{field.initial}}">
-                    </div>
-                </dmc-datetime>
+                {% if field.disabled %}
+                    <dmc-datetime>
+                        <div class="input-field col s6">
+                            <input data-date-format="Y-m-d H:i" data-form-control="datetime" data-lang="en"
+                                id={{field.id_for_label}} name={{field.name}} type="text" value="{{field.initial}}" disabled>
+                        </div>
+                    </dmc-datetime>
+                {% else %}
+                    <dmc-datetime>
+                        <div class="input-field col s6">
+                            <input data-date-format="Y-m-d H:i" data-form-control="datetime" data-lang="en"
+                                id={{field.id_for_label}} name={{field.name}} type="text" value="{{field.initial}}">
+                        </div>
+                    </dmc-datetime>
+                {% endif %}
                 <label>
                     <div class="checkbox-field col s6">
                         <input class="filled-in " id={{next_field.id_for_label}} name={{next_field.name}}
