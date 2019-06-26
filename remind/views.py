@@ -341,8 +341,6 @@ def update(request, *args, **kwargs):
 
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
-
-
         return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
