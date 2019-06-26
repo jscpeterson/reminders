@@ -330,8 +330,7 @@ class UpdateForm(Form):
                     completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
                     deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
                 )
-            initial = deadline.datetime
-
+            initial = deadline.datetime.strftime('%Y-%m-%d %H:%M')
             self.fields[key] = forms.DateTimeField(
                 input_formats=['%Y-%m-%d %H:%M'],
                 label=label,

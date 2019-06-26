@@ -319,7 +319,7 @@ def update(request, *args, **kwargs):
     case = Case.objects.get(case_number=kwargs.get('case_number'))
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
-
+    print(request.method)
     if request.method == 'POST':
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
@@ -334,7 +334,8 @@ def update(request, *args, **kwargs):
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
 
-            return HttpResponseRedirect(reverse('remind:dashboard'))
+
+        return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
