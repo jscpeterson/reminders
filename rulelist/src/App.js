@@ -1,4 +1,7 @@
-import React from 'react'
+import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
+import TextField, {HelperText, Input} from '@material/react-text-field';
+import MaterialIcon from '@material/react-material-icon';
 import MaterialTable from 'material-table'
 import Cookies from 'js-cookie'
 
@@ -26,8 +29,6 @@ class App extends React.Component {
           field: 'defense-attorney' ,
           editable: 'onUpdate' },
 
-        // TODO Notes cell should be larger
-        { title: 'Notes', field: 'notes', editable: 'onUpdate' },
         { title: 'Witness List',
           field: 'witness-list',
           type:'date',
@@ -133,9 +134,9 @@ class App extends React.Component {
 
       // Populate basic case data
       row['defendant'] = caseJSON['defendant'];
-      row['case_number'] = caseJSON['case_number'];
+      row['case-number'] = caseJSON['case_number'];
       row['judge'] = caseJSON['judge'];
-      row['defense_attorney'] = caseJSON['defense_attorney'];
+      row['defense-attorney'] = caseJSON['defense_attorney'];
       row['notes'] = caseJSON['notes'];
 
 
@@ -179,6 +180,17 @@ class App extends React.Component {
 
   componentDidMount() {
     this.fetchCases();
+  }
+
+  setNotes(rowData, value) {
+      rowData['notes'] = value;
+      this.forceUpdate();
+  }
+
+  putNotes(rowData) {
+      let json = this.state.jsonData[this.state.tableData.indexOf(rowData)];
+      json['notes'] = rowData['notes'];
+      this.putData(json).then(onfulfilled => alert('Saved!'))
   }
 
   render() {
@@ -246,6 +258,21 @@ class App extends React.Component {
               }, 1000)
             }),
         }}
+        detailPanel={[{
+            tooltip: 'Notes',
+            render:rowData => {
+            return <div>
+        <TextField
+          // helperText={<HelperText>Save</HelperText>}
+          onTrailingIconSelect={() => {this.putNotes(rowData)}}
+          trailingIcon={<MaterialIcon aria-label="Save" role="button" icon="done" hasRipple={true}/>}
+        ><Input
+            // disableUnderline={ true }
+            value={ rowData['notes'] }
+            onChange={(e) => this.setNotes(rowData, e.currentTarget.value)} />
+        </TextField>
+      </div>
+        }}]}
       />
     )
   }
