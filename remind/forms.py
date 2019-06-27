@@ -333,17 +333,23 @@ class UpdateForm(Form):
                     required=False,
                 )
             initial = deadline.datetime.strftime('%Y-%m-%d %H:%M')
+            # disabled = deadline.status != Deadline.ACTIVE
+            disabled = case.case_number
+            self.disabled = disabled
             self.fields[key] = forms.DateTimeField(
                 input_formats=['%Y-%m-%d %H:%M'],
                 label=label,
                 initial=initial,
-                disabled=(deadline.status != Deadline.ACTIVE),
+                disabled=disabled,
                 required=False
             )
-            self.fields[key+'_completed'] = forms.BooleanField(
+            self.fields[key + '_completed'] = forms.BooleanField(
                 label="Completed?",
-                required=False
+                required=False,
+                disabled=disabled,
             )
+            print(self.fields[key].disabled)
+            print(type(self.fields[key].disabled))
 
 
 class UpdateCaseForm(Form):
