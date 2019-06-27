@@ -322,24 +322,26 @@ class UpdateForm(Form):
                     expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
                     completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
                     deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
-                    motion_title=deadline.motion.title
+                    motion_title=deadline.motion.title,
+                    required=False
                 )
             else:
                 label = '{expired}{completed}{deadline_desc}'.format(
                     expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
                     completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
                     deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
+                    required=False,
                 )
-            initial = deadline.datetime
-
+            initial = deadline.datetime.strftime('%Y-%m-%d %H:%M')
             self.fields[key] = forms.DateTimeField(
                 input_formats=['%Y-%m-%d %H:%M'],
                 label=label,
                 initial=initial,
-                disabled=deadline.status != Deadline.ACTIVE
+                required=False
             )
-            self.fields[key+'_completed'] = forms.BooleanField(
-                label="Completed?"
+            self.fields[key + '_completed'] = forms.BooleanField(
+                label="Completed?",
+                required=False,
             )
 
 

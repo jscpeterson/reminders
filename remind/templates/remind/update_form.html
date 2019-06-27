@@ -11,25 +11,29 @@
         <form method="POST">
             {% csrf_token %}
             {% for field in form %}
-            {% if forloop.counter0|divisibleby:2 %}
-            {% with next_field=form|next:forloop.counter0 %}
-            <div class="row">
-                {{field.label}}
-            </div>
-            <div class="row">
-                <div class="col s6">
-                    {{ field }}
+                {% if forloop.counter0|divisibleby:2 %}
+                {% with next_field=form|next:forloop.counter0 %}
+                <div class="'row">
+                    {{field.label}}
                 </div>
-                <label>
-                    <div class="checkbox-field col s6 required">
-                        <input class="filled-in " id={{next_field.id_for_label}} name={{next_field.name}}
-                               type="checkbox"><span
-                            for={{next_field.id_for_label}}>Completed?</span>
-                    </div>
-                </label>
-            </div>
-            {% endwith %}
-            {% endif %}
+                <div class="row">
+                    <dmc-datetime>
+                        <div class="input-field col s6">
+                            <input data-date-format="Y-m-d H:i" data-form-control="datetime" data-lang="en"
+                                id={{field.id_for_label}} name={{field.name}} type="text" value="{{field.initial}}"
+                            {% if disabled|index:forloop.counter0 %} disabled{% endif %}>
+                        </div>
+                    </dmc-datetime>
+                    <label>
+                        <div class="checkbox-field col s6">
+                            <input class="filled-in " id={{next_field.id_for_label}} name={{next_field.name}} type="checkbox"
+                             {% if disabled|index:forloop.counter0 %} checked disabled{% endif %}><span
+                                for={{next_field.id_for_label}}>Completed?</span>
+                        </div>
+                    </label>
+                </div>
+                {% endwith %}
+                {% endif %}
             {% endfor %}
             <button type="submit" name="_submit" class="btn">Submit</button>
         </form>
@@ -40,6 +44,10 @@
         $(document).ready(function() {
             $('select').material_select();
         });
+
+
+
+
 
 
 

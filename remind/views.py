@@ -319,13 +319,21 @@ def update(request, *args, **kwargs):
     case = Case.objects.get(case_number=kwargs.get('case_number'))
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
-
+    print(request.method)
     if request.method == 'POST':
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
             for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
+
+                completed_key = '{}_completed'.format(index)
+                if form.cleaned_data.get(completed_key):
+                    deadline.status = Deadline.COMPLETED
+                    deadline.updated_by = request.user
+                    deadline.save(update_fields=['status', 'updated_by'])
+                    continue
+
                 key = '{}'.format(index)
-                if deadline.datetime != form.cleaned_data.get(key):
+                if form.cleaned_data.get(key) is not None and deadline.datetime != form.cleaned_data.get(key):
                     deadline.datetime = form.cleaned_data.get(key)
                     deadline.updated_by = request.user
                     deadline.invalid_notice_sent = False
@@ -333,13 +341,19 @@ def update(request, *args, **kwargs):
 
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
-
-            return HttpResponseRedirect(reverse('remind:dashboard'))
+        return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
 
-    return render(request, 'remind/update_form.html', {'form': form, 'case_number': case.case_number})
+    disabled = []
+    for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
+        answer = (deadline.status != Deadline.ACTIVE)
+        disabled.append(answer)
+        disabled.append(answer)
+
+    return render(request, 'remind/update_form.html',
+                  {'form': form, 'case_number': case.case_number, 'disabled': disabled})
 
 
 ################################################################################
@@ -548,11 +562,9 @@ def judge_confirmed(request, *args, **kwargs):
         'remind/judge_confirmed_form.html',
         {
             'form': form,
-            'deadline_desc': DEADLINE_DESCRIPTIONS[ str(deadline.type)],
+            'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
             'case_number': deadline.case.case_number,
             'date': deadline.datetime,
             'required_days': utils.get_deadline_dict(deadline.case.track)[str(deadline.type)]
         }
     )
-
-
