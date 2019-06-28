@@ -321,10 +321,11 @@ def update(request, *args, **kwargs):
         raise PermissionDenied
     print(request.method)
     if request.method == 'POST':
+
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
+
         if form.is_valid():
             for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
-
                 completed_key = '{}_completed'.format(index)
                 if form.cleaned_data.get(completed_key):
                     deadline.status = Deadline.COMPLETED
@@ -346,7 +347,7 @@ def update(request, *args, **kwargs):
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
 
-    disabled = [False, False] # First two fields for judge and defense attorney should not be disabled
+    disabled = [False, False]  # First two fields for judge and defense attorney should not be disabled
     for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
         answer = (deadline.status != Deadline.ACTIVE)
         disabled.append(answer)

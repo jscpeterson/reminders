@@ -333,10 +333,10 @@ class UpdateForm(Form):
         case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        self.fields['judge'] = forms.CharField(  # TODO Change to choice field
-            # choices=JUDGES,
+        self.fields['judge'] = forms.ChoiceField(  # TODO Change to choice field
+            choices=JUDGES,
             required=False,
-            initial=case.judge, # TODO Change to location in JUDGES dict
+            initial=4,  # TODO Change to location in JUDGES dict
             label='Change the judge for this case?',
             disabled=False
         )
