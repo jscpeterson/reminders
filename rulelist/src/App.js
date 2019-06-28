@@ -34,12 +34,12 @@ class App extends React.Component {
           render: rowData => <span>{this.displayDate(rowData['scheduling-conference'])}</span>,
           editable: 'never'
         },
-        { title: 'Request PTIs',
+        { title: 'PTIs Requested',
           field: 'defense-request-ptis',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['defense-request-ptis'])}</span>,
           editable: 'never' },
-        { title: 'Conduct PTIs',
+        { title: 'PTIs Conducted',
           field: 'defense-conduct-ptis',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['defense-conduct-ptis'])}</span>,
@@ -195,6 +195,33 @@ class App extends React.Component {
         options={{
           pageSize: 10
         }}
+        actions={[
+            {
+                icon: 'assignment',
+                tooltip: 'Update Case',
+
+                onClick: (event, rowData) => {
+                  console.log(rowData['trial']);
+                  alert("Update Case")
+                }
+            },
+            {
+                icon: 'date_range',
+                tooltip: 'Enter Scheduling Order',
+                // disabled: (rowData) => rowData['trial'] !== null, TODO Disable if there is a trial date
+                onClick: (event, rowData) => {
+                  alert("Enter Scheduling Order")
+                },
+            },
+            {
+                icon: 'gavel',
+                tooltip: 'New Motion',
+                // disabled: (rowData) => rowData['trial'] === null, TODO Disable if there is no trial date
+                onClick: (event, rowData) => {
+                  alert("New Motion")
+                }
+            },
+        ]}
         detailPanel={[{
             tooltip: 'Notes',
             render:rowData => {
