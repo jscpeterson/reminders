@@ -227,8 +227,7 @@ class App extends React.Component {
                     alert("No scheduling order has been entered for this case.")
                   } else {
                     let case_number = rowData['case-number'];
-                    // window.location.href = `motion/${case_number}`; TODO Create motion url
-                    alert("Unimplemented")
+                    window.location.href = `motion/${case_number}`;
                   }
                 },
             },

@@ -34,12 +34,30 @@ class CaseForm(ModelForm):
 
 
 class MotionForm(Form):
+
     motion_title = forms.CharField(
         label='Title of the motion'
     )
 
     case_number = forms.ModelChoiceField(
         queryset=Case.objects.exclude(trial_date__isnull=True),
+    )
+
+    date_filed = forms.DateTimeField(
+        input_formats=['%Y-%m-%d'],
+        label='Date motion was filed'
+    )
+
+    motion_type = forms.ChoiceField(
+        choices=Motion.TYPE_CHOICES,
+        label='Type of motion'
+    )
+
+
+class MotionFormWithCase(Form):
+
+    motion_title = forms.CharField(
+        label='Title of the motion'
     )
 
     date_filed = forms.DateTimeField(

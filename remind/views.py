@@ -9,7 +9,7 @@ from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm
+    MotionResponseForm, MotionFormWithCase
 from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, JUDGES
 from . import utils
 from . import case_utils
@@ -380,6 +380,49 @@ class CreateMotionView(LoginRequiredMixin, FormView):
         return reverse('remind:motion_deadline', kwargs={'motion_pk': self.motion.pk})
 
 
+class CreateMotionViewWithCase(LoginRequiredMixin, FormView):
+    """ This is the same form as CreateMotionView, but with a case number already provided. """
+
+    template_name = 'remind/create_motion_form_with_case.html'
+    form_class = MotionFormWithCase
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def form_valid(self, form):
+        self.motion = Motion.objects.create(
+            title=form.cleaned_data.get('motion_title'),
+            case=Case.objects.get(case_number=self.kwargs['case_number']),
+            type=form.cleaned_data['motion_type'],
+            date_received=form.cleaned_data['date_filed'],
+        )
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('remind:motion_deadline', kwargs={'motion_pk': self.motion.pk})
+
+
+def create_motion_with_case(request, *args, **kwargs):
+
+
+    template_name = 'remind/create_motion_form_with_case.html'
+    form_class = MotionFormWithCase
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    form = form_class(request.POST)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            motion = Motion.objects.create(
+                title=form.cleaned_data.get('motion_title'),
+                case=case,
+                type=form.cleaned_data['motion_type'],
+                date_received=form.cleaned_data['date_filed'],
+            )
+            return HttpResponseRedirect('remind:motion_deadline', kwargs={'motion_pk': motion.pk})
+
+    return render(request, template_name, {'form': form})
+
+
 @login_required
 def motion_deadline(request, *args, **kwargs):
     """
@@ -387,7 +430,6 @@ def motion_deadline(request, *args, **kwargs):
     Deadlines are created for each of these dates.
     """
 
-    # TODO: Make Permission required
     motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
     case = motion.case
     if not request.user.has_perm('change_case', case):

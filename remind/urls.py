@@ -6,6 +6,7 @@ urlpatterns = [
     path('', views.DashView.as_view(), name='dashboard'),
     path('create/', views.CaseCreateView.as_view(), name='create-case'),
     path('motion/', views.CreateMotionView.as_view(), name='create-motion'),
+    path('motion/<str:case_number>', views.CreateMotionViewWithCase.as_view(), name='create-motion-with-case'),
     path('update/', views.UpdateCaseView.as_view(), name='update-case'),
     path('track/', views.UpdateTrackView.as_view(), name='enter-sched'),
     path('case_created/<str:case_number>', views.case_created, name='case_created'),
