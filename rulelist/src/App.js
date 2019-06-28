@@ -199,18 +199,19 @@ class App extends React.Component {
             {
                 icon: 'assignment',
                 tooltip: 'Update Case',
-
                 onClick: (event, rowData) => {
-                  console.log(rowData['trial']);
-                  alert("Update Case")
-                }
+                  console.log(rowData);
+                  let case_number = rowData['case-number'];
+                  window.location.href = `update/${case_number}`;
+                },
             },
             {
                 icon: 'date_range',
                 tooltip: 'Enter Scheduling Order',
                 // disabled: (rowData) => rowData['trial'] !== null, TODO Disable if there is a trial date
                 onClick: (event, rowData) => {
-                  alert("Enter Scheduling Order")
+                  let case_number = rowData['case-number'];
+                  window.location.href = `track/${case_number}`;
                 },
             },
             {
@@ -218,7 +219,9 @@ class App extends React.Component {
                 tooltip: 'New Motion',
                 // disabled: (rowData) => rowData['trial'] === null, TODO Disable if there is no trial date
                 onClick: (event, rowData) => {
-                  alert("New Motion")
+                  let case_number = rowData['case-number'];
+                  // window.location.href = `motion/${case_number}`; TODO Create motion url
+                  alert("Unimplemented")
                 }
             },
         ]}
