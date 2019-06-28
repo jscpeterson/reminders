@@ -5,34 +5,63 @@
 {% block content %}
 <div class="content container">
     <div class="row">
-        <h3>Deadlines for case {{ case_number }}</h3>
+        <h3>Updating case {{ case_number }}</h3>
     </div>
     <div class="row">
         <form method="POST">
             {% csrf_token %}
             {% for field in form %}
-                {% if forloop.counter0|divisibleby:2 %}
-                {% with next_field=form|next:forloop.counter0 %}
-                <div class="'row">
-                    {{field.label}}
-                </div>
-                <div class="row">
-                    <dmc-datetime>
+                {% if forloop.counter0 is 0 %}
+                    <div class="row">
+                    <h4>Case Information</h4>
+                    </div>
+                    <div class="row">
+                            {{ field.label }}
+                    </div>
+                    <div class="row">
+                            <div class="input-field col s8">
+                            <input type="text" id={{ field.id_for_label }} name={{ field.name }} value="{{ field.initial }}">
+                            </div>
+                    </div>
+                {% elif forloop.counter0 is 1 %}
+                    <div class="row">
+                            {{ field.label }}
+                    </div>
+                    <div class="row">
+                            <div class="input-field col s8">
+                            <input type="text" id={{ field.id_for_label }} name={{ field.name }} value="{{ field.initial }}">
+                            </div>
+                    </div>
+
+                    
+                    <div class="row">
+                    <h4>Deadlines</h4>
+                    </div>
+                {% else %}
+
+                    {% if forloop.counter0|divisibleby:2 %}
+                        {% with next_field=form|next:forloop.counter0 %}
+                            <div class="row">
+                                {{field.label}}
+                            </div>
+                        <div class="row">
+                            <dmc-datetime>
                         <div class="input-field col s6">
                             <input data-date-format="Y-m-d H:i" data-form-control="datetime" data-lang="en"
                                 id={{field.id_for_label}} name={{field.name}} type="text" value="{{field.initial}}"
                             {% if disabled|index:forloop.counter0 %} disabled{% endif %}>
                         </div>
-                    </dmc-datetime>
-                    <label>
-                        <div class="checkbox-field col s6">
+                            </dmc-datetime>
+                        <label>
+                            <div class="checkbox-field col s6">
                             <input class="filled-in " id={{next_field.id_for_label}} name={{next_field.name}} type="checkbox"
                              {% if disabled|index:forloop.counter0 %} checked disabled{% endif %}><span
                                 for={{next_field.id_for_label}}>Completed?</span>
-                        </div>
-                    </label>
-                </div>
-                {% endwith %}
+                            </div>
+                        </label>
+                    </div>
+                        {% endwith %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
             <button type="submit" name="_submit" class="btn">Submit</button>

@@ -333,6 +333,21 @@ class UpdateForm(Form):
         case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
+        self.fields['judge'] = forms.CharField(  # TODO Change to choice field
+            # choices=JUDGES,
+            required=False,
+            initial=case.judge, # TODO Change to location in JUDGES dict
+            label='Change the judge for this case?',
+            disabled=False
+        )
+
+        self.fields['defense_attorney'] = forms.CharField(
+            required=False,
+            initial=case.defense_attorney,
+            label='Change the defense attorney for this case?',
+            disabled=False
+        )
+
         for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
             key = '{}'.format(index)
             if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE, Deadline.PRETRIAL_MOTION_HEARING]:

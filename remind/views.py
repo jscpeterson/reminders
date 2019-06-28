@@ -346,14 +346,14 @@ def update(request, *args, **kwargs):
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
 
-    disabled = []
+    disabled = [False, False] # First two fields for judge and defense attorney should not be disabled
     for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
         answer = (deadline.status != Deadline.ACTIVE)
         disabled.append(answer)
         disabled.append(answer)
 
     return render(request, 'remind/update_form.html',
-                  {'form': form, 'case_number': case.case_number, 'disabled': disabled})
+                  {'form': form, 'case_number': case.case_number, 'disabled': disabled, 'judges': JUDGES})
 
 
 ################################################################################
