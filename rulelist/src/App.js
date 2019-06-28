@@ -208,21 +208,29 @@ class App extends React.Component {
             {
                 icon: 'date_range',
                 tooltip: 'Enter Scheduling Order',
-                // disabled: (rowData) => rowData['trial'] !== null, TODO Disable if there is a trial date
+                // disabled: TODO Disable if trial is set ,
                 onClick: (event, rowData) => {
-                  let case_number = rowData['case-number'];
-                  window.location.href = `track/${case_number}`;
+                  if (rowData['trial'] !== undefined) {
+                    alert("Scheduling order has already been entered for this case.")
+                  } else {
+                    let case_number = rowData['case-number'];
+                    window.location.href = `track/${case_number}`;
+                  }
                 },
             },
             {
                 icon: 'gavel',
                 tooltip: 'New Motion',
-                // disabled: (rowData) => rowData['trial'] === null, TODO Disable if there is no trial date
+                // disabled: TODO Disable if trial is not set ,
                 onClick: (event, rowData) => {
-                  let case_number = rowData['case-number'];
-                  // window.location.href = `motion/${case_number}`; TODO Create motion url
-                  alert("Unimplemented")
-                }
+                  if (rowData['trial'] === undefined) {
+                    alert("No scheduling order has been entered for this case.")
+                  } else {
+                    let case_number = rowData['case-number'];
+                    // window.location.href = `motion/${case_number}`; TODO Create motion url
+                    alert("Unimplemented")
+                  }
+                },
             },
         ]}
         detailPanel={[{
