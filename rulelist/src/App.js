@@ -24,101 +24,117 @@ class App extends React.Component {
           editable: 'never' },
         { title: 'Judge',
           field: 'judge' ,
-          editable: 'onUpdate'},
+          editable: 'never'},
         { title: 'Defense',
           field: 'defense-attorney' ,
-          editable: 'onUpdate' },
+          editable: 'never' },
 
         { title: 'Witness List',
           field: 'witness-list',
           type:'date',
           render: rowData => <span>{this.displayDate(rowData['witness-list'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Scheduling Conference',
           field: 'scheduling-conference',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['scheduling-conference'])}</span>,
-          editable: 'onUpdate'
+          render: rowData => this.displayDate(rowData['scheduling-conference']),
+          editable: 'never'
         },
         { title: 'Request PTIs',
           field: 'defense-request-ptis',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['defense-request-ptis'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Conduct PTIs',
           field: 'defense-conduct-ptis',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['defense-conduct-ptis'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Witness PTIs',
           field: 'witness-ptis',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['witness-ptis'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Scientific Evidence',
           field: 'scientific-evidence',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['scientific-evidence'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Pretrial Motion Filing',
           field: 'pretrial-motion-filing',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['pretrial-motion-filing'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Pretrial Conference',
           field: 'pretrial-conference',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['pretrial-conference'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Final Witness List',
           field: 'final-witness-list',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['final-witness-list'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Need for Interpreter',
           field: 'need-for-interpreter',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['need-for-interpreter'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Plea Agreement',
           field: 'plea-agreement',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['plea-agreement'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Trial',
           field: 'trial',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['trial'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
       ],
       tableData: [],
       jsonData: []
     }
   }
 
+  formatDate(date) {
+    // Could use Moment.js here instead...
+    const day = date.getDate().toString();
+    const month = (date.getMonth() + 1).toString();
+    const year = date.getFullYear().toString();
+
+    return month.concat('/', day, '/', year)
+  }
+
   displayDate(date) {
     /* Displays a date as M/D/YYYY.
-    * param date: either Date or string
+    * param date: either Date or string in ISO format (e.g., 2019-06-28T22:13:06Z)
     * */
 
     let realDate = new Date();
     if (date) {
-      if (typeof(date) === 'string') {
+      if (typeof (date) === 'string') {
         realDate = new Date(date);
       } else {
         realDate = date;
       }
-
-      // Could use Moment.js here instead...
-      const day = realDate.getDate().toString();
-      const month = (realDate.getMonth() + 1).toString();
-      const year = realDate.getFullYear().toString();
-
-      const dateString = month.concat('/', day, '/', year)
-
-      return dateString;
+      return <span style={{backgroundColor: this.getDateBgColor(realDate)}}>{this.formatDate(realDate)}</span>;
     } else {
       return '';
+    }
+  }
+
+  getDateBgColor(dueDate) {
+    const today = new Date();
+    const daysLeft = daysBetween(today, dueDate);
+
+    if (5 < daysLeft) {
+      return bgColors['OnTrack'];
+    } else if (2 < daysLeft <= 5) {
+      return bgColors['InTrouble'];
+    } else if (daysLeft <= 2) {
+      return bgColors['Urgent'];
+    } else {
+      return bgColors['Default'];
     }
   }
 
@@ -138,7 +154,7 @@ class App extends React.Component {
       row['judge'] = caseJSON['judge'];
       row['defense-attorney'] = caseJSON['defense_attorney'];
       row['notes'] = caseJSON['notes'];
-
+      row['status'] = 'good';
 
       // Populate deadlines for case
       const deadlines = caseJSON['deadline_set']
@@ -202,62 +218,6 @@ class App extends React.Component {
         options={{
           pageSize: 10
         }}
-        editable={{
-          onRowUpdate: (newData, oldData) =>
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  // console.log('Update called');
-
-                  // standard row update behavior
-                  const data = this.state.tableData;
-                  const index = data.indexOf(oldData);
-                  data[index] = newData;
-
-                  // final part of standard row update behavior
-                  this.setState({ data }, () => resolve());
-
-                  // update json data from newData
-                  let dataToSend = this.state.jsonData[index];
-                  // EDITABLE FIELDS TODO move to constants.js later
-                  // Judge
-                  // Defense
-                  // Notes
-
-                  dataToSend['judge'] = newData['judge'];
-                  dataToSend['defense_attorney'] = newData['defense-attorney'];
-                  dataToSend['notes'] = newData['notes'];
-
-
-                  // console.log('dataToSend');
-                  // console.log(dataToSend);
-
-                  // Copy dates from deadlines to data that will be sent in request
-                  this.state.columns.forEach(function(data) {
-                    // console.log(data);
-                    if (data.type === 'date' && data.editable === 'onUpdate') {
-                      const deadlineIndex = dataToSend.deadline_set.findIndex(item => {
-                        return item.type === data.field
-                      });
-
-                      /* TODO: Will not update deadline not found because it was not included in state.jsonData
-                          This will be a problem when we want to enter a deadline that is currently blank.
-                      */
-                      if (deadlineIndex >= 0) {
-                        if (oldData[data.field] !== newData[data.field]) {
-                          dataToSend.deadline_set[deadlineIndex].datetime = newData[data.field];
-                        }
-                      }
-                    }
-                  });
-
-                  this.putData(dataToSend);
-
-                }
-                resolve()
-              }, 1000)
-            }),
-        }}
         detailPanel={[{
             tooltip: 'Notes',
             render:rowData => {
@@ -276,6 +236,28 @@ class App extends React.Component {
       />
     )
   }
+}
+
+const bgColors = {
+  "Expired": "C0C0C0", // light gray
+  "Completed": "66B2FF", // light blue
+  "OnTrack": "66FF66", // light green
+  "InTrouble": "FFFF66", // light yellow
+  "Urgent": "FF6666", // light red
+  "Default": "FFFFFF" // white
+}
+
+// Per this source
+// https://stackoverflow.com/questions/542938/how-do-i-get-the-number-of-days-between-two-dates-in-javascript
+function treatAsUTC(date) {
+    let result = new Date(date);
+    result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
+    return result;
+}
+
+function daysBetween(startDate, endDate) {
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    return (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
 }
 
 export default App;
