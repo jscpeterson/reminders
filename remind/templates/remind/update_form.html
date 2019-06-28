@@ -15,23 +15,24 @@
                     <div class="row">
                     <h4>Case Information</h4>
                     </div>
-                    <div class="row">
-                            {{ field.label }}
+                    <dmc-select><div class="row">
+                    <div class="select-field col s8" id="id_judge_container">
+                        <label for={{ field.id_for_label }}>{{field.label}}</label>
+                        <select id={{ field.id_for_label }} name={{ field.name }}>
+        	            {% for choice in judges %}
+        		            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+    		            {% endfor %}
+		                </select>
                     </div>
+                    </div></dmc-select>
+                    {% elif forloop.counter0 is 1 %}
                     <div class="row">
                             <div class="input-field col s8">
+                                <label for={{ field.id_for_label }}>{{field.label}}</label>
                             <input type="text" id={{ field.id_for_label }} name={{ field.name }} value="{{ field.initial }}">
                             </div>
                     </div>
-                {% elif forloop.counter0 is 1 %}
-                    <div class="row">
-                            {{ field.label }}
-                    </div>
-                    <div class="row">
-                            <div class="input-field col s8">
-                            <input type="text" id={{ field.id_for_label }} name={{ field.name }} value="{{ field.initial }}">
-                            </div>
-                    </div>
+
 
                     
                     <div class="row">
@@ -41,12 +42,10 @@
 
                     {% if forloop.counter0|divisibleby:2 %}
                         {% with next_field=form|next:forloop.counter0 %}
-                            <div class="row">
-                                {{field.label}}
-                            </div>
                         <div class="row">
                             <dmc-datetime>
                         <div class="input-field col s6">
+                            <label for={{ field.id_for_label }}>{{field.label}}</label>
                             <input data-date-format="Y-m-d H:i" data-form-control="datetime" data-lang="en"
                                 id={{field.id_for_label}} name={{field.name}} type="text" value="{{field.initial}}"
                             {% if disabled|index:forloop.counter0 %} disabled{% endif %}>
