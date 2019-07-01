@@ -377,6 +377,10 @@ class UpdateForm(Form):
                 required=False,
             )
 
+    def clean(self):
+        print("cleaning!!")
+        super(UpdateForm, self).clean()
+
 
 class UpdateCaseForm(Form):
     case_number = forms.ModelChoiceField(

@@ -319,19 +319,32 @@ def update(request, *args, **kwargs):
     case = Case.objects.get(case_number=kwargs.get('case_number'))
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
-    print(request.method)
     if request.method == 'POST':
 
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
 
         if form.is_valid():
+            judge = JUDGES[int(form.cleaned_data.get('judge'))-1][1]
+            defense_attorney = form.cleaned_data.get('defense_attorney')
+
+            if case.judge != judge:
+                case.judge = judge
+                case.updated_by = request.user
+                case.save(update_fields=['judge'])
+
+            if case.defense_attorney != form:
+                case.defense_attorney = defense_attorney
+                case.updated_by = request.user
+                case.save(update_fields=['defense_attorney'])
+
             for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
                 completed_key = '{}_completed'.format(index)
                 if form.cleaned_data.get(completed_key):
                     deadline.status = Deadline.COMPLETED
                     deadline.updated_by = request.user
                     deadline.save(update_fields=['status', 'updated_by'])
-                    continue
+                    continue  # Complete takes priority, if user checks complete and changes date for some reason,
+                    # do not change date. Could consider changing this behavior. Maybe raise a ValidationError?
 
                 key = '{}'.format(index)
                 if form.cleaned_data.get(key) is not None and deadline.datetime != form.cleaned_data.get(key):
