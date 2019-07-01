@@ -376,9 +376,8 @@ class UpdateForm(Form):
                     deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
                     required=False,
                 )
-            initial = deadline.datetime.strftime('%Y-%m-%d %H:%M')
+            initial = deadline.datetime
             self.fields[key] = forms.DateTimeField(
-                input_formats=['%Y-%m-%d %H:%M'],
                 label=label,
                 initial=initial,
                 required=False
@@ -389,6 +388,7 @@ class UpdateForm(Form):
             )
 
     def clean(self):
+
         cleaned_data = super(UpdateForm, self).clean()
 
         # check if user both changed a date and marked it as a complete

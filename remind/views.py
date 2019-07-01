@@ -1,3 +1,4 @@
+from dateutil import parser
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.urls import reverse
@@ -342,6 +343,16 @@ def update(request, *args, **kwargs):
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
     if request.method == 'POST':
+
+        # Request QueryDict is immutable, can circumvent this by creating a mutable copy.
+        request.POST = request.POST.copy()
+
+        # Have to manually parse all active deadline fields
+        for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
+            # Disabled deadlines will not appear in the post request
+            if deadline.status == Deadline.ACTIVE:
+                key = '{}'.format(index)
+                request.POST[key] = parser.parse(request.POST[key])
 
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
 
