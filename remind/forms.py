@@ -387,6 +387,11 @@ class UpdateForm(Form):
                 required=False,
             )
 
+        self.fields['override'] = forms.BooleanField(
+            label='Override invalid dates?',
+            required=False,
+        )
+
     def clean(self):
         cleaned_data = super(UpdateForm, self).clean()
 
@@ -403,8 +408,8 @@ class UpdateForm(Form):
                 )
 
         # check if overriding invalid dates before doing date validation
-        # if cleaned_data.get('override'):
-        #     return
+        if cleaned_data.get('override'):
+            return
 
         # check deadlines
         for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):

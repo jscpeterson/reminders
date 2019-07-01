@@ -32,11 +32,19 @@
                             <input type="text" id={{ field.id_for_label }} name={{ field.name }} value="{{ field.initial }}">
                             </div>
                     </div>
-
-
-                    
                     <div class="row">
                     <h4>Deadlines</h4>
+                    </div>
+
+                    {% elif forloop.counter is override_index %}
+                    <div class="row">
+                    <label>
+                            <div class="checkbox-field col s6">
+                            <input class="filled-in " id={{field.id_for_label}} name={{field.name}} type="checkbox"
+                            ><span
+                                for={{next_field.id_for_label}}>Override invalid dates?</span>
+                            </div>
+                    </label>
                     </div>
                 {% else %}
 

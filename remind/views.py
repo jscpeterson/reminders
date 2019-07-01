@@ -362,6 +362,9 @@ def update(request, *args, **kwargs):
 
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
 
+        # Index of the override field will be the last field in the form. Saving this to pass into template
+        override_index = len(form.fields)
+
         if form.is_valid():
             judge = JUDGES[int(form.cleaned_data.get('judge'))-1][1]
             defense_attorney = form.cleaned_data.get('defense_attorney')
@@ -408,10 +411,14 @@ def update(request, *args, **kwargs):
                           {'form': form,
                            'case_number': case.case_number,
                            'disabled': disabled,
-                           'judges': sorted_judges,})
+                           'judges': sorted_judges,
+                           'override_index': override_index})
 
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
+
+        # Index of the override field will be the last field in the form. Saving this to pass into template
+        override_index = len(form.fields)
 
     # Icky duplicate code
     disabled = [False, False]  # First two fields for judge and defense attorney should not be disabled
@@ -424,7 +431,8 @@ def update(request, *args, **kwargs):
                   {'form': form,
                    'case_number': case.case_number,
                    'disabled': disabled,
-                   'judges': sorted_judges})
+                   'judges': sorted_judges,
+                   'override_index': override_index})
 
 
 ################################################################################
