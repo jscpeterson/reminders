@@ -352,7 +352,13 @@ def update(request, *args, **kwargs):
             # Disabled deadlines will not appear in the post request
             if deadline.status == Deadline.ACTIVE:
                 key = '{}'.format(index)
-                request.POST[key] = parser.parse(request.POST[key])
+                form_value = request.POST[key]
+
+                # 'midnight' and 'noon' are provided literally, have to manually parse these if present
+                form_value = form_value.replace('midnight', '12:00AM')
+                form_value = form_value.replace('noon', '12:00PM')
+
+                request.POST[key] = parser.parse(form_value)
 
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
 
