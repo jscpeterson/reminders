@@ -333,10 +333,20 @@ class UpdateForm(Form):
         self.case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        self.fields['judge'] = forms.ChoiceField(  # TODO Change to choice field
+        def find_judge_index(judge):
+            """
+            Finds the index of the judge by name in the JUDGES constant. Not an ideal way to go about this.
+            """
+            for judge_tuple in JUDGES:
+                if judge == judge_tuple[1]:
+                    return judge_tuple[0]-1
+
+        initial_judge = find_judge_index(self.case.judge)
+
+        self.fields['judge'] = forms.ChoiceField(
             choices=JUDGES,
             required=False,
-            initial=4,  # TODO Change to location in JUDGES dict
+            initial=initial_judge,
             label='Change the judge for this case?',
             disabled=False
         )
@@ -381,18 +391,12 @@ class UpdateForm(Form):
     def clean(self):
         cleaned_data = super(UpdateForm, self).clean()
 
-        # if cleaned_data.get('override'):
-        #     return
-
+        # check if user both changed a date and marked it as a complete
+        # cannot think of a reason they would want to do this so considering it a data entry error
         for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
             key = '{}'.format(index)
             key_completed = '{}_completed'.format(index)
 
-            print(deadline.datetime != cleaned_data.get(key))
-            print(cleaned_data.get(key_completed))
-
-            # check if user both changed a date and marked it as a complete
-            # cannot think of a reason they would want to do this so considering it a data entry error
             if deadline.datetime != cleaned_data.get(key) and cleaned_data.get(key_completed):
                 print("boom")
                 self.add_error(

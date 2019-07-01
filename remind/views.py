@@ -317,6 +317,28 @@ class UpdateCaseView(LoginRequiredMixin, FormView):
 def update(request, *args, **kwargs):
     """ The user can update all the deadlines for a case here. """
     case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+    def find_judge_index(judge):
+        """
+        Finds the index of the judge by name in the JUDGES constant. Not an ideal way to go about this.
+        """
+        for judge_tuple in JUDGES:
+            if judge == judge_tuple[1]:
+                return judge_tuple[0] - 1
+
+    def sort_judges(case):
+        """
+        Returns a reorganized version of the JUDGES constant based on a case, where the first entry is the current judge
+        on the case. This is a workaround to set the initial judge value in the HTML template.
+        """
+        judge = case.judge
+        judges_list = list(JUDGES)
+        judge_tuple = judges_list.pop(find_judge_index(judge))
+        judges_list.insert(0, judge_tuple)
+        return judges_list
+
+    sorted_judges = sort_judges(case)
+
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
     if request.method == 'POST':
@@ -369,7 +391,7 @@ def update(request, *args, **kwargs):
                           {'form': form,
                            'case_number': case.case_number,
                            'disabled': disabled,
-                           'judges': JUDGES,})
+                           'judges': sorted_judges,})
 
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
@@ -382,7 +404,10 @@ def update(request, *args, **kwargs):
         disabled.append(answer)
 
     return render(request, 'remind/update_form.html',
-                  {'form': form, 'case_number': case.case_number, 'disabled': disabled, 'judges': JUDGES})
+                  {'form': form,
+                   'case_number': case.case_number,
+                   'disabled': disabled,
+                   'judges': sorted_judges})
 
 
 ################################################################################
