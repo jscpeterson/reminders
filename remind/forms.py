@@ -388,7 +388,6 @@ class UpdateForm(Form):
             )
 
     def clean(self):
-
         cleaned_data = super(UpdateForm, self).clean()
 
         # check if user both changed a date and marked it as a complete
@@ -398,11 +397,28 @@ class UpdateForm(Form):
             key_completed = '{}_completed'.format(index)
 
             if deadline.datetime != cleaned_data.get(key) and cleaned_data.get(key_completed):
-                print("boom")
                 self.add_error(
                     key,
                     'Cannot complete a deadline and change it at the same time.'
                 )
+
+        # check if overriding invalid dates before doing date validation
+        # if cleaned_data.get('override'):
+        #     return
+
+        # check deadlines
+        for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
+            key = '{}'.format(index)
+
+            if deadline.datetime != cleaned_data.get(key) and deadline.status == Deadline.ACTIVE:
+                deadline.datetime = cleaned_data.get(key)  # temporarily changing this should be fine if we're never
+                # actually saving it
+
+                if utils.is_deadline_invalid(deadline):
+                    self.add_error(
+                        key,
+                        'Deadline outside permissible limits.'
+                    )
 
 
 class UpdateCaseForm(Form):
