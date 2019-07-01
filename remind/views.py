@@ -338,28 +338,43 @@ def update(request, *args, **kwargs):
                 case.save(update_fields=['defense_attorney'])
 
             for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
-                completed_key = '{}_completed'.format(index)
-                if form.cleaned_data.get(completed_key):
-                    deadline.status = Deadline.COMPLETED
-                    deadline.updated_by = request.user
-                    deadline.save(update_fields=['status', 'updated_by'])
-                    continue  # Complete takes priority, if user checks complete and changes date for some reason,
-                    # do not change date. Could consider changing this behavior. Maybe raise a ValidationError?
-
                 key = '{}'.format(index)
+                completed_key = '{}_completed'.format(index)
+
                 if form.cleaned_data.get(key) is not None and deadline.datetime != form.cleaned_data.get(key):
                     deadline.datetime = form.cleaned_data.get(key)
                     deadline.updated_by = request.user
                     deadline.invalid_notice_sent = False
                     deadline.save(update_fields=['datetime', 'updated_by', 'invalid_notice_sent'])
 
+                if form.cleaned_data.get(completed_key):
+                    deadline.status = Deadline.COMPLETED
+                    deadline.updated_by = request.user
+                    deadline.save(update_fields=['status', 'updated_by'])
+
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
-        return HttpResponseRedirect(reverse('remind:dashboard'))
+
+            return HttpResponseRedirect(reverse('remind:dashboard'))
+
+        else:  # Form is invalid
+            # Icky duplicate code
+            disabled = [False, False]  # First two fields for judge and defense attorney should not be disabled
+            for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
+                answer = (deadline.status != Deadline.ACTIVE)
+                disabled.append(answer)
+                disabled.append(answer)
+
+            return render(request, 'remind/update_form.html',
+                          {'form': form,
+                           'case_number': case.case_number,
+                           'disabled': disabled,
+                           'judges': JUDGES,})
 
     else:
         form = UpdateForm(case_number=kwargs['case_number'])
 
+    # Icky duplicate code
     disabled = [False, False]  # First two fields for judge and defense attorney should not be disabled
     for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
         answer = (deadline.status != Deadline.ACTIVE)

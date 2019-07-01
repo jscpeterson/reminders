@@ -49,6 +49,9 @@
                             <input data-date-format="Y-m-d H:i" data-form-control="datetime" data-lang="en"
                                 id={{field.id_for_label}} name={{field.name}} type="text" value="{{field.initial}}"
                             {% if disabled|index:forloop.counter0 %} disabled{% endif %}>
+                            {% for error in field.errors %}
+                                <p style="color: red; font-size: 10px"> {{ error }} </p>
+                                {% endfor %}
                         </div>
                             </dmc-datetime>
                         <label>

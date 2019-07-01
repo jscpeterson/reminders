@@ -330,7 +330,7 @@ class RequestPTIForm(Form):
 class UpdateForm(Form):
 
     def __init__(self, *args, **kwargs):
-        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        self.case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
         self.fields['judge'] = forms.ChoiceField(  # TODO Change to choice field
@@ -343,13 +343,14 @@ class UpdateForm(Form):
 
         self.fields['defense_attorney'] = forms.CharField(
             required=False,
-            initial=case.defense_attorney,
+            initial=self.case.defense_attorney,
             label='Change the defense attorney for this case?',
             disabled=False
         )
 
-        for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
+        for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
             key = '{}'.format(index)
+            completed_key = '{}_completed'.format(index)
             if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE, Deadline.PRETRIAL_MOTION_HEARING]:
                 label = '{expired}{completed}{deadline_desc} for {motion_title}'.format(
                     expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
@@ -372,14 +373,32 @@ class UpdateForm(Form):
                 initial=initial,
                 required=False
             )
-            self.fields[key + '_completed'] = forms.BooleanField(
+            self.fields[completed_key] = forms.BooleanField(
                 label="Completed?",
                 required=False,
             )
 
     def clean(self):
-        print("cleaning!!")
-        super(UpdateForm, self).clean()
+        cleaned_data = super(UpdateForm, self).clean()
+
+        # if cleaned_data.get('override'):
+        #     return
+
+        for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
+            key = '{}'.format(index)
+            key_completed = '{}_completed'.format(index)
+
+            print(deadline.datetime != cleaned_data.get(key))
+            print(cleaned_data.get(key_completed))
+
+            # check if user both changed a date and marked it as a complete
+            # cannot think of a reason they would want to do this so considering it a data entry error
+            if deadline.datetime != cleaned_data.get(key) and cleaned_data.get(key_completed):
+                print("boom")
+                self.add_error(
+                    key,
+                    'Cannot complete a deadline and change it at the same time.'
+                )
 
 
 class UpdateCaseForm(Form):
