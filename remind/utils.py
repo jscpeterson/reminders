@@ -5,7 +5,7 @@ import holidays
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
-    TRIAL_DEADLINES, JUDGES
+    TRIAL_DEADLINES, JUDGES, RESPONSE_AFTER_FILING_DAYS
 
 
 def clear_deadlines(case):
@@ -36,6 +36,7 @@ class InvalidCaseTrackException(Exception):
 
 
 def get_deadline_dict(track):
+    """Gets a dictionary of deadlines based on the track of a case."""
     if track is None:
         deadlines = TRACKLESS_DEADLINE_LIMITS
     elif track == 1:
@@ -247,9 +248,24 @@ def is_deadline_invalid(deadline):
     elif deadline.type in [Deadline.CONDUCT_PTI]:
         return False
 
-    # Skipping this for now
+    # Pretrial motion responses have two considerations for their date
     if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE]:
-        return False  # TODO set up pretrial motion response logic
+        """
+        Written responses to any pretrial motions shall be filed within ten (10) days of the filing of any pretrial 
+        motions and in any case not less than forty (40) days before the trial date. Failure to file a written response 
+        shall be deemed, for purposes of deciding the motion, an admission of the facts stated in the motion;
+        """
+        return is_deadline_within_limits(
+            deadline=deadline.datetime,
+            event=deadline.motion.date_received,
+            days=RESPONSE_AFTER_FILING_DAYS,
+            future_event=False,
+        ) and is_deadline_within_limits(
+            deadline=deadline.datetime,
+            event=deadline.case.trial_date,
+            days=deadline_dict[Deadline.PRETRIAL_MOTION_RESPONSE],
+            future_event=True,
+        )
 
     raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
 
