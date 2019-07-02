@@ -33,9 +33,15 @@ class CaseViewSet(viewsets.ModelViewSet):
     queryset = Case.objects.all()
 
     def get_queryset(self):
-        return super().get_queryset().filter(
+        cases = super().get_queryset().filter(
             Q(supervisor=self.request.user) |
             Q(prosecutor=self.request.user) |
             Q(secretary=self.request.user)
         )
 
+        for case in cases:
+            deadlines = case.deadline_set.filter(status=Deadline.ACTIVE)
+            if len(deadlines) == 0 and case.trial_date is not None:
+                cases = cases.exclude(case_number=case.case_number)
+
+        return cases
