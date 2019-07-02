@@ -170,6 +170,21 @@ def get_actual_deadline_from_end(end_date, days):
     return result_date
 
 
+def get_motion_response_deadline(motion):
+    """
+    Written responses to any pretrial motions shall be filed within ten (10) days of the filing of any pretrial
+    motions and in any case not less than forty (40) days before the trial date. Failure to file a written response
+    shall be deemed, for purposes of deciding the motion, an admission of the facts stated in the motion;
+
+    Note: 40 days will vary according to case track.
+    """
+    deadline_dict = get_deadline_dict(motion.case.track)
+    actual_deadline_from_filing = get_actual_deadline_from_start(motion.date_received, RESPONSE_AFTER_FILING_DAYS)
+    actual_deadline_from_trial = get_actual_deadline_from_end(motion.case.trial_date,
+                                                              deadline_dict[str(Deadline.PRETRIAL_MOTION_RESPONSE)])
+    return min(actual_deadline_from_filing, actual_deadline_from_trial)
+
+
 def is_deadline_within_limits(deadline, event, days, future_event=False):
     """
     Returns True if a deadline is within the acceptable limits given an event and the days required.
@@ -250,24 +265,38 @@ def is_deadline_invalid(deadline):
 
     # Pretrial motion responses have two considerations for their date
     if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE]:
-        """
-        Written responses to any pretrial motions shall be filed within ten (10) days of the filing of any pretrial 
-        motions and in any case not less than forty (40) days before the trial date. Failure to file a written response 
-        shall be deemed, for purposes of deciding the motion, an admission of the facts stated in the motion;
-        """
-        return is_deadline_within_limits(
-            deadline=deadline.datetime,
-            event=deadline.motion.date_received,
-            days=RESPONSE_AFTER_FILING_DAYS,
-            future_event=False,
-        ) and is_deadline_within_limits(
-            deadline=deadline.datetime,
-            event=deadline.case.trial_date,
-            days=deadline_dict[Deadline.PRETRIAL_MOTION_RESPONSE],
-            future_event=True,
-        )
+        return is_motion_response_deadline_invalid(deadline.motion, deadline.datetime)
 
     raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
+
+
+def is_motion_response_deadline_invalid(motion, motion_response_deadline):
+    """
+    Written responses to any pretrial motions shall be filed within ten (10) days of the filing of any pretrial
+    motions and in any case not less than forty (40) days before the trial date. Failure to file a written response
+    shall be deemed, for purposes of deciding the motion, an admission of the facts stated in the motion;
+
+    Note: 40 days will vary according to case track.
+    """
+    deadline_dict = get_deadline_dict(motion.case.track)
+    motion_response_deadline = motion_response_deadline.replace(tzinfo=pytz.timezone(settings.TIME_ZONE),
+                                                                hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE,
+                                                                second=LAST_DAY_SECOND)
+
+    check1 = is_deadline_within_limits(
+        deadline=motion_response_deadline,
+        event=motion.date_received,
+        days=RESPONSE_AFTER_FILING_DAYS,
+        future_event=False,
+    )
+    check2 = is_deadline_within_limits(
+        deadline=motion_response_deadline,
+        event=motion.case.trial_date,
+        days=deadline_dict[str(Deadline.PRETRIAL_MOTION_RESPONSE)],
+        future_event=True,
+    )
+
+    return not check1 and check2
 
 
 def find_judge_index(judge):
