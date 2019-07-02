@@ -333,15 +333,7 @@ class UpdateForm(Form):
         self.case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        def find_judge_index(judge):
-            """
-            Finds the index of the judge by name in the JUDGES constant. Not an ideal way to go about this.
-            """
-            for judge_tuple in JUDGES:
-                if judge == judge_tuple[1]:
-                    return judge_tuple[0]-1
-
-        initial_judge = find_judge_index(self.case.judge)
+        initial_judge = utils.find_judge_index(self.case.judge)
 
         self.fields['judge'] = forms.ChoiceField(
             choices=JUDGES,
@@ -415,6 +407,7 @@ class UpdateForm(Form):
         for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
             key = '{}'.format(index)
 
+            # check if deadline has been changed and deadline is not inactive
             if deadline.datetime != cleaned_data.get(key) and deadline.status == Deadline.ACTIVE:
                 deadline.datetime = cleaned_data.get(key)  # temporarily changing this should be fine if we're never
                 # actually saving it

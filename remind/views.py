@@ -319,26 +319,7 @@ def update(request, *args, **kwargs):
     """ The user can update all the deadlines for a case here. """
     case = Case.objects.get(case_number=kwargs.get('case_number'))
 
-    def find_judge_index(judge):
-        """
-        Finds the index of the judge by name in the JUDGES constant. Not an ideal way to go about this.
-        """
-        for judge_tuple in JUDGES:
-            if judge == judge_tuple[1]:
-                return judge_tuple[0] - 1
-
-    def sort_judges(case):
-        """
-        Returns a reorganized version of the JUDGES constant based on a case, where the first entry is the current judge
-        on the case. This is a workaround to set the initial judge value in the HTML template.
-        """
-        judge = case.judge
-        judges_list = list(JUDGES)
-        judge_tuple = judges_list.pop(find_judge_index(judge))
-        judges_list.insert(0, judge_tuple)
-        return judges_list
-
-    sorted_judges = sort_judges(case)
+    sorted_judges = utils.sort_judges(case)
 
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
@@ -347,7 +328,7 @@ def update(request, *args, **kwargs):
         # Request QueryDict is immutable, can circumvent this by creating a mutable copy.
         request.POST = request.POST.copy()
 
-        # Have to manually parse all active deadline fields
+        # Have to manually parse all active deadline fields to properly make timezone aware
         for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
             # Disabled deadlines will not appear in the post request
             if deadline.status == Deadline.ACTIVE:
@@ -362,11 +343,8 @@ def update(request, *args, **kwargs):
 
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
 
-        # Index of the override field will be the last field in the form. Saving this to pass into template
-        override_index = len(form.fields)
-
         if form.is_valid():
-            judge = JUDGES[int(form.cleaned_data.get('judge'))-1][1]
+            judge = JUDGES[int(form.cleaned_data.get('judge')) - 1][1]
             defense_attorney = form.cleaned_data.get('defense_attorney')
 
             if case.judge != judge:
@@ -399,34 +377,17 @@ def update(request, *args, **kwargs):
 
             return HttpResponseRedirect(reverse('remind:dashboard'))
 
-        else:  # Form is invalid
-            # Icky duplicate code
-            disabled = [False, False]  # First two fields for judge and defense attorney should not be disabled
-            for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
-                answer = (deadline.status != Deadline.ACTIVE)
-                disabled.append(answer)
-                disabled.append(answer)
+        else:  # Form is invalid - error handling may go here
+            pass
 
-            return render(request, 'remind/update_form.html',
-                          {'form': form,
-                           'case_number': case.case_number,
-                           'disabled': disabled,
-                           'judges': sorted_judges,
-                           'override_index': override_index})
-
-    else:
+    else:  # Request method is GET
         form = UpdateForm(case_number=kwargs['case_number'])
+        pass
 
-        # Index of the override field will be the last field in the form. Saving this to pass into template
-        override_index = len(form.fields)
-
-    # Icky duplicate code
-    disabled = [False, False]  # First two fields for judge and defense attorney should not be disabled
-    for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
-        answer = (deadline.status != Deadline.ACTIVE)
-        disabled.append(answer)
-        disabled.append(answer)
-
+    # Render form if code gets to this point
+    # Index of the override field will be the last field in the form. Saving this to pass into template
+    override_index = len(form.fields)
+    disabled = utils.get_disabled_fields(case)
     return render(request, 'remind/update_form.html',
                   {'form': form,
                    'case_number': case.case_number,
@@ -482,8 +443,6 @@ class CreateMotionViewWithCase(LoginRequiredMixin, FormView):
 
 
 def create_motion_with_case(request, *args, **kwargs):
-
-
     template_name = 'remind/create_motion_form_with_case.html'
     form_class = MotionFormWithCase
     case = Case.objects.get(case_number=kwargs.get('case_number'))
