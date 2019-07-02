@@ -514,12 +514,11 @@ def motion_response(request, *args, **kwargs):
     This form allows the user to record that a motion response was filed.
     The deadline is marked as complete.
     """
-    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
-    case = deadline.case
+    motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
+    case = motion.case
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
 
-    motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
     form = MotionResponseForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
