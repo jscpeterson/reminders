@@ -1,3 +1,5 @@
+import pytz
+from django.conf import settings
 from datetime import timedelta
 import holidays
 from .models import Deadline
@@ -180,9 +182,13 @@ def is_deadline_within_limits(deadline, event, days, future_event=False):
 
     if future_event:
         actual_deadline = get_actual_deadline_from_end(event, days)
+        actual_deadline = actual_deadline.replace(hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
+        pytz.timezone(settings.TIME_ZONE).localize(actual_deadline)
         return actual_deadline - deadline >= timedelta(days=0)
     else:
         actual_deadline = get_actual_deadline_from_start(event, days)
+        actual_deadline = actual_deadline.replace(tzinfo=pytz.timezone(settings.TIME_ZONE),
+                                                  hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE, second=LAST_DAY_SECOND)
         return actual_deadline - deadline >= timedelta(days=0)
 
 
