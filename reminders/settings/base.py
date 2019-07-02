@@ -99,7 +99,7 @@ AUTHENTICATION_BACKENDS = (
 # Custom User model
 AUTH_USER_MODEL = 'users.CustomUser'
 
-# LOGIN_URL = 'home'
+LOGIN_URL = 'home'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
