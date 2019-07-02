@@ -1,3 +1,4 @@
+from dateutil import parser
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.urls import reverse
@@ -9,7 +10,7 @@ from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm
+    MotionResponseForm, MotionFormWithCase
 from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, JUDGES
 from . import utils
 from . import case_utils
@@ -317,43 +318,82 @@ class UpdateCaseView(LoginRequiredMixin, FormView):
 def update(request, *args, **kwargs):
     """ The user can update all the deadlines for a case here. """
     case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+    sorted_judges = utils.sort_judges(case)
+
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
-    print(request.method)
     if request.method == 'POST':
-        form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
-        if form.is_valid():
-            for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
 
-                completed_key = '{}_completed'.format(index)
-                if form.cleaned_data.get(completed_key):
-                    deadline.status = Deadline.COMPLETED
-                    deadline.updated_by = request.user
-                    deadline.save(update_fields=['status', 'updated_by'])
-                    continue
+        # Request QueryDict is immutable, can circumvent this by creating a mutable copy.
+        request.POST = request.POST.copy()
 
+        # Have to manually parse all active deadline fields to properly make timezone aware
+        for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
+            # Disabled deadlines will not appear in the post request
+            if deadline.status == Deadline.ACTIVE:
                 key = '{}'.format(index)
+                form_value = request.POST[key]
+
+                # 'midnight' and 'noon' are provided literally, have to manually parse these if present
+                form_value = form_value.replace('midnight', '12:00AM')
+                form_value = form_value.replace('noon', '12:00PM')
+
+                request.POST[key] = parser.parse(form_value)
+
+        form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
+
+        if form.is_valid():
+            judge = JUDGES[int(form.cleaned_data.get('judge')) - 1][1]
+            defense_attorney = form.cleaned_data.get('defense_attorney')
+
+            if case.judge != judge:
+                case.judge = judge
+                case.updated_by = request.user
+                case.save(update_fields=['judge'])
+
+            if case.defense_attorney != form:
+                case.defense_attorney = defense_attorney
+                case.updated_by = request.user
+                case.save(update_fields=['defense_attorney'])
+
+            for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
+                key = '{}'.format(index)
+                completed_key = '{}_completed'.format(index)
+
                 if form.cleaned_data.get(key) is not None and deadline.datetime != form.cleaned_data.get(key):
                     deadline.datetime = form.cleaned_data.get(key)
                     deadline.updated_by = request.user
                     deadline.invalid_notice_sent = False
                     deadline.save(update_fields=['datetime', 'updated_by', 'invalid_notice_sent'])
 
+                if form.cleaned_data.get(completed_key):
+                    deadline.status = Deadline.COMPLETED
+                    deadline.updated_by = request.user
+                    deadline.save(update_fields=['status', 'updated_by'])
+
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
-        return HttpResponseRedirect(reverse('remind:dashboard'))
 
-    else:
+            return HttpResponseRedirect(reverse('remind:dashboard'))
+
+        else:  # Form is invalid - error handling may go here
+            pass
+
+    else:  # Request method is GET
         form = UpdateForm(case_number=kwargs['case_number'])
+        pass
 
-    disabled = []
-    for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
-        answer = (deadline.status != Deadline.ACTIVE)
-        disabled.append(answer)
-        disabled.append(answer)
-
+    # Render form if code gets to this point
+    # Index of the override field will be the last field in the form. Saving this to pass into template
+    override_index = len(form.fields)
+    disabled = utils.get_disabled_fields(case)
     return render(request, 'remind/update_form.html',
-                  {'form': form, 'case_number': case.case_number, 'disabled': disabled})
+                  {'form': form,
+                   'case_number': case.case_number,
+                   'disabled': disabled,
+                   'judges': sorted_judges,
+                   'override_index': override_index})
 
 
 ################################################################################
@@ -380,6 +420,47 @@ class CreateMotionView(LoginRequiredMixin, FormView):
         return reverse('remind:motion_deadline', kwargs={'motion_pk': self.motion.pk})
 
 
+class CreateMotionViewWithCase(LoginRequiredMixin, FormView):
+    """ This is the same form as CreateMotionView, but with a case number already provided. """
+
+    template_name = 'remind/create_motion_form_with_case.html'
+    form_class = MotionFormWithCase
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def form_valid(self, form):
+        self.motion = Motion.objects.create(
+            title=form.cleaned_data.get('motion_title'),
+            case=Case.objects.get(case_number=self.kwargs['case_number']),
+            type=form.cleaned_data['motion_type'],
+            date_received=form.cleaned_data['date_filed'],
+        )
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('remind:motion_deadline', kwargs={'motion_pk': self.motion.pk})
+
+
+def create_motion_with_case(request, *args, **kwargs):
+    template_name = 'remind/create_motion_form_with_case.html'
+    form_class = MotionFormWithCase
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    form = form_class(request.POST)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            motion = Motion.objects.create(
+                title=form.cleaned_data.get('motion_title'),
+                case=case,
+                type=form.cleaned_data['motion_type'],
+                date_received=form.cleaned_data['date_filed'],
+            )
+            return HttpResponseRedirect('remind:motion_deadline', kwargs={'motion_pk': motion.pk})
+
+    return render(request, template_name, {'form': form})
+
+
 @login_required
 def motion_deadline(request, *args, **kwargs):
     """
@@ -387,7 +468,6 @@ def motion_deadline(request, *args, **kwargs):
     Deadlines are created for each of these dates.
     """
 
-    # TODO: Make Permission required
     motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
     case = motion.case
     if not request.user.has_perm('change_case', case):

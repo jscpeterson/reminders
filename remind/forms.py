@@ -34,12 +34,30 @@ class CaseForm(ModelForm):
 
 
 class MotionForm(Form):
+
     motion_title = forms.CharField(
         label='Title of the motion'
     )
 
     case_number = forms.ModelChoiceField(
         queryset=Case.objects.exclude(trial_date__isnull=True),
+    )
+
+    date_filed = forms.DateTimeField(
+        input_formats=['%Y-%m-%d'],
+        label='Date motion was filed'
+    )
+
+    motion_type = forms.ChoiceField(
+        choices=Motion.TYPE_CHOICES,
+        label='Type of motion'
+    )
+
+
+class MotionFormWithCase(Form):
+
+    motion_title = forms.CharField(
+        label='Title of the motion'
     )
 
     date_filed = forms.DateTimeField(
@@ -312,11 +330,29 @@ class RequestPTIForm(Form):
 class UpdateForm(Form):
 
     def __init__(self, *args, **kwargs):
-        case = Case.objects.get(case_number=kwargs.pop('case_number'))
+        self.case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
+        initial_judge = utils.find_judge_index(self.case.judge)
+
+        self.fields['judge'] = forms.ChoiceField(
+            choices=JUDGES,
+            required=False,
+            initial=initial_judge,
+            label='Change the judge for this case?',
+            disabled=False
+        )
+
+        self.fields['defense_attorney'] = forms.CharField(
+            required=False,
+            initial=self.case.defense_attorney,
+            label='Change the defense attorney for this case?',
+            disabled=False
+        )
+
+        for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
             key = '{}'.format(index)
+            completed_key = '{}_completed'.format(index)
             if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE, Deadline.PRETRIAL_MOTION_HEARING]:
                 label = '{expired}{completed}{deadline_desc} for {motion_title}'.format(
                     expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
@@ -332,17 +368,55 @@ class UpdateForm(Form):
                     deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
                     required=False,
                 )
-            initial = deadline.datetime.strftime('%Y-%m-%d %H:%M')
+            initial = deadline.datetime
             self.fields[key] = forms.DateTimeField(
-                input_formats=['%Y-%m-%d %H:%M'],
                 label=label,
                 initial=initial,
                 required=False
             )
-            self.fields[key + '_completed'] = forms.BooleanField(
+            self.fields[completed_key] = forms.BooleanField(
                 label="Completed?",
                 required=False,
             )
+
+        self.fields['override'] = forms.BooleanField(
+            label='Override invalid dates?',
+            required=False,
+        )
+
+    def clean(self):
+        cleaned_data = super(UpdateForm, self).clean()
+
+        # check if user both changed a date and marked it as a complete
+        # cannot think of a reason they would want to do this so considering it a data entry error
+        for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
+            key = '{}'.format(index)
+            key_completed = '{}_completed'.format(index)
+
+            if deadline.datetime != cleaned_data.get(key) and cleaned_data.get(key_completed):
+                self.add_error(
+                    key,
+                    'Cannot complete a deadline and change it at the same time.'
+                )
+
+        # check if overriding invalid dates before doing date validation
+        if cleaned_data.get('override'):
+            return
+
+        # check deadlines
+        for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
+            key = '{}'.format(index)
+
+            # check if deadline has been changed and deadline is not inactive
+            if deadline.datetime != cleaned_data.get(key) and deadline.status == Deadline.ACTIVE:
+                deadline.datetime = cleaned_data.get(key)  # temporarily changing this should be fine if we're never
+                # actually saving it
+
+                if utils.is_deadline_invalid(deadline):
+                    self.add_error(
+                        key,
+                        'Deadline outside permissible limits.'
+                    )
 
 
 class UpdateCaseForm(Form):

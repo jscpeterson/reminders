@@ -1,11 +1,9 @@
 from datetime import timedelta
-from pytz import timezone
 import holidays
-from reminders import settings
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
-    TRIAL_DEADLINES
+    TRIAL_DEADLINES, JUDGES
 
 
 def clear_deadlines(case):
@@ -243,9 +241,41 @@ def is_deadline_invalid(deadline):
     elif deadline.type in [Deadline.CONDUCT_PTI]:
         return False
 
-    # Skipping this for not
+    # Skipping this for now
     if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE]:
         return False  # TODO set up pretrial motion response logic
 
     raise DeadlineTypeException('Deadline type {} not handled'.format(deadline.type))
 
+
+def find_judge_index(judge):
+    """
+    Finds the index of the judge by name in the JUDGES constant. Not an ideal way to go about this.
+    """
+    for judge_tuple in JUDGES:
+        if judge == judge_tuple[1]:
+            return judge_tuple[0] - 1
+
+
+def sort_judges(case):
+    """
+    Returns a reorganized version of the JUDGES constant based on a case, where the first entry is the current judge
+    on the case. This is a workaround to set the initial judge value in the HTML template.
+    """
+    judge = case.judge
+    judges_list = list(JUDGES)
+    judge_tuple = judges_list.pop(find_judge_index(judge))
+    judges_list.insert(0, judge_tuple)
+    return judges_list
+
+
+def get_disabled_fields(case):
+    """
+    Gets the disabled fields for a case to pass into the Update Form
+    """
+    disabled = [False, False]  # First two fields for judge and defense attorney should not be disabled
+    for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
+        answer = (deadline.status != Deadline.ACTIVE)
+        disabled.append(answer)
+        disabled.append(answer)
+    return disabled

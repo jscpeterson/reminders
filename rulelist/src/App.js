@@ -1,5 +1,4 @@
-import React, { Component } from 'react'
-import ReactDOM from 'react-dom'
+import React from 'react'
 import TextField, {HelperText, Input} from '@material/react-text-field';
 import MaterialIcon from '@material/react-material-icon';
 import MaterialTable from 'material-table'
@@ -8,11 +7,6 @@ import Cookies from 'js-cookie'
 class App extends React.Component {
   constructor(props) {
     super(props);
-
-    // EDITABLE FIELDS TODO move to constants.js later
-    // Judge
-    // Defense
-    // Notes
 
     this.state = {
       columns: [
@@ -24,72 +18,72 @@ class App extends React.Component {
           editable: 'never' },
         { title: 'Judge',
           field: 'judge' ,
-          editable: 'onUpdate'},
+          editable: 'never'},
         { title: 'Defense',
           field: 'defense-attorney' ,
-          editable: 'onUpdate' },
+          editable: 'never' },
 
         { title: 'Witness List',
           field: 'witness-list',
           type:'date',
           render: rowData => <span>{this.displayDate(rowData['witness-list'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Scheduling Conference',
           field: 'scheduling-conference',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['scheduling-conference'])}</span>,
-          editable: 'onUpdate'
+          editable: 'never'
         },
-        { title: 'Request PTIs',
+        { title: 'PTIs Requested',
           field: 'defense-request-ptis',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['defense-request-ptis'])}</span>,
-          editable: 'onUpdate' },
-        { title: 'Conduct PTIs',
+          editable: 'never' },
+        { title: 'PTIs Conducted',
           field: 'defense-conduct-ptis',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['defense-conduct-ptis'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Witness PTIs',
           field: 'witness-ptis',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['witness-ptis'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Scientific Evidence',
           field: 'scientific-evidence',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['scientific-evidence'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Pretrial Motion Filing',
           field: 'pretrial-motion-filing',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['pretrial-motion-filing'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Pretrial Conference',
           field: 'pretrial-conference',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['pretrial-conference'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Final Witness List',
           field: 'final-witness-list',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['final-witness-list'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Need for Interpreter',
           field: 'need-for-interpreter',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['need-for-interpreter'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Plea Agreement',
           field: 'plea-agreement',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['plea-agreement'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
         { title: 'Trial',
           field: 'trial',
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData['trial'])}</span>,
-          editable: 'onUpdate' },
+          editable: 'never' },
       ],
       tableData: [],
       jsonData: []
@@ -138,7 +132,6 @@ class App extends React.Component {
       row['judge'] = caseJSON['judge'];
       row['defense-attorney'] = caseJSON['defense_attorney'];
       row['notes'] = caseJSON['notes'];
-
 
       // Populate deadlines for case
       const deadlines = caseJSON['deadline_set']
@@ -202,62 +195,43 @@ class App extends React.Component {
         options={{
           pageSize: 10
         }}
-        editable={{
-          onRowUpdate: (newData, oldData) =>
-            new Promise((resolve, reject) => {
-              setTimeout(() => {
-                {
-                  // console.log('Update called');
-
-                  // standard row update behavior
-                  const data = this.state.tableData;
-                  const index = data.indexOf(oldData);
-                  data[index] = newData;
-
-                  // final part of standard row update behavior
-                  this.setState({ data }, () => resolve());
-
-                  // update json data from newData
-                  let dataToSend = this.state.jsonData[index];
-                  // EDITABLE FIELDS TODO move to constants.js later
-                  // Judge
-                  // Defense
-                  // Notes
-
-                  dataToSend['judge'] = newData['judge'];
-                  dataToSend['defense_attorney'] = newData['defense-attorney'];
-                  dataToSend['notes'] = newData['notes'];
-
-
-                  // console.log('dataToSend');
-                  // console.log(dataToSend);
-
-                  // Copy dates from deadlines to data that will be sent in request
-                  this.state.columns.forEach(function(data) {
-                    // console.log(data);
-                    if (data.type === 'date' && data.editable === 'onUpdate') {
-                      const deadlineIndex = dataToSend.deadline_set.findIndex(item => {
-                        return item.type === data.field
-                      });
-
-                      /* TODO: Will not update deadline not found because it was not included in state.jsonData
-                          This will be a problem when we want to enter a deadline that is currently blank.
-                      */
-                      if (deadlineIndex >= 0) {
-                        if (oldData[data.field] !== newData[data.field]) {
-                          dataToSend.deadline_set[deadlineIndex].datetime = newData[data.field];
-                        }
-                      }
-                    }
-                  });
-
-                  this.putData(dataToSend);
-
-                }
-                resolve()
-              }, 1000)
-            }),
-        }}
+        actions={[
+            {
+                icon: 'assignment',
+                tooltip: 'Update Case',
+                onClick: (event, rowData) => {
+                  console.log(rowData);
+                  let case_number = rowData['case-number'];
+                  window.location.href = `update/${case_number}`;
+                },
+            },
+            {
+                icon: 'date_range',
+                tooltip: 'Enter Scheduling Order',
+                // disabled: TODO Disable if trial is set ,
+                onClick: (event, rowData) => {
+                  if (rowData['trial'] !== undefined) {
+                    alert("Scheduling order has already been entered for this case.")
+                  } else {
+                    let case_number = rowData['case-number'];
+                    window.location.href = `track/${case_number}`;
+                  }
+                },
+            },
+            {
+                icon: 'gavel',
+                tooltip: 'New Motion',
+                // disabled: TODO Disable if trial is not set ,
+                onClick: (event, rowData) => {
+                  if (rowData['trial'] === undefined) {
+                    alert("No scheduling order has been entered for this case.")
+                  } else {
+                    let case_number = rowData['case-number'];
+                    window.location.href = `motion/${case_number}`;
+                  }
+                },
+            },
+        ]}
         detailPanel={[{
             tooltip: 'Notes',
             render:rowData => {
