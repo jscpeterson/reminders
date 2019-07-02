@@ -514,7 +514,8 @@ def motion_response(request, *args, **kwargs):
     This form allows the user to record that a motion response was filed.
     The deadline is marked as complete.
     """
-    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+    case = deadline.case
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
 
@@ -552,11 +553,11 @@ def complete(request, *args, **kwargs):
     """
     This page allows the user to mark a deadline as complete.
     """
-    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+    case = deadline.case
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
 
-    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
         form = CompleteForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
@@ -589,11 +590,11 @@ def complete(request, *args, **kwargs):
 def extension(request, *args, **kwargs):
     """ This page allows the user to record that an extension has been filed on a deadline """
 
-    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+    case = deadline.case
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
 
-    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
         form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
@@ -621,11 +622,11 @@ def extension(request, *args, **kwargs):
 def judge_confirmed(request, *args, **kwargs):
     """ This page allows the user to record that a judge has approved the extension for a deadline. """
 
-    case = Case.objects.get(case_number=kwargs.get('case_number'))
+    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
+    case = deadline.case
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
 
-    deadline = Deadline.objects.get(pk=kwargs.get('deadline_pk'))
     if request.method == 'POST':
         form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
         if form.is_valid():
