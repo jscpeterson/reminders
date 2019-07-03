@@ -283,20 +283,21 @@ def is_motion_response_deadline_invalid(motion, motion_response_deadline):
                                                                 hour=LAST_DAY_HOUR, minute=LAST_DAY_MINUTE,
                                                                 second=LAST_DAY_SECOND)
 
-    check1 = is_deadline_within_limits(
+    # Deadline is invalid if first check is not within limits or the second check is not within limits
+    check1 = not is_deadline_within_limits(
         deadline=motion_response_deadline,
         event=motion.date_received,
         days=RESPONSE_AFTER_FILING_DAYS,
         future_event=False,
     )
-    check2 = is_deadline_within_limits(
+    check2 = not is_deadline_within_limits(
         deadline=motion_response_deadline,
         event=motion.case.trial_date,
         days=deadline_dict[str(Deadline.PRETRIAL_MOTION_RESPONSE)],
         future_event=True,
     )
 
-    return not check1 and check2
+    return check1 or check2
 
 
 def find_judge_index(judge):
