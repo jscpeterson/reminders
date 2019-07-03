@@ -115,11 +115,18 @@ class Email:
 
         required_days = utils.get_deadline_dict(self.deadline.case.track)[str(self.deadline.type)]
 
-        return '''{indent}The {desc} is over {days} days from the triggering event, which may be in violation of \
-LR2-400. Please visit {url} to confirm that the judge is aware of this, or visit {update_url} to change the date.'''.format(
+        if self.deadline.type == Deadline.PRETRIAL_MOTION_RESPONSE:
+            motion_clause = ' or is over 10 days from the motion filing,'
+        else:
+            motion_clause = ''
+
+        return '''{indent}The {desc} is over {days} days from the triggering event,{motion_clause} which may be in \
+violation of LR2-400. Please visit {url} to confirm that the judge is aware of this, or visit {update_url} to change \
+the date.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
             days=required_days,
+            motion_clause=motion_clause,
             url=url,
             update_url=update_url,
         )

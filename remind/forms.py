@@ -79,7 +79,7 @@ class MotionDateForm(Form):
 
         deadline_dict = utils.get_deadline_dict(self.motion.case.track)
 
-        initial_response = utils.get_actual_deadline_from_start(self.motion.date_received, 10)
+        initial_response = utils.get_motion_response_deadline(self.motion)
         initial_hearing = utils.get_actual_deadline_from_end(self.motion.case.trial_date,
                                                              deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)], )
 
@@ -107,24 +107,18 @@ class MotionDateForm(Form):
         if cleaned_data.get('override'):
             return
 
-        deadline_dict = utils.get_deadline_dict(self.motion.case.track)
-
         if 'response_deadline' in cleaned_data:
             response_deadline = cleaned_data.get('response_deadline')
 
-            # if not utils.is_deadline_within_limits(
-            #     deadline=scheduling_conf_date,
-            #     event=self.case.arraignment_date,
-            #     days=SCHEDULING_ORDER_DEADLINE_DAYS,
-            #     future_event=False,
-            # ):
-            #     self.add_error(
-            #         'scheduling_conference_date',
-            #         'Scheduling conference date is past permissible limit'
-            #     )
+            if utils.is_motion_response_deadline_invalid(self.motion, response_deadline):
+                self.add_error(
+                    'response_deadline',
+                    'Response deadline is past permissible limit'
+                )
 
         if 'date_hearing' in cleaned_data:
             date_hearing = cleaned_data.get('date_hearing')
+            deadline_dict = utils.get_deadline_dict(self.motion.case.track)
 
             if not utils.is_deadline_within_limits(
                     deadline=date_hearing,
