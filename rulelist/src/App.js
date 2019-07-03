@@ -245,6 +245,7 @@ class App extends React.Component {
             value={ rowData['notes'] }
             onChange={(e) => this.setNotes(rowData, e.currentTarget.value)} />
         </TextField>
+              Save?
       </div>
         }}]}
       />
