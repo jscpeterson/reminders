@@ -4,7 +4,7 @@ import MaterialIcon from '@material/react-material-icon';
 import MaterialTable from 'material-table'
 import Cookies from 'js-cookie'
 
-class App extends React.Component {
+class RuleList extends React.Component {
   constructor(props) {
     super(props);
 
@@ -35,14 +35,14 @@ class App extends React.Component {
           editable: 'never'
         },
         { title: 'PTIs Requested',
-          field: 'defense-request-ptis',
+          field: 'ptis-requested',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['defense-request-ptis'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData['ptis-requested'])}</span>,
           editable: 'never' },
         { title: 'PTIs Conducted',
-          field: 'defense-conduct-ptis',
+          field: 'ptis-conducted',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['defense-conduct-ptis'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData['ptis-conducted'])}</span>,
           editable: 'never' },
         { title: 'Witness PTIs',
           field: 'witness-ptis',
@@ -90,7 +90,7 @@ class App extends React.Component {
     }
   }
 
-  displayDate(date) {
+  displayDate(date) { //TODO Move this function to App.js or utils
     /* Displays a date as M/D/YYYY.
     * param date: either Date or string
     * */
@@ -253,4 +253,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default RuleList;

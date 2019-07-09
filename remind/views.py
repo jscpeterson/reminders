@@ -69,7 +69,7 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
 
 class DashView(LoginRequiredMixin, ListView):
     template_name = 'remind/dashboard.html'
-    component = 'rulelist.js'
+    component = 'frontend.js'
 
     def get_queryset(self):
         cases = case_utils.get_cases(self.request.user)
