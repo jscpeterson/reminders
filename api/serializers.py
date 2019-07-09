@@ -7,8 +7,21 @@ class DeadlineSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
 
+    deadline_name = serializers.CharField()
+    defendant = serializers.CharField()
+    case_number = serializers.CharField()
+    judge = serializers.CharField()
+    defense_attorney = serializers.CharField()
+
     class Meta:
         model = Deadline
+        read_only_fields = (
+            'deadline_name',
+            'defendant',
+            'case_number',
+            'judge',
+            'defense_attorney',
+        )
         fields = '__all__'
 
     def get_type(self, obj):

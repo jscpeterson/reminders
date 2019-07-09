@@ -12,10 +12,16 @@ class DeadlineViewSet(viewsets.ModelViewSet):
         case_number = self.request.query_params.get('case', None)
 
         if case_number is None:
+            # No case number specified
+            # Get all active cases belonging to the user sorted by soonest to expire
             return super().get_queryset().filter(
                 Q(case__supervisor=self.request.user) |
                 Q(case__prosecutor=self.request.user) |
                 Q(case__secretary=self.request.user)
+            ).filter(
+                status=Deadline.ACTIVE
+            ).order_by(
+                'datetime'
             )
         elif not Case.objects.filter(case_number=case_number).exists():
             return []

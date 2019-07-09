@@ -104,11 +104,12 @@ class Deadline(TimeStampedModel):
     TRIAL = 14
 
     TYPE_CHOICES = (
+        # TODO Update these names as accurate short descriptions - they are significant now
         (FFA, 'FFA'),
         (SCHEDULING_CONFERENCE, 'Scheduling Conference'),
         (WITNESS_LIST, 'Witness List'),
-        (REQUEST_PTI, 'Defense Request PTIs'),
-        (CONDUCT_PTI, 'Defense Conduct PTIs'),
+        (REQUEST_PTI, 'PTIs Requested'),
+        (CONDUCT_PTI, 'PTIs Conducted'),
         (WITNESS_PTI, 'Witness PTIs'),
         (SCIENTIFIC_EVIDENCE, 'Scientific Evidence'),
         (PRETRIAL_MOTION_FILING, 'Pretrial Motion Filing'),
@@ -140,6 +141,33 @@ class Deadline(TimeStampedModel):
     invalid_notice_sent = models.BooleanField(default=False)
     invalid_judge_approved = models.BooleanField(default=False)
     invalid_extension_filed = models.BooleanField(default=False)
+
+    def deadline_name(self):
+        if self.type in [Deadline.PRETRIAL_MOTION_RESPONSE,]:
+            label = 'Response to {motion_title}'.format(
+                motion_title=self.motion.title,
+            )
+        elif self.type in [Deadline.PRETRIAL_MOTION_HEARING,]:
+            label = 'Hearing for {motion_title}'.format(
+                motion_title=self.motion.title
+            )
+        else:
+            label = '{deadline_simple_desc}'.format(
+                deadline_simple_desc=Deadline.TYPE_CHOICES[self.type][1],
+            )
+        return label
+
+    def defendant(self):
+        return self.case.defendant
+
+    def case_number(self):
+        return self.case.case_number
+
+    def judge(self):
+        return self.case.judge
+
+    def defense_attorney(self):
+        return self.case.defense_attorney
 
     def __str__(self):
         return self.TYPE_CHOICES[self.type][1]
