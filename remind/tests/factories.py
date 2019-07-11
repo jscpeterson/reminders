@@ -1,4 +1,7 @@
 from faker import Faker
+from random import randint
+
+from remind.constants import JUDGES
 from remind.models import Case
 from users.models import CustomUser
 
@@ -46,4 +49,6 @@ class CaseFactory:
             supervisor=UserFactory.create(CustomUser.SUPERVISOR),
             case_number=fake.uuid4()[:8],
             arraignment_date=fake.date(),
+            judge=JUDGES[randint(0, len(JUDGES)-1)][1],
+            defendant=fake.first_name() + ' ' + fake.last_name(),
         )
