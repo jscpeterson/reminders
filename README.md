@@ -46,6 +46,9 @@ To start the project in a development setting, do the following:
   
     `cp params.ini.example params.ini`
   * Enter the email addresses for your fake users in params.ini. The emails should be real accounts you can check.
+  * Run the management command to create the users.
+
+    `python manage.py create_fake_users`
 
 * Run the server. 
 
