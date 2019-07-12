@@ -1,9 +1,10 @@
+from random import randint
 from django.test import TestCase
 from datetime import datetime
 from pytz import timezone
 from remind import utils
 from remind.constants import LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
-from remind.models import Deadline, Case
+from remind.models import Deadline, Case, Motion
 from django.conf import settings
 from users.models import CustomUser
 
@@ -55,7 +56,8 @@ class TestActualDeadline(TestCase):
                          tzinfo=timezone(settings.TIME_ZONE))  # Date of trial
         days = 15
         result = datetime(2019, 10, 4, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
-                          tzinfo=timezone(settings.TIME_ZONE))  # Latest possible deadline for witness list/language access services
+                          tzinfo=timezone(
+                              settings.TIME_ZONE))  # Latest possible deadline for witness list/language access services
         self.assertEqual(utils.get_actual_deadline_from_end(event, days), result)
 
     def test_holiday_deadline_from_end(self):
@@ -82,8 +84,10 @@ class TestDeadlineCheck(TestCase):
         bad_deadline = datetime(2018, 10, 2, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE))
         self.assertTrue(utils.is_deadline_within_limits(deadline=deadline, event=event, days=days, future_event=False))
-        self.assertTrue(utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=False))
-        self.assertFalse(utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=False))
+        self.assertTrue(
+            utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=False))
+        self.assertFalse(
+            utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=False))
 
     def test_10day_prior_event(self):
         event = datetime(2018, 8, 2, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
@@ -96,8 +100,10 @@ class TestDeadlineCheck(TestCase):
         bad_deadline = datetime(2018, 8, 17, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE))
         self.assertTrue(utils.is_deadline_within_limits(deadline=deadline, event=event, days=days, future_event=False))
-        self.assertTrue(utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=False))
-        self.assertFalse(utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=False))
+        self.assertTrue(
+            utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=False))
+        self.assertFalse(
+            utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=False))
 
     def test_long_future_event(self):
         event = datetime(2019, 10, 21, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
@@ -110,8 +116,10 @@ class TestDeadlineCheck(TestCase):
         bad_deadline = datetime(2019, 10, 7, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE))
         self.assertTrue(utils.is_deadline_within_limits(deadline=deadline, event=event, days=days, future_event=True))
-        self.assertTrue(utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=True))
-        self.assertFalse(utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=True))
+        self.assertTrue(
+            utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=True))
+        self.assertFalse(
+            utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=True))
 
     def test_10day_future_event(self):
         event = datetime(2019, 10, 21, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
@@ -124,8 +132,10 @@ class TestDeadlineCheck(TestCase):
         bad_deadline = datetime(2019, 10, 7, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
                                 tzinfo=timezone(settings.TIME_ZONE))
         self.assertTrue(utils.is_deadline_within_limits(deadline=deadline, event=event, days=days, future_event=True))
-        self.assertTrue(utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=True))
-        self.assertFalse(utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=True))
+        self.assertTrue(
+            utils.is_deadline_within_limits(deadline=good_deadline, event=event, days=days, future_event=True))
+        self.assertFalse(
+            utils.is_deadline_within_limits(deadline=bad_deadline, event=event, days=days, future_event=True))
 
 
 class TestExtensionCheck(TestCase):
@@ -282,3 +292,43 @@ class TestInvalidDeadlineCheck(TestCase):
         )
         self.assertFalse(utils.is_deadline_invalid(good_deadline))
         self.assertTrue(utils.is_deadline_invalid(invalid_deadline))
+
+    def test_motion_response_deadline(self):
+        case = Case.objects.create(
+            arraignment_date=datetime(2019, 1, 11, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+                                      tzinfo=timezone(settings.TIME_ZONE)),
+            trial_date=datetime(2019, 5, 5, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+                                tzinfo=timezone(settings.TIME_ZONE)),
+            track=1,
+            secretary=self.secretary,
+            prosecutor=self.prosecutor,
+            supervisor=self.supervisor,
+        )
+
+        motion = Motion.objects.create(
+            case=case,
+            type=Motion.TYPE_CHOICES[randint(0, len(Motion.TYPE_CHOICES) - 1)][0],
+            date_received=datetime(2019, 1, 14, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+                                   tzinfo=timezone(settings.TIME_ZONE)),
+        )
+
+        print(utils.get_actual_deadline_from_start(motion.date_received, 10))
+
+        late_motion = Motion.objects.create(
+            case=case,
+            type=Motion.TYPE_CHOICES[randint(0, len(Motion.TYPE_CHOICES) - 1)][0],
+            date_received=datetime(2019, 3, 26, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+                                   tzinfo=timezone(settings.TIME_ZONE)),
+        )
+
+        good_deadline = datetime(2019, 1, 29, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+                                 tzinfo=timezone(settings.TIME_ZONE)),
+        self.assertFalse(utils.is_motion_response_deadline_invalid(motion, good_deadline[0]))
+
+        invalid_deadline_due_to_date_recieved = datetime(2019, 1, 30, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+                                                         tzinfo=timezone(settings.TIME_ZONE)),
+        self.assertTrue(utils.is_motion_response_deadline_invalid(motion, invalid_deadline_due_to_date_recieved[0]))
+
+        invalid_deadline_due_to_trial = datetime(2019, 3, 27, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND,
+                                                 tzinfo=timezone(settings.TIME_ZONE)),
+        self.assertTrue(utils.is_motion_response_deadline_invalid(late_motion, invalid_deadline_due_to_trial[0]))

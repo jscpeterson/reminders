@@ -23,14 +23,6 @@ def is_weekend_or_nm_holiday(date):
     return date.weekday() in [SATURDAY, SUNDAY] or date.date() in holidays.US(state='NM', years=date.year).keys()
 
 
-def count_holidays_weekends_in_range_from_start(start_date, num_days):
-    return sum([1 for i in range(num_days) if is_weekend_or_nm_holiday(start_date + timedelta(days=i))])
-
-
-def count_holidays_weekends_in_range_from_end(end_date, num_days):
-    return sum([1 for i in range(num_days) if is_weekend_or_nm_holiday(end_date - timedelta(days=i))])
-
-
 class InvalidCaseTrackException(Exception):
     pass
 
@@ -91,7 +83,14 @@ def get_actual_deadline_from_start(start_date, days):
     # of days is ten (10) days or less
     else:
         # (b) exclude intermediate Saturdays, Sundays, and legal holidays; and
-        result_date = next_day + timedelta(days=days + count_holidays_weekends_in_range_from_start(next_day, days))
+        i = 0
+        actual_days = days
+        while i < actual_days:
+            day_before_deadline = next_day + timedelta(days=i)
+            if is_weekend_or_nm_holiday(day_before_deadline):
+                actual_days += 1
+            i += 1
+        result_date = next_day + timedelta(days=actual_days)
 
     # (c) include the last day of the period,
     result_date = result_date - timedelta(days=1)
@@ -151,7 +150,14 @@ def get_actual_deadline_from_end(end_date, days):
     # of days is ten (10) days or less
     else:
         # (b) exclude intermediate Saturdays, Sundays, and legal holidays; and
-        result_date = prior_day - timedelta(days=days + count_holidays_weekends_in_range_from_end(prior_day, days))
+        i = 0
+        actual_days = days
+        while i < days:
+            day_before_deadline = prior_day - timedelta(days=i)
+            if is_weekend_or_nm_holiday(day_before_deadline):
+                actual_days += 1
+            i += 1
+        result_date = prior_day - timedelta(days=actual_days)
 
     # (c) include the last day of the period,
     result_date = result_date + timedelta(days=1)

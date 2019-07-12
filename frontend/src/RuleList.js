@@ -102,23 +102,13 @@ class RuleList extends React.Component {
 
     if (date) {
       let realDate = this.toDate(date);
-      console.log("realDate");
-      console.log(realDate);
       let dateString = this.formatDate(realDate);
-      console.log("dateString");
-      console.log(dateString);
       let deadlineUrgency = this.getDateUrgency(realDate);
-      console.log("deadlineUrgency");
-      console.log(deadlineUrgency);
       let bgColor = this.getDateBgColor(deadlineUrgency);
-      console.log("bgColor");
-      console.log(bgColor);
       const spanStyle = {
         backgroundColor: bgColor
       };
       const display = <span style={spanStyle}>{dateString}</span>;
-      console.log('display');
-      console.log(display);
       return display;
     } else {
       return <span></span>;
@@ -136,7 +126,7 @@ class RuleList extends React.Component {
 
     if (THRESHOLD_IN_TROUBLE_DAYS < daysLeft) {
       return "OnTrack";
-    } else if (THRESHOLD_URGENT_DAYS < daysLeft <= THRESHOLD_IN_TROUBLE_DAYS) {
+    } else if (THRESHOLD_URGENT_DAYS < daysLeft && daysLeft <= THRESHOLD_IN_TROUBLE_DAYS) {
       return "InTrouble";
     } else if (daysLeft <= THRESHOLD_URGENT_DAYS) {
       return "Urgent";
@@ -223,8 +213,6 @@ class RuleList extends React.Component {
   }
 
   putData(data) {
-    // console.log('Data sent to /api/cases/ for update');
-    // console.log(data);
     let pk = data['id'];
     let url = `/api/cases/${pk}/`;
     return fetch(url, {
@@ -266,7 +254,6 @@ class RuleList extends React.Component {
                 icon: 'assignment',
                 tooltip: 'Update Case',
                 onClick: (event, rowData) => {
-                  console.log(rowData);
                   let case_number = rowData['case-number'];
                   window.location.href = `update/${case_number}`;
                 },

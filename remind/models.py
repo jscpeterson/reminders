@@ -104,7 +104,6 @@ class Deadline(TimeStampedModel):
     TRIAL = 14
 
     TYPE_CHOICES = (
-        # TODO Update these names as accurate short descriptions - they are significant now
         (FFA, 'FFA'),
         (SCHEDULING_CONFERENCE, 'Scheduling Conference'),
         (WITNESS_LIST, 'Witness List'),
