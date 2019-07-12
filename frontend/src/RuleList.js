@@ -4,6 +4,9 @@ import MaterialIcon from '@material/react-material-icon';
 import MaterialTable from 'material-table'
 import Cookies from 'js-cookie'
 
+const THRESHOLD_IN_TROUBLE_DAYS = 5;
+const THRESHOLD_URGENT_DAYS = 2;
+
 class RuleList extends React.Component {
   constructor(props) {
     super(props);
@@ -91,29 +94,82 @@ class RuleList extends React.Component {
   }
 
   displayDate(date) { //TODO Move this function to App.js or utils
-    /* Displays a date as M/D/YYYY.
-    * param date: either Date or string
-    * */
+    /** 
+     * Displays a date as M/D/YYYY.
+     * @param date: either Date or string
+     * @return {span} date with proper style and format
+     */
 
-    let realDate = new Date();
     if (date) {
-      if (typeof(date) === 'string') {
-        realDate = new Date(date);
-      } else {
-        realDate = date;
-      }
-
-      // Could use Moment.js here instead...
-      const day = realDate.getDate().toString();
-      const month = (realDate.getMonth() + 1).toString();
-      const year = realDate.getFullYear().toString();
-
-      const dateString = month.concat('/', day, '/', year)
-
-      return dateString;
+      let realDate = this.toDate(date);
+      let dateString = this.formatDate(realDate);
+      let deadlineUrgency = this.getDateUrgency(realDate);
+      let bgColor = this.getDateBgColor(deadlineUrgency);
+      const spanStyle = {
+        backgroundColor: bgColor
+      };
+      const display = <span style={spanStyle}>{dateString}</span>;
+      return display;
     } else {
-      return '';
+      return <span></span>;
     }
+  }
+
+  getDateUrgency(dueDate) {
+    /**
+     * Returns urgency of deadline based on proximity to due date
+     * @param {Date} dueDate Due date of deadline
+     * @return {string} urgency of deadline
+     */
+    const today = new Date();
+    const daysLeft = daysBetween(today, dueDate);
+
+    if (THRESHOLD_IN_TROUBLE_DAYS < daysLeft) {
+      return "OnTrack";
+    } else if (THRESHOLD_URGENT_DAYS < daysLeft && daysLeft <= THRESHOLD_IN_TROUBLE_DAYS) {
+      return "InTrouble";
+    } else if (daysLeft <= THRESHOLD_URGENT_DAYS) {
+      return "Urgent";
+    } else {
+      return "Default";
+    } 
+  }
+
+  getDateBgColor(urgency) {
+    /**
+     * Returns background color for date cell based on due date
+     * @param {string} urgency Indicates how close a deadline is to due date
+     * @return {string} background color to use for date
+     */
+    return bgColors[urgency];
+  }
+
+  toDate(date) {
+    /**
+     * Accepts date as string or date and returns to date
+     * @param date Date as string or Date
+     * @return {Date} date
+     */
+    if (typeof(date) === 'string') {
+      return new Date(date);
+    } else {
+      return date;
+    }
+  }
+
+  formatDate(date) {
+    /**
+     * Formats the date as M/D/YYYY
+     * @param {Date} date
+     * @return {string} properly formatted date string
+     */    
+    
+     // Could use Moment.js here instead...
+    const day = date.getDate().toString();
+    const month = (date.getMonth() + 1).toString();
+    const year = date.getFullYear().toString();
+
+    return month.concat('/', day, '/', year)
   }
 
   populateTable(cases) {
@@ -157,8 +213,6 @@ class RuleList extends React.Component {
   }
 
   putData(data) {
-    // console.log('Data sent to /api/cases/ for update');
-    // console.log(data);
     let pk = data['id'];
     let url = `/api/cases/${pk}/`;
     return fetch(url, {
@@ -200,7 +254,6 @@ class RuleList extends React.Component {
                 icon: 'assignment',
                 tooltip: 'Update Case',
                 onClick: (event, rowData) => {
-                  console.log(rowData);
                   let case_number = rowData['case-number'];
                   window.location.href = `update/${case_number}`;
                 },
@@ -251,6 +304,39 @@ class RuleList extends React.Component {
       />
     )
   }
+}
+
+const bgColors = {
+  "Expired": "#C0C0C0", // light gray
+  "Completed": "#66B2FF", // light blue
+  "OnTrack": "#66FF66", // light green
+  "InTrouble": "#FFFF66", // light yellow
+  "Urgent": "#FF6666", // light red
+  "Default": "#FFFFFF" // white
+} 
+
+// Per this source
+// https://stackoverflow.com/questions/542938/how-do-i-get-the-number-of-days-between-two-dates-in-javascript
+function treatAsUTC(date) {
+  /**
+   * Converts date to UTC
+   * @param {Date} date Date in any timezone
+   * @return {Date} Date as UTC
+   */
+    let result = new Date(date);
+    result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
+    return result;
+}
+
+function daysBetween(startDate, endDate) {
+  /**
+   * Finds days between two dates
+   * @param {Date} startDate Start date
+   * @param {Date} endDate End date
+   * @return {number} Date as UTC
+   */
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    return (treatAsUTC(endDate) - treatAsUTC(startDate)) / millisecondsPerDay;
 }
 
 export default RuleList;
