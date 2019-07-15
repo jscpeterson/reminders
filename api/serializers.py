@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from remind.constants import EVENT_DEADLINES
 from remind.models import Deadline, Case
 from drf_writable_nested import WritableNestedModelSerializer
 from remind.constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS
@@ -9,6 +11,7 @@ class DeadlineSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     first_reminder_days = serializers.SerializerMethodField()
     second_reminder_days = serializers.SerializerMethodField()
+    event = serializers.SerializerMethodField()
 
     deadline_name = serializers.CharField()
     defendant = serializers.CharField()
@@ -40,6 +43,9 @@ class DeadlineSerializer(serializers.ModelSerializer):
 
     def get_second_reminder_days(self, obj):
         return SECOND_REMINDER_DAYS[obj.type]
+
+    def get_event(self, obj):
+        return obj.type in EVENT_DEADLINES
 
 
 class CaseSerializer(WritableNestedModelSerializer):
