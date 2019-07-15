@@ -4,8 +4,9 @@ import MaterialIcon from '@material/react-material-icon';
 import MaterialTable from 'material-table'
 import Cookies from 'js-cookie'
 
-const THRESHOLD_IN_TROUBLE_DAYS = 5;
-const THRESHOLD_URGENT_DAYS = 2;
+const DEADLINE_ACTIVE = "active";
+const DEADLINE_COMPLETE = "complete";
+const DEADLINE_EXPIRED = "expired";
 
 class RuleList extends React.Component {
   constructor(props) {
@@ -29,63 +30,63 @@ class RuleList extends React.Component {
         { title: 'Witness List',
           field: 'witness-list',
           type:'date',
-          render: rowData => <span>{this.displayDate(rowData['witness-list'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'witness-list')}</span>,
           editable: 'never' },
         { title: 'Scheduling Conference',
           field: 'scheduling-conference',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['scheduling-conference'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'scheduling-conference')}</span>,
           editable: 'never'
         },
         { title: 'PTIs Requested',
           field: 'ptis-requested',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['ptis-requested'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'ptis-requested')}</span>,
           editable: 'never' },
         { title: 'PTIs Conducted',
           field: 'ptis-conducted',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['ptis-conducted'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'ptis-conducted', )}</span>,
           editable: 'never' },
         { title: 'Witness PTIs',
           field: 'witness-ptis',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['witness-ptis'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'witness-ptis')}</span>,
           editable: 'never' },
         { title: 'Scientific Evidence',
           field: 'scientific-evidence',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['scientific-evidence'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'scientific-evidence')}</span>,
           editable: 'never' },
         { title: 'Pretrial Motion Filing',
           field: 'pretrial-motion-filing',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['pretrial-motion-filing'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'pretrial-motion-filing')}</span>,
           editable: 'never' },
         { title: 'Pretrial Conference',
           field: 'pretrial-conference',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['pretrial-conference'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'pretrial-conference')}</span>,
           editable: 'never' },
         { title: 'Final Witness List',
           field: 'final-witness-list',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['final-witness-list'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'final-witness-list')}</span>,
           editable: 'never' },
         { title: 'Need for Interpreter',
           field: 'need-for-interpreter',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['need-for-interpreter'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'need-for-interpreter',)}</span>,
           editable: 'never' },
         { title: 'Plea Agreement',
           field: 'plea-agreement',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['plea-agreement'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'plea-agreement')}</span>,
           editable: 'never' },
         { title: 'Trial',
           field: 'trial',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData['trial'])}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'trial')}</span>,
           editable: 'never' },
       ],
       tableData: [],
@@ -93,17 +94,20 @@ class RuleList extends React.Component {
     }
   }
 
-  displayDate(date) { //TODO Move this function to App.js or utils
+  displayDate(rowData, key) {
     /** 
      * Displays a date as M/D/YYYY.
-     * @param date: either Date or string
+     * @param rowData: all of the case data from a given row
+     * @param key: the key of the date to be displayed
      * @return {span} date with proper style and format
      */
+    let date = rowData[key];
+    let deadlineData = this.getDeadlineData(rowData, key);
 
     if (date) {
       let realDate = this.toDate(date);
       let dateString = this.formatDate(realDate);
-      let deadlineUrgency = this.getDateUrgency(realDate);
+      let deadlineUrgency = this.getDateUrgency(realDate, deadlineData);
       let bgColor = this.getDateBgColor(deadlineUrgency);
       const spanStyle = {
         backgroundColor: bgColor
@@ -115,24 +119,58 @@ class RuleList extends React.Component {
     }
   }
 
-  getDateUrgency(dueDate) {
+  getDeadlineData(rowData, key) {
+      /**
+       * Returns the json data for a deadline given the rowData for the case and the key corresponding to the deadline.
+       * @param rowData: all of the case data from a given row
+       * @param key: the key of the date to be displayed
+       * @return json data for the deadline
+       */
+      let index = rowData['tableData'].id;
+      let json = this.state.jsonData[index];
+      let deadlines = json['deadline_set'];
+      return deadlines.filter(function(data){ return data.type === key })[0];
+  }
+
+  getDateUrgency(dueDate, deadlineData) {
     /**
      * Returns urgency of deadline based on proximity to due date
      * @param {Date} dueDate Due date of deadline
+     * @param deadlineData: json data for a deadline
      * @return {string} urgency of deadline
      */
     const today = new Date();
     const daysLeft = daysBetween(today, dueDate);
 
-    if (THRESHOLD_IN_TROUBLE_DAYS < daysLeft) {
-      return "OnTrack";
-    } else if (THRESHOLD_URGENT_DAYS < daysLeft && daysLeft <= THRESHOLD_IN_TROUBLE_DAYS) {
-      return "InTrouble";
-    } else if (daysLeft <= THRESHOLD_URGENT_DAYS) {
-      return "Urgent";
-    } else {
+    // Threshold days are one day before the reminders are sent out
+    const thresholdInTroubleDays = deadlineData['first_reminder_days'] + 1;
+    const thresholdUrgentDays = deadlineData['second_reminder_days'] + 1;
+
+    if (deadlineData['status'] === DEADLINE_COMPLETE){
+      return "Completed";
+    }
+
+    else if (deadlineData['status'] === DEADLINE_EXPIRED) {
+      return "Expired";
+    }
+
+    else if (deadlineData['status'] === DEADLINE_ACTIVE) {
+      if (thresholdInTroubleDays < daysLeft) {
+        return "OnTrack";
+      } else if (thresholdUrgentDays < daysLeft && daysLeft <= thresholdInTroubleDays) {
+        return "InTrouble";
+      } else if (daysLeft <= thresholdUrgentDays) {
+        return "Urgent";
+      } else {
+        return "Default";
+      }
+    }
+
+    else {
+      // Status is incorrect if code hits this point
       return "Default";
-    } 
+    }
+
   }
 
   getDateBgColor(urgency) {
@@ -227,6 +265,7 @@ class RuleList extends React.Component {
 
   componentDidMount() {
     this.fetchCases();
+
   }
 
   setNotes(rowData, value) {
@@ -284,6 +323,14 @@ class RuleList extends React.Component {
                   }
                 },
             },
+            // {
+            //     icon: 'bug_report',
+            //     tooltip: 'Debug',
+            //     onClick: (event, rowData) => {
+            //       console.log(rowData);
+            //       console.log(rowData.index);
+            //     }
+            // },
         ]}
         detailPanel={[{
             tooltip: 'Notes',
