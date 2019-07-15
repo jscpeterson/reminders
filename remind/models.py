@@ -141,6 +141,9 @@ class Deadline(TimeStampedModel):
     invalid_judge_approved = models.BooleanField(default=False)
     invalid_extension_filed = models.BooleanField(default=False)
 
+    def first_reminder_days(self):
+        return self.type
+
     def deadline_name(self):
         if self.type in [Deadline.PRETRIAL_MOTION_RESPONSE,]:
             label = 'Response to {motion_title}'.format(
