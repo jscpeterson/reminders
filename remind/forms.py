@@ -5,7 +5,7 @@ from datetime import timedelta
 from users.models import CustomUser
 from django import forms
 from . import utils
-from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, JUDGES
+from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, JUDGES, EVENT_DEADLINES
 
 TRUE_FALSE_CHOICES = (
     (True, 'Yes'),
@@ -393,6 +393,13 @@ class UpdateForm(Form):
                     'Cannot complete a deadline and change it at the same time.'
                 )
 
+            # event deadlines should not be completed
+            if deadline.type in EVENT_DEADLINES and cleaned_data.get(key_completed):
+                self.add_error(
+                    key,
+                    'This is an event, you do not need to complete it.'
+                )
+
         # check if overriding invalid dates before doing date validation
         if cleaned_data.get('override'):
             return
@@ -425,7 +432,7 @@ class CompleteForm(Form):
         deadline_pk = kwargs.pop('deadline_pk')
         super(CompleteForm, self).__init__(*args, **kwargs)
 
-        deadline = Deadline.objects.get(pk=deadline_pk)
+        self.deadline = Deadline.objects.get(pk=deadline_pk)
 
         label = 'Task completed'
 
@@ -433,6 +440,15 @@ class CompleteForm(Form):
             label=label,
             required=False
         )
+
+    def clean(self):
+        cleaned_data = super(CompleteForm, self).clean()
+
+        if self.deadline.type in EVENT_DEADLINES:
+            self.add_error(
+                'completed',
+                'This is an event, you do not need to complete it.'
+            )
 
 
 class ExtensionForm(Form):

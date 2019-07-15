@@ -23,9 +23,12 @@ class UpcomingDeadlines extends React.Component {
               { title: 'Defense',
                 field: 'defense-attorney' },
 
-              // This column is only for storing the pk - user should not see
+              // These columns are only for storing data - user shouldn't see these.
               { title: 'PK - YOU SHOULDN\'T SEE ME',
                 field: 'pk',
+                hidden: true },
+              { title: 'EVENT - YOU SHOULDN\'T SEE ME',
+                field: 'event',
                 hidden: true },
           ],
           tableData: [],
@@ -86,6 +89,7 @@ class UpcomingDeadlines extends React.Component {
           row['judge'] = deadlineJSON['judge'];
           row['defense-attorney'] = deadlineJSON['defense_attorney'];
           row['pk'] = deadlineJSON['id'];
+          row['event'] = deadlineJSON['event'];
 
           dataArray.push(row);
 
@@ -111,9 +115,22 @@ class UpcomingDeadlines extends React.Component {
                     tooltip: 'Complete Deadline',
                     onClick: (event, rowData) => {
                         let pk = rowData['pk'];
-                        window.location.href = `complete/${pk}`;
-                    }
-                }
+                        if (rowData['event']) {
+                            alert('This is a deadline for an event - you do not need to complete it.')
+                        } else {
+                            window.location.href = `complete/${pk}`;
+                        }
+                    },
+                },
+            // {
+            //     // Debug button for checking data - comment out in production
+            //     icon: 'bug_report',
+            //     tooltip: 'Debug',
+            //     onClick: (event, rowData) => {
+            //       console.log(rowData);
+            //       console.log(rowData['event'])
+            //     }
+            // },
             ]}
             />
     );
