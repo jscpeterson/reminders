@@ -19,6 +19,8 @@ DATABASES = {
     }
 }
 
+BASE_URL = os.environ.get('BASE_URL')
+
 INSTALLED_APPS += [
     'debug_toolbar',
 ]

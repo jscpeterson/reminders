@@ -19,7 +19,7 @@ BASE_DIR = up(up(up(os.path.abspath(__file__))))
 
 dotenv.read_dotenv(os.path.join(BASE_DIR, '.env'))
 
-BASE_URL = os.environ.get('BASE_URL')
+# BASE_URL = os.environ.get('BASE_URL')
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 

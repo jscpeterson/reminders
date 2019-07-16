@@ -6,7 +6,9 @@ from .base import *
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-ALLOWED_HOSTS += ['172.30.143.164']
+ALLOWED_HOSTS += ['172.30.143.164', '172.30.141.221', 'daapps']
+
+BASE_URL = 'http://daapps'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -24,6 +26,10 @@ DATABASES = {
         'PORT': os.environ.get('POSTGRES_PORT'),
     }
 }
+
+#INSTALLED_APPS += [
+#    'debug_toolbar',
+#]
 
 # Celery Settings
 # https://docs.celeryproject.org/en/latest/userguide/configuration.html
