@@ -14,6 +14,8 @@
                 Type: {{ motion_type }} <br />
                 Filing Date: {{ date_received }} <br />
                 {% form form=form %}{% endform %}
+                <button class="btn" onclick="window.location.href = `/remind/`;
+                return false;">Back</button>
                 <button type="submit" name="_submit" class="btn">Submit</button>
             </form>
         </div>
