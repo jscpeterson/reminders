@@ -64,8 +64,8 @@ class Email:
                 date=self.deadline.datetime.date()
             ),
             self.SCHEDULING_CONFERENCE: 'Please enter scheduling information.',
-            self.REQUEST_PTI: 'The defense may no longer request PTIs.',
-            self.CONDUCT_PTI: 'The defense may no longer conduct PTIs.',
+            self.REQUEST_PTI: 'PTIs sanctions availability',
+            self.CONDUCT_PTI: 'Reminder - 30 days from date of PTI request.',
         }
 
         output += subjects[self.email_type]
@@ -121,7 +121,7 @@ class Email:
             motion_clause = ''
 
         return '''{indent}The {desc} is over {days} days from the triggering event,{motion_clause} which may be in \
-violation of LR2-400. Please visit {url} to confirm that the judge is aware of this, or visit {update_url} to change \
+violation of LR2-308. Please visit {url} to confirm that the judge is aware of this, or visit {update_url} to change \
 the date.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
@@ -183,7 +183,6 @@ problems, please notify {contact}.'''.format(
         )
 
     def get_second_reminder_message(self):
-        #TODO: Looks like we need to handle case for pretrial motion response
         return self.get_first_reminder_message() + '''\n\n{indent}{supervisor} has received a copy of this message. \
 Administration will be notified if the task is not completed by {date}.'''.format(
             indent=INDENT,
@@ -199,7 +198,6 @@ Administration will be notified if the task is not completed by {date}.'''.forma
         )
 
         # Need to define these values even if there is no scheduling conference date to prevent runtime error
-        # TODO: Can we get rid of time?
         if self.case.scheduling_conference_date is not None:
             date = self.case.scheduling_conference_date.date()
             time = self.case.scheduling_conference_date.strftime('%H:%M')
@@ -226,8 +224,9 @@ Please enter the results of the scheduling order at {url}.'''.format(
             request_pti_days = 14
 
         return '''{indent}It has been {days} days since the scheduling conference for case {case_number}. If the \
-defense requested pretrial interviews, please enter the date they did so at {url}. If they did not, you are no \
-longer under any obligation to assist them.'''.format(
+defense requested pretrial interviews, please enter the date they did so at {url}. If they did not timely request PTIs,\
+ then under LR2-308(F)(5)(a)(vii), LR2-308(F)(5)(b)(vii), and LR2-308(F)(5)(c)(vii), "the court shall not consider \
+failure to conduct pretrial interviews of witnesses as the basis of any sanction."'''.format(
             indent=INDENT,
             days=request_pti_days,
             case_number=self.case.case_number,
@@ -241,8 +240,8 @@ longer under any obligation to assist them.'''.format(
             conduct_pti_days = 14
 
         return '''{indent}It has been {days} days since the defense requested pretrial interviews for case \
-{case_number}. If the defense has set up and conducted their pretrial interviews, you can disregard this \
-message. If they did not, this is a notification that you are no longer under any obligation to assist them.'''.format(
+{case_number}. If PTIs have been set up and conducted, you can disregard this message. If not, then please get them \
+scheduled as soon as possible.'''.format(
             indent=INDENT,
             days=conduct_pti_days,
             case_number=self.case.case_number,
