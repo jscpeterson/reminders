@@ -2,7 +2,7 @@ import React from "react";
 import MaterialTable from "material-table";
 
 class UpcomingDeadlines extends React.Component {
-  constructor(props) {
+    constructor(props) {
       super(props);
       this.state = {
           columns: [
@@ -29,6 +29,12 @@ class UpcomingDeadlines extends React.Component {
                 hidden: true },
               { title: 'EVENT - YOU SHOULDN\'T SEE ME',
                 field: 'event',
+                hidden: true },
+              { title: 'TYPE - YOU SHOULDN\'T SEE ME',
+                field: 'type',
+                hidden: true },
+              { title: 'MOTION - YOU SHOULD\'T SEE ME',
+                field: 'motion',
                 hidden: true },
           ],
           tableData: [],
@@ -90,6 +96,8 @@ class UpcomingDeadlines extends React.Component {
           row['defense-attorney'] = deadlineJSON['defense_attorney'];
           row['pk'] = deadlineJSON['id'];
           row['event'] = deadlineJSON['event'];
+          row['type'] = deadlineJSON['type'];
+          row['motion'] = deadlineJSON['motion'];
 
           dataArray.push(row);
 
@@ -100,10 +108,17 @@ class UpcomingDeadlines extends React.Component {
       )
   }
 
+  isMotionResponse(rowData) {
+      /*
+       Returns true if rowData is determined to be a motion response
+       */
+       return rowData['type'] === 'pretrial-motion-response';
+  }
+
   render() {
     return (
         <MaterialTable
-            title="Upcoming Deadlines"
+            title="Upcoming Deadlines 2"
             columns={this.state.columns}
             data={this.state.tableData}
             options={{
@@ -115,8 +130,12 @@ class UpcomingDeadlines extends React.Component {
                     tooltip: 'Complete Deadline',
                     onClick: (event, rowData) => {
                         let pk = rowData['pk'];
+
                         if (rowData['event']) {
                             alert('This is a deadline for an event - you do not need to complete it.')
+                        } else if (this.isMotionResponse(rowData)) {
+                            let motion = rowData['motion'];
+                            window.location.href = `motion_response/${motion}`
                         } else {
                             window.location.href = `complete/${pk}`;
                         }
@@ -128,7 +147,7 @@ class UpcomingDeadlines extends React.Component {
             //     tooltip: 'Debug',
             //     onClick: (event, rowData) => {
             //       console.log(rowData);
-            //       console.log(rowData['event'])
+            //       console.log(this.isMotionResponse(rowData))
             //     }
             // },
             ]}

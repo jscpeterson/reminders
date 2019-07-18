@@ -516,8 +516,8 @@ def motion_response(request, *args, **kwargs):
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
 
-    form = MotionResponseForm(request.POST)
     if request.method == 'POST':
+        form = MotionResponseForm(request.POST)
         if form.is_valid():
             motion.response_filed = form.cleaned_data['response_filed']
             motion.save(update_fields=['response_filed'])
@@ -526,6 +526,8 @@ def motion_response(request, *args, **kwargs):
                 deadline.status = Deadline.COMPLETED
                 deadline.save(update_fields=['status'])
             return HttpResponseRedirect(reverse('remind:dashboard'))
+    else:
+        form = MotionResponseForm()
 
     return render(
         request,
