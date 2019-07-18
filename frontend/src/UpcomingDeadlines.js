@@ -118,7 +118,7 @@ class UpcomingDeadlines extends React.Component {
   render() {
     return (
         <MaterialTable
-            title="Upcoming Deadlines 2"
+            title="Upcoming Deadlines"
             columns={this.state.columns}
             data={this.state.tableData}
             options={{
