@@ -20,5 +20,6 @@ urlpatterns = [
     path('extension/<int:deadline_pk>', views.extension, name='extension'),
     path('judge_confirmed/<int:deadline_pk>', views.judge_confirmed, name='judge_confirmed'),
     path('motion_deadline/<int:motion_pk>', views.motion_deadline, name='motion_deadline'),
-    path('motion_response/<int:motion_pk>', views.motion_response, name='motion_response')
+    path('motion_response/<int:motion_pk>', views.motion_response, name='motion_response'),
+    path('case_closed/<str:case_number>', views.case_closed, name='case_closed'),
 ]

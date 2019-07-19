@@ -337,3 +337,15 @@ def get_disabled_fields(case):
         disabled.append(answer)
         disabled.append(answer)
     return disabled
+
+
+def close_case(case):
+    """
+    Completes all active deadlines on a Case object.
+    :param case: a case
+    """
+    for deadline in Deadline.objects.filter(case=case, status=Deadline.ACTIVE):
+        deadline.status = Deadline.COMPLETED
+        deadline.save(update_fields=['status'])
+    case.closed = True
+    case.save(update_fields=['closed'])

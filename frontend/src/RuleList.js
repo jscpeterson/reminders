@@ -324,6 +324,24 @@ class RuleList extends React.Component {
                 },
             },
             // {
+            //     icon: 'pan_tool',
+            //     tooltip: 'Stay of Proceedings',
+            //     onClick: (event, rowData) => {
+            //       alert("Unimplemented")
+            //     }
+            // },
+            {
+                icon: 'event_available',
+                tooltip: 'Close Case',
+                onClick: (event, rowData) => {
+                  if (confirm("This will end all deadlines and close the case. You will not be able to reopen it. " +
+                      "Are you sure?")) { // Consider moving confirmation to its own URL so it's more noticeable.
+                    let case_number = rowData['case-number'];
+                    window.location.href = `case_closed/${case_number}`;
+                  }
+                }
+            },
+            // {
             //     icon: 'bug_report',
             //     tooltip: 'Debug',
             //     onClick: (event, rowData) => {
@@ -339,7 +357,7 @@ class RuleList extends React.Component {
         <TextField
           // helperText={<HelperText>Save</HelperText>}
           onTrailingIconSelect={() => {this.putNotes(rowData)}}
-          trailingIcon={<MaterialIcon aria-label="Save" role="button" icon="done" hasRipple={true}/>}
+          trailingIcon={<MaterialIcon aria-label="Save" role="button" icon="edit" hasRipple={true}/>}
         ><Input
             // disableUnderline={ true }
             value={ rowData['notes'] }
