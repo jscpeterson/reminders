@@ -45,9 +45,4 @@ class CaseViewSet(viewsets.ModelViewSet):
             Q(secretary=self.request.user)
         )
 
-        for case in cases:
-            deadlines = case.deadline_set.filter(status=Deadline.ACTIVE)
-            if len(deadlines) == 0 and case.trial_date is not None:
-                cases = cases.exclude(case_number=case.case_number)
-
-        return cases
+        return cases.exclude(closed=True)

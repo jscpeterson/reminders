@@ -48,6 +48,8 @@ class Case(TimeStampedModel):
     pti_request_date = models.DateTimeField(null=True)
     trial_date = models.DateTimeField(null=True)
 
+    closed = models.BooleanField(default=False)
+
     def __str__(self):
         return self.case_number
 

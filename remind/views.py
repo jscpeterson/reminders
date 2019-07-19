@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
     MotionResponseForm, MotionFormWithCase
-from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, JUDGES
+from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, JUDGES, SUPPORT_EMAIL
 from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
@@ -645,5 +645,23 @@ def judge_confirmed(request, *args, **kwargs):
             'case_number': deadline.case.case_number,
             'date': deadline.datetime,
             'required_days': utils.get_deadline_dict(deadline.case.track)[str(deadline.type)]
+        }
+    )
+
+
+@login_required
+def case_closed(request, *args, **kwargs):
+    """Completes all active deadlines on a case and returns a confirmation to the user."""
+
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+    utils.close_case(case)
+
+    return render(
+        request, 'remind/case_closed.html',
+        {
+            'case_number': case.case_number,
+            'defendant': case.defendant,
+            'support_email': SUPPORT_EMAIL,  # Should this be changed to "your supervisor"?
         }
     )
