@@ -1,7 +1,9 @@
+import re
+
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm, Form
 from .models import Case, Deadline, Motion
-from datetime import timedelta
+from datetime import timedelta, datetime
 from users.models import CustomUser
 from django import forms
 from . import utils
@@ -18,7 +20,11 @@ class CaseForm(ModelForm):
     prosecutor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=2), empty_label=None)
     secretary = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
     arraignment_date = forms.DateTimeField(input_formats=['%Y-%m-%d %H:%M'])
-    case_number = forms.CharField(label='CR#')
+    case_number = forms.CharField(
+        label='CR#',
+        help_text='Use format *{year}-xxxxx-y-z, where *, -y, and -z are optional'.format(year=datetime.now().year),
+        )
+    override = forms.BooleanField(label="Override invalid case number formatting?", required=False)
     judge = forms.ChoiceField(choices=JUDGES, )
 
     class Meta:
@@ -32,9 +38,21 @@ class CaseForm(ModelForm):
                   'secretary',
                   'arraignment_date']
 
+    def clean(self):
+        cleaned_data = super(CaseForm, self).clean()
+
+        case_number = cleaned_data.get('case_number')
+        current_year = datetime.now().year
+        case_number_format = r'^\D?{year}-\d{{5}}(-\w*)?(-\w*)?$'.format(year=current_year)
+        case_number_pattern = re.compile(case_number_format)
+
+        # If case number does not match pattern and override is not checked
+        if not self.cleaned_data.get('override') and not bool(re.match(case_number_pattern, case_number)):
+            raise ValidationError('Case number looks invalid. Check "Override invalid case number formatting?" if you '
+                                  'want to use it anyway.')
+
 
 class MotionForm(Form):
-
     motion_title = forms.CharField(
         label='Title of the motion'
     )
@@ -55,7 +73,6 @@ class MotionForm(Form):
 
 
 class MotionFormWithCase(Form):
-
     motion_title = forms.CharField(
         label='Title of the motion'
     )
