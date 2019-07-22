@@ -345,7 +345,7 @@ class RuleList extends React.Component {
             },
             {
                 icon: 'pan_tool',
-                tooltip: 'Stay of Proceedings',
+                tooltip: 'Stay/Resume Case',
                 onClick: (event, rowData) => {
                   let case_number = rowData['case-number'];
                   if (!rowData['stayed']) {
