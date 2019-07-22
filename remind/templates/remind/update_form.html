@@ -65,7 +65,7 @@
                         <label>
                             <div class="checkbox-field col s6">
                             <input class="filled-in " id={{next_field.id_for_label}} name={{next_field.name}} type="checkbox"
-                             {% if disabled|index:forloop.counter0 %} checked disabled{% endif %}><span
+                             {% if disabled|index:forloop.counter0 %} checked disabled{% endif %} {% if next_field.field.initial %}checked{% endif %}><span
                                 for={{next_field.id_for_label}}>Completed?</span>
                             </div>
                         </label>

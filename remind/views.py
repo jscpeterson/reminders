@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.shortcuts import render, render_to_response
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
+
+from users.models import CustomUser
 from .models import Case, Deadline, Motion
 from django.core.exceptions import PermissionDenied
 
@@ -369,9 +371,18 @@ def update(request, *args, **kwargs):
                     deadline.save(update_fields=['datetime', 'updated_by', 'invalid_notice_sent'])
 
                 if form.cleaned_data.get(completed_key):
+                    # If Completed key is checked
                     deadline.status = Deadline.COMPLETED
                     deadline.updated_by = request.user
                     deadline.save(update_fields=['status', 'updated_by'])
+                elif not form.cleaned_data.get(completed_key) and deadline.status == Deadline.COMPLETED\
+                        and request.user.position == CustomUser.SUPERVISOR:
+                    # If Completed key is unchecked and prior deadline status is completed (additional check for
+                    # user privileges just for extra safeguard)
+                    deadline.status = Deadline.ACTIVE
+                    deadline.updated_by = request.user
+                    deadline.save(update_fields=['status', 'updated_by'])
+
 
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
@@ -388,7 +399,7 @@ def update(request, *args, **kwargs):
     # Render form if code gets to this point
     # Index of the override field will be the last field in the form. Saving this to pass into template
     override_index = len(form.fields)
-    disabled = utils.get_disabled_fields(case)
+    disabled = utils.get_disabled_fields(case, request.user)
     return render(request, 'remind/update_form.html',
                   {'form': form,
                    'case_number': case.case_number,

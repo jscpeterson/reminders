@@ -21,3 +21,9 @@ def next(some_list, current_index):
 @register.filter
 def index(List, i):
     return List[int(i)]
+
+
+@register.filter
+def lower(value): # Only one argument.
+    """Converts a string into all lowercase"""
+    return value.lower()

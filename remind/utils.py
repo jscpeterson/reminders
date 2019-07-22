@@ -2,6 +2,7 @@ import pytz
 from django.conf import settings
 from datetime import timedelta
 import holidays
+from users.models import CustomUser
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
@@ -327,13 +328,16 @@ def sort_judges(case):
     return judges_list
 
 
-def get_disabled_fields(case):
+def get_disabled_fields(case, user):
     """
     Gets the disabled fields for a case to pass into the Update Form
     """
     disabled = [False, False]  # First two fields for judge and defense attorney should not be disabled
     for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
-        answer = (deadline.status != Deadline.ACTIVE)
+        if user.position == CustomUser.SUPERVISOR:
+            answer = False
+        else:
+            answer = (deadline.status != Deadline.ACTIVE)
         disabled.append(answer)
         disabled.append(answer)
     return disabled

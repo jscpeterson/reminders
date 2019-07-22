@@ -387,6 +387,7 @@ class UpdateForm(Form):
             )
             self.fields[completed_key] = forms.BooleanField(
                 label="Completed?",
+                initial=deadline.status == Deadline.COMPLETED,
                 required=False,
             )
 
