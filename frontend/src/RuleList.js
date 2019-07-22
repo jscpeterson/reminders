@@ -88,6 +88,12 @@ class RuleList extends React.Component {
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData,'trial')}</span>,
           editable: 'never' },
+
+        {
+          title: 'Stayed Case - YOU SHOULDN\'T SEE THIS',
+          field: 'stayed',
+          hidden: 'true,'
+        }
       ],
       tableData: [],
       jsonData: []
@@ -107,7 +113,7 @@ class RuleList extends React.Component {
     if (date) {
       let realDate = this.toDate(date);
       let dateString = this.formatDate(realDate);
-      let deadlineUrgency = this.getDateUrgency(realDate, deadlineData);
+      let deadlineUrgency = this.getDateUrgency(realDate, deadlineData, rowData);
       let bgColor = this.getDateBgColor(deadlineUrgency);
       const spanStyle = {
         backgroundColor: bgColor
@@ -132,11 +138,12 @@ class RuleList extends React.Component {
       return deadlines.filter(function(data){ return data.type === key })[0];
   }
 
-  getDateUrgency(dueDate, deadlineData) {
+  getDateUrgency(dueDate, deadlineData, rowData) {
     /**
      * Returns urgency of deadline based on proximity to due date
      * @param {Date} dueDate Due date of deadline
      * @param deadlineData: json data for a deadline
+     * @param rowData: data associated with the deadline's row
      * @return {string} urgency of deadline
      */
     const today = new Date();
@@ -146,7 +153,11 @@ class RuleList extends React.Component {
     const thresholdInTroubleDays = deadlineData['first_reminder_days'] + 1;
     const thresholdUrgentDays = deadlineData['second_reminder_days'] + 1;
 
-    if (deadlineData['status'] === DEADLINE_COMPLETE){
+    if (rowData['stayed']) {
+      return "Stayed";
+    }
+
+    else if (deadlineData['status'] === DEADLINE_COMPLETE){
       return "Completed";
     }
 
@@ -226,6 +237,7 @@ class RuleList extends React.Component {
       row['judge'] = caseJSON['judge'];
       row['defense-attorney'] = caseJSON['defense_attorney'];
       row['notes'] = caseJSON['notes'];
+      row['stayed'] = caseJSON['stayed'];
 
       // Populate deadlines for case
       const deadlines = caseJSON['deadline_set']
@@ -302,11 +314,15 @@ class RuleList extends React.Component {
                 tooltip: 'Enter Scheduling Order',
                 // disabled: TODO Disable if trial is set ,
                 onClick: (event, rowData) => {
-                  if (rowData['trial'] !== undefined) {
-                    alert("Scheduling order has already been entered for this case.")
+                  if (rowData['stayed']) {
+                    alert('Case is stayed')
                   } else {
-                    let case_number = rowData['case-number'];
-                    window.location.href = `track/${case_number}`;
+                    if (rowData['trial'] !== undefined) {
+                      alert("Scheduling order has already been entered for this case.")
+                    } else {
+                      let case_number = rowData['case-number'];
+                      window.location.href = `track/${case_number}`;
+                    }
                   }
                 },
             },
@@ -315,21 +331,30 @@ class RuleList extends React.Component {
                 tooltip: 'New Motion',
                 // disabled: TODO Disable if trial is not set ,
                 onClick: (event, rowData) => {
-                  if (rowData['trial'] === undefined) {
-                    alert("No scheduling order has been entered for this case.")
+                  if (rowData['stayed']) {
+                    alert('Case is stayed')
                   } else {
-                    let case_number = rowData['case-number'];
-                    window.location.href = `motion/${case_number}`;
+                    if (rowData['trial'] === undefined) {
+                      alert("No scheduling order has been entered for this case.")
+                    } else {
+                      let case_number = rowData['case-number'];
+                      window.location.href = `motion/${case_number}`;
+                    }
                   }
                 },
             },
-            // {
-            //     icon: 'pan_tool',
-            //     tooltip: 'Stay of Proceedings',
-            //     onClick: (event, rowData) => {
-            //       alert("Unimplemented")
-            //     }
-            // },
+            {
+                icon: 'pan_tool',
+                tooltip: 'Stay of Proceedings',
+                onClick: (event, rowData) => {
+                  let case_number = rowData['case-number'];
+                  if (!rowData['stayed']) {
+                    window.location.href = `stay_case/${case_number}`;
+                  } else {
+                    window.location.href = `update/${case_number}`;
+                  }
+                }
+            },
             {
                 icon: 'event_available',
                 tooltip: 'Close Case',
@@ -346,7 +371,6 @@ class RuleList extends React.Component {
             //     tooltip: 'Debug',
             //     onClick: (event, rowData) => {
             //       console.log(rowData);
-            //       console.log(rowData.index);
             //     }
             // },
         ]}
@@ -372,7 +396,8 @@ class RuleList extends React.Component {
 }
 
 const bgColors = {
-  "Expired": "#C0C0C0", // light gray
+  "Stayed": "#C0C0C0", // light gray
+  "Expired": "#808080", // dark gray
   "Completed": "#66B2FF", // light blue
   "OnTrack": "#66FF66", // light green
   "InTrouble": "#FFFF66", // light yellow

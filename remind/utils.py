@@ -344,8 +344,26 @@ def close_case(case):
     Completes all active deadlines on a Case object.
     :param case: a case
     """
-    for deadline in Deadline.objects.filter(case=case, status=Deadline.ACTIVE):
+    for deadline in case.deadline_set.filter(status=Deadline.ACTIVE):
         deadline.status = Deadline.COMPLETED
         deadline.save(update_fields=['status'])
     case.closed = True
     case.save(update_fields=['closed'])
+
+
+def stay_case(case):
+    """
+    Stays a case.
+    :param case: a case
+    """
+    case.stayed = True
+    case.save(update_fields=['stayed'])
+
+
+def resume_case(case):
+    """
+    Resumes a case.
+    :param case:
+    """
+    case.stayed = False
+    case.save(update_fields=['stayed'])

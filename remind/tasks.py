@@ -28,7 +28,7 @@ def check_all_deadlines():
     now = timezone.now()
     print('Now the time is {}'.format(now.strftime('%H:%M:%S.%f')))
 
-    for deadline in Deadline.objects.filter(status=Deadline.ACTIVE):
+    for deadline in Deadline.objects.filter(status=Deadline.ACTIVE, case__stayed=False):
         days_until = deadline.datetime - now
 
         # Send notice if celery detects a deadline is invalid or requires an extension
