@@ -22,4 +22,5 @@ urlpatterns = [
     path('motion_deadline/<int:motion_pk>', views.motion_deadline, name='motion_deadline'),
     path('motion_response/<int:motion_pk>', views.motion_response, name='motion_response'),
     path('case_closed/<str:case_number>', views.case_closed, name='case_closed'),
+    path('stay_case/<str:case_number>', views.stay_case, name='stay_case'),
 ]

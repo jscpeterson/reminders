@@ -41,12 +41,14 @@ class Case(TimeStampedModel):
     prosecutor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='prosecutor')
     secretary = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='secretary')
     supervisor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='supervisor')
-#
+
     track = models.IntegerField(choices=TRACK_CHOICES, null=True)
     arraignment_date = models.DateTimeField(null=True)
     scheduling_conference_date = models.DateTimeField(null=True)
     pti_request_date = models.DateTimeField(null=True)
     trial_date = models.DateTimeField(null=True)
+
+    stayed = models.BooleanField(default=False)
 
     closed = models.BooleanField(default=False)
 

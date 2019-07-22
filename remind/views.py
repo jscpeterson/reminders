@@ -344,6 +344,10 @@ def update(request, *args, **kwargs):
             judge = JUDGES[int(form.cleaned_data.get('judge')) - 1][1]
             defense_attorney = form.cleaned_data.get('defense_attorney')
 
+            # If case is stayed, unfreeze case and all deadlines.
+            if case.stayed:
+                utils.resume_case(case)
+
             if case.judge != judge:
                 case.judge = judge
                 case.updated_by = request.user
@@ -652,8 +656,10 @@ def judge_confirmed(request, *args, **kwargs):
 @login_required
 def case_closed(request, *args, **kwargs):
     """Completes all active deadlines on a case and returns a confirmation to the user."""
-
     case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
 
     utils.close_case(case)
 
@@ -663,5 +669,25 @@ def case_closed(request, *args, **kwargs):
             'case_number': case.case_number,
             'defendant': case.defendant,
             'support_email': SUPPORT_EMAIL,  # Should this be changed to "your supervisor"?
+        }
+    )
+
+
+@login_required
+def stay_case(request, *args, **kwargs):
+    """Stays a case and and all active deadlines and returns a confirmation to the user"""
+    # TODO Prompt user to select reason?
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+    if not request.user.has_perm('change_case', case):
+        raise PermissionDenied
+
+    utils.stay_case(case)
+
+    return render(
+        request, 'remind/case_stayed.html',
+        {
+            'case_number': case.case_number,
+            'defendant': case.defendant,
         }
     )
