@@ -325,6 +325,13 @@ def update(request, *args, **kwargs):
 
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
+
+    if request.user.position == CustomUser.SUPERVISOR:
+        supervisor_message = 'As a supervisor, you are able to modify completed or expired deadlines. Please use ' \
+                             'caution in doing so.'
+    else:
+        supervisor_message = ''
+
     if request.method == 'POST':
 
         # Request QueryDict is immutable, can circumvent this by creating a mutable copy.
@@ -405,7 +412,8 @@ def update(request, *args, **kwargs):
                    'case_number': case.case_number,
                    'disabled': disabled,
                    'judges': sorted_judges,
-                   'override_index': override_index})
+                   'override_index': override_index,
+                   'supervisor_message': supervisor_message})
 
 
 ################################################################################
