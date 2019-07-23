@@ -412,7 +412,10 @@ class UpdateForm(Form):
                 )
 
             # event deadlines should not be completed
-            if deadline.type in EVENT_DEADLINES and cleaned_data.get(key_completed):
+            # skip check if deadline is already completed
+            if deadline.status != deadline.COMPLETED \
+                    and cleaned_data.get(key_completed) \
+                    and deadline.type in EVENT_DEADLINES:
                 self.add_error(
                     key,
                     'This is an event, you do not need to complete it.'
