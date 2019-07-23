@@ -51,10 +51,18 @@ class DeadlineSerializer(serializers.ModelSerializer):
 
 class CaseSerializer(WritableNestedModelSerializer):
     deadline_set = DeadlineSerializer(many=True)
+    prosecutor_name = serializers.SerializerMethodField()
+    secretary_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
         fields = '__all__'
+
+    def get_prosecutor_name(self, obj):
+        return str(obj.prosecutor)
+
+    def get_secretary_name(self, obj):
+        return str(obj.secretary)
 
 
 class UserSerializer(WritableNestedModelSerializer):
