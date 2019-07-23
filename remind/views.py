@@ -362,7 +362,7 @@ def update(request, *args, **kwargs):
                 case.updated_by = request.user
                 case.save(update_fields=['judge'])
 
-            if case.defense_attorney != form:
+            if case.defense_attorney != defense_attorney:
                 case.defense_attorney = defense_attorney
                 case.updated_by = request.user
                 case.save(update_fields=['defense_attorney'])
@@ -389,7 +389,6 @@ def update(request, *args, **kwargs):
                     deadline.status = Deadline.ACTIVE
                     deadline.updated_by = request.user
                     deadline.save(update_fields=['status', 'updated_by'])
-
 
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
