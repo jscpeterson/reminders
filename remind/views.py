@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.urls import reverse
 from django.shortcuts import render, render_to_response
+from django.utils import timezone
+from django.utils.datetime_safe import datetime
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
 
@@ -379,16 +381,21 @@ def update(request, *args, **kwargs):
                     deadline.updated_by = request.user
                     deadline.invalid_notice_sent = False
                     deadline.save(update_fields=['datetime', 'updated_by', 'invalid_notice_sent'])
-                    # TODO Update expired status if user is supervisor and expired deadline moved past today
+                    # If modified deadline was expired, change status to active is date is past current date.
+                    # (additional check for privileges just for safeguard - only supervisor should be able to do this)
+                    if deadline.status == Deadline.EXPIRED and deadline.datetime > timezone.now() and \
+                            request.user.position == CustomUser.SUPERVISOR:
+                        deadline.status = Deadline.ACTIVE
+                        deadline.save(update_fields=['status'])
 
                 # Complete deadline if completed key is checked and deadline has not already been completed.
                 if form.cleaned_data.get(completed_key) and deadline.status != Deadline.COMPLETED:
                     deadline.status = Deadline.COMPLETED
                     deadline.updated_by = request.user
                     deadline.save(update_fields=['status', 'updated_by'])
-                # If Completed key is unchecked and prior deadline status is completed (additional check for user
-                # privileges just for extra safeguard - only supervisor should be able to do this)
-                elif not form.cleaned_data.get(completed_key) and deadline.status == Deadline.COMPLETED\
+                # If Completed key is unchecked and prior deadline status is completed
+                # (additional check for privileges just for safeguard - only supervisor should be able to do this)
+                elif not form.cleaned_data.get(completed_key) and deadline.status == Deadline.COMPLETED \
                         and request.user.position == CustomUser.SUPERVISOR:
                     deadline.status = Deadline.ACTIVE
                     deadline.updated_by = request.user
