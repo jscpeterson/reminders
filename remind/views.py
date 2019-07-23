@@ -88,6 +88,11 @@ def case_created(request, *args, **kwargs):
 
     case = Case.objects.get(case_number=kwargs.get('case_number'))
     witness_deadline = Deadline.objects.get(case=case, type=Deadline.WITNESS_LIST)
+    if witness_deadline.status == Deadline.COMPLETED:
+        witness_deadline_message = 'However, since this date has already past, this deadline has been marked as ' \
+                                   'completed.'
+    else:
+        witness_deadline_message = ''
 
     if request.method == 'POST':
         return HttpResponseRedirect(reverse('remind:scheduling', kwargs={'case_number': case.case_number}))
@@ -97,7 +102,8 @@ def case_created(request, *args, **kwargs):
                    'prosecutor': case.prosecutor,
                    'secretary': case.secretary,
                    'supervisor': case.supervisor,
-                   'witness_deadline': witness_deadline.datetime.date()})
+                   'witness_deadline': witness_deadline.datetime.date(),
+                   'witness_deadline_message': witness_deadline_message})
 
 
 @login_required
