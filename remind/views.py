@@ -357,11 +357,13 @@ def update(request, *args, **kwargs):
             if case.stayed:
                 utils.resume_case(case)
 
+            # Update judge if modified
             if case.judge != judge:
                 case.judge = judge
                 case.updated_by = request.user
                 case.save(update_fields=['judge'])
 
+            # Update defense attorney if modified
             if case.defense_attorney != defense_attorney:
                 case.defense_attorney = defense_attorney
                 case.updated_by = request.user
@@ -371,25 +373,28 @@ def update(request, *args, **kwargs):
                 key = '{}'.format(index)
                 completed_key = '{}_completed'.format(index)
 
+                # Update deadline if modified
                 if form.cleaned_data.get(key) is not None and deadline.datetime != form.cleaned_data.get(key):
                     deadline.datetime = form.cleaned_data.get(key)
                     deadline.updated_by = request.user
                     deadline.invalid_notice_sent = False
                     deadline.save(update_fields=['datetime', 'updated_by', 'invalid_notice_sent'])
+                    # TODO Update expired status if user is supervisor and expired deadline moved past today
 
-                if form.cleaned_data.get(completed_key):
-                    # If Completed key is checked
+                # Complete deadline if completed key is checked and deadline has not already been completed.
+                if form.cleaned_data.get(completed_key) and deadline.status != Deadline.COMPLETED:
                     deadline.status = Deadline.COMPLETED
                     deadline.updated_by = request.user
                     deadline.save(update_fields=['status', 'updated_by'])
+                # If Completed key is unchecked and prior deadline status is completed (additional check for user
+                # privileges just for extra safeguard - only supervisor should be able to do this)
                 elif not form.cleaned_data.get(completed_key) and deadline.status == Deadline.COMPLETED\
                         and request.user.position == CustomUser.SUPERVISOR:
-                    # If Completed key is unchecked and prior deadline status is completed (additional check for
-                    # user privileges just for extra safeguard)
                     deadline.status = Deadline.ACTIVE
                     deadline.updated_by = request.user
                     deadline.save(update_fields=['status', 'updated_by'])
 
+            # Log update and save fields
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
 
