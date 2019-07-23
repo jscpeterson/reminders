@@ -55,7 +55,7 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
         assign_perm('change_case', self.object.supervisor, self.object)
 
         # Start first deadline for Witness List
-        Deadline.objects.create(
+        deadline = Deadline.objects.create(
             case=self.object,
             type=Deadline.WITNESS_LIST,
             datetime=utils.get_actual_deadline_from_start(
@@ -63,6 +63,7 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
                 days=WITNESS_LIST_DEADLINE_DAYS),
             created_by=self.request.user
         )
+        utils.complete_old_deadline(deadline)
 
         return reverse('remind:case_created', kwargs={'case_number': self.object.case_number})
 
@@ -116,12 +117,13 @@ def scheduling(request, *args, **kwargs):
             case.save(update_fields=['scheduling_conference_date', 'updated_by'])
 
             # Start scheduling conference deadline timer
-            Deadline.objects.create(
+            deadline = Deadline.objects.create(
                 case=case,
                 type=Deadline.SCHEDULING_CONFERENCE,
                 datetime=case.scheduling_conference_date,
                 created_by=request.user
             )
+            utils.complete_old_deadline(deadline)
             return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
@@ -183,12 +185,13 @@ def track(request, *args, **kwargs):
             # Start Request PTI deadline timer
             deadlines_dict = utils.get_deadline_dict(case.track)
             day_after_request_due = deadlines_dict[str(Deadline.REQUEST_PTI)] + 1
-            Deadline.objects.create(
+            deadline = Deadline.objects.create(
                 case=case,
                 type=Deadline.REQUEST_PTI,
                 datetime=utils.get_actual_deadline_from_start(case.scheduling_conference_date, day_after_request_due),
                 created_by=request.user
             )
+            utils.complete_old_deadline(deadline)
 
             return HttpResponseRedirect(reverse('remind:trial', kwargs=kwargs))
     else:
@@ -213,12 +216,13 @@ def trial(request, *args, **kwargs):
             case.save(update_fields=['trial_date', 'updated_by'])
 
             # Start trial deadline timer
-            Deadline.objects.create(
+            deadline = Deadline.objects.create(
                 case=case,
                 type=Deadline.TRIAL,
                 datetime=case.trial_date,
                 created_by=request.user
             )
+            utils.complete_old_deadline(deadline)
 
             return HttpResponseRedirect(reverse('remind:order', kwargs=kwargs))
 
@@ -242,12 +246,13 @@ def order(request, *args, **kwargs):
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
             for key in TRIAL_DEADLINES:
-                Deadline.objects.create(
+                deadline = Deadline.objects.create(
                     case=case,
                     type=int(key),
                     datetime=form.cleaned_data.get(key),
                     created_by=request.user
                 )
+                utils.complete_old_deadline(deadline)
 
             return HttpResponseRedirect(reverse('remind:dashboard'))
 
@@ -281,12 +286,13 @@ def request_pti(request, *args, **kwargs):
             # Start Conduct PTI deadline timer
             deadlines_dict = utils.get_deadline_dict(case.track)
             day_after_request_due = deadlines_dict[str(Deadline.CONDUCT_PTI)] + 1
-            Deadline.objects.create(
+            deadline = Deadline.objects.create(
                 case=case,
                 type=Deadline.CONDUCT_PTI,
                 datetime=utils.get_actual_deadline_from_start(case.pti_request_date, day_after_request_due),
                 created_by=request.user
             )
+            utils.complete_old_deadline(deadline)
 
             return HttpResponseRedirect(reverse('remind:dashboard'))
 
@@ -483,20 +489,22 @@ def motion_deadline(request, *args, **kwargs):
             motion.save(update_fields=['response_deadline', 'date_hearing'])
 
             # Create motion response deadline
-            Deadline.objects.create(
+            deadline = Deadline.objects.create(
                 type=Deadline.PRETRIAL_MOTION_RESPONSE,
                 case=motion.case,
                 motion=motion,
                 datetime=motion.response_deadline,
             )
+            utils.complete_old_deadline(deadline)
 
             # Create motion hearing deadline
-            Deadline.objects.create(
+            deadline = Deadline.objects.create(
                 type=Deadline.PRETRIAL_MOTION_HEARING,
                 case=motion.case,
                 motion=motion,
                 datetime=motion.date_hearing
             )
+            utils.complete_old_deadline(deadline)
 
             return HttpResponseRedirect(reverse('remind:dashboard'))
     else:
