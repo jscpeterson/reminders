@@ -1,18 +1,21 @@
 from random import randint
-
+from django.core.management.base import BaseCommand
 from remind.models import Case, Deadline
 
 
-class CaseCreator:
+class Command(BaseCommand):
+    help = 'Clones a case from the case number passed in as an argument for stress testing purposes where the specific ' \
+           'data does not matter. --clones is the number of clones that will be created'
 
-    def clone_cases(self, case, number):
-        """
-        Clones a given case <i>number</i> number of times, and clones it's deadline set, for the purposes of stress
-        testing that does not care about the specific data.
-        """
+    def add_arguments(self, parser):
+        parser.add_argument('--case', type=str, required=True)
+        parser.add_argument('--clones', type=int, required=True)
+
+    def handle(self, *args, **kwargs):
+        case = Case.objects.get(case_number=kwargs['case'])
         poor_bastard = case.prosecutor
         print('Creating cases with deadlines for {poor_bastard}...'.format(poor_bastard=poor_bastard))
-        for i in range(number):
+        for i in range(kwargs['clones']):
 
             new_case = Case.objects.get(pk=case.pk)
 
