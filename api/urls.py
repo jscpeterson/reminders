@@ -20,6 +20,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register(r'deadlines', views.DeadlineViewSet, 'deadline')
 router.register(r'cases', views.CaseViewSet, 'case')
+router.register(r'user', views.UserSet, 'user')
 
 urlpatterns = [
     path('', include(router.urls))

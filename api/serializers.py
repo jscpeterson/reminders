@@ -4,6 +4,7 @@ from remind.constants import EVENT_DEADLINES
 from remind.models import Deadline, Case
 from drf_writable_nested import WritableNestedModelSerializer
 from remind.constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS
+from users.models import CustomUser
 
 
 class DeadlineSerializer(serializers.ModelSerializer):
@@ -53,4 +54,11 @@ class CaseSerializer(WritableNestedModelSerializer):
 
     class Meta:
         model = Case
+        fields = '__all__'
+
+
+class UserSerializer(WritableNestedModelSerializer):
+
+    class Meta:
+        model = CustomUser
         fields = '__all__'

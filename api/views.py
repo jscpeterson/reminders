@@ -1,7 +1,8 @@
 from django.db.models import Q
 from rest_framework import viewsets
-from api.serializers import DeadlineSerializer, CaseSerializer
+from api.serializers import DeadlineSerializer, CaseSerializer, UserSerializer
 from remind.models import Deadline, Case
+from users.models import CustomUser
 
 
 class DeadlineViewSet(viewsets.ModelViewSet):
@@ -46,3 +47,10 @@ class CaseViewSet(viewsets.ModelViewSet):
         )
 
         return cases.exclude(closed=True)
+
+
+class UserSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        return CustomUser.objects.filter(pk=self.request.user.pk)
