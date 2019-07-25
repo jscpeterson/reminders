@@ -2,6 +2,8 @@ import pytz
 from django.conf import settings
 from datetime import timedelta
 import holidays
+from django.utils import timezone
+
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
@@ -367,3 +369,14 @@ def resume_case(case):
     """
     case.stayed = False
     case.save(update_fields=['stayed'])
+
+
+def complete_old_deadline(deadline):
+    """
+    If a newly created deadline has a past date, completes it so it isn't immediately handled as an expiration. This is
+    so users can start cases that are already in proceedings.
+    :param deadline: a newly created deadline
+    """
+    if deadline.datetime < timezone.now():
+        deadline.status = Deadline.COMPLETED
+        deadline.save(update_fields=['status'])
