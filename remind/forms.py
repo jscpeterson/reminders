@@ -426,7 +426,7 @@ class UpdateForm(Form):
             key = '{}'.format(index)
 
             # check if deadline has been changed and deadline is not inactive
-            if deadline.datetime != cleaned_data.get(key) and deadline.status == Deadline.ACTIVE:
+            if cleaned_data.get(key) is not None and deadline.datetime != cleaned_data.get(key) and deadline.status == Deadline.ACTIVE:
                 deadline.datetime = cleaned_data.get(key)  # temporarily changing this should be fine if we're never
                 # actually saving it
 
