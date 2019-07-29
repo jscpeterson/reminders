@@ -7,7 +7,7 @@ from django.utils import timezone
 from .models import Deadline
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
-    TRIAL_DEADLINES, JUDGES, RESPONSE_AFTER_FILING_DAYS, DEADLINE_DESCRIPTIONS
+    TRIAL_DEADLINES, JUDGES, RESPONSE_AFTER_FILING_DAYS, DEADLINE_DESCRIPTIONS, EVENT_DEADLINES
 
 
 def clear_deadlines(case):
@@ -339,6 +339,21 @@ def get_disabled_fields(case):
         disabled.append(answer)
         disabled.append(answer)
     return disabled
+
+
+def get_hidden_fields(case):
+    """
+    Gets the hidden fields for a case to pass into the Update Form. Event deadlines should hide "Completed?" checkbox.
+    """
+    hidden = [False, False]  # First two fields for judge and defense attorney should not be hidden
+    for deadline in Deadline.objects.filter(case=case).order_by('datetime'):
+        if deadline.type in EVENT_DEADLINES:
+            hidden.append(True)
+            hidden.append(True)
+        else:
+            hidden.append(False)
+            hidden.append(False)
+    return hidden
 
 
 def close_case(case):
