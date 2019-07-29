@@ -141,7 +141,7 @@ def scheduling(request, *args, **kwargs):
 ################################################################################
 # Populate Scheduling Order Sequence
 
-
+# TODO Only select user cases
 class UpdateTrackView(LoginRequiredMixin, FormView):
     """ This page allows the user to select a case to update its track (deadlines) """
 
@@ -311,7 +311,7 @@ def request_pti(request, *args, **kwargs):
 ################################################################################
 # Update Case Deadlines Sequence
 
-
+# TODO change to update_select_case
 class UpdateCaseView(LoginRequiredMixin, FormView):
     """ This form asks the user what case they want to update """
     template_name = 'remind/update_case_form.html'
@@ -401,10 +401,12 @@ def update(request, *args, **kwargs):
     # Index of the override field will be the last field in the form. Saving this to pass into template
     override_index = len(form.fields)
     disabled = utils.get_disabled_fields(case)
+    hidden = utils.get_hidden_fields(case)
     return render(request, 'remind/update_form.html',
                   {'form': form,
                    'case_number': case.case_number,
                    'disabled': disabled,
+                   'hidden': hidden,
                    'judges': sorted_judges,
                    'override_index': override_index})
 
@@ -412,7 +414,7 @@ def update(request, *args, **kwargs):
 ################################################################################
 # Create Motion Sequence
 
-
+# TODO Pass user info in
 class CreateMotionView(LoginRequiredMixin, FormView):
     """ This form allows the user to record a motion filed for a case. """
 

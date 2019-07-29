@@ -410,13 +410,6 @@ class UpdateForm(Form):
                     'Cannot complete a deadline and change it at the same time.'
                 )
 
-            # event deadlines should not be completed
-            if deadline.type in EVENT_DEADLINES and cleaned_data.get(key_completed):
-                self.add_error(
-                    key,
-                    'This is an event, you do not need to complete it.'
-                )
-
         # check if overriding invalid dates before doing date validation
         if cleaned_data.get('override'):
             return

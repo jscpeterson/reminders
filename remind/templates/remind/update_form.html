@@ -15,6 +15,8 @@
                     <div class="row">
                     <h4>Case Information</h4>
                     </div>
+
+                    {# Judge selection dropdown #}
                     <dmc-select><div class="row">
                     <div class="select-field col s8" id="id_judge_container">
                         <label for={{ field.id_for_label }}>{{field.label}}</label>
@@ -25,6 +27,8 @@
 		                </select>
                     </div>
                     </div></dmc-select>
+
+                    {# Defense attorney field #}
                     {% elif forloop.counter0 is 1 %}
                     <div class="row">
                             <div class="input-field col s8">
@@ -32,10 +36,13 @@
                             <input type="text" id={{ field.id_for_label }} name={{ field.name }} value="{{ field.initial }}">
                             </div>
                     </div>
+
+                    {# "Deadlines" header #}
                     <div class="row">
                     <h4>Deadlines</h4>
                     </div>
 
+                    {# "Override invalid date" checkbox (shown at bottom) #}
                     {% elif forloop.counter is override_index %}
                     <div class="row">
                     <label>
@@ -46,37 +53,75 @@
                             </div>
                     </label>
                     </div>
+
                 {% else %}
 
                     {% if forloop.counter0|divisibleby:2 %}
-                        {% with next_field=form|next:forloop.counter0 %}
+
                         <div class="row">
+
+                        {# Deadline datetime picker #}
                             <dmc-datetime>
-                        <div class="input-field col s6">
-                            <label for={{ field.id_for_label }}>{{field.label}}</label>
-                            <input data-date-format="Y-m-d H:i" data-form-control="datetime" data-lang="en"
-                                id={{field.id_for_label}} name={{field.name}} type="text" value="{{field.initial|date:'Y-m-d H:i'}}"
-                            {% if disabled|index:forloop.counter0 %} disabled{% endif %}>
-                            {% for error in field.errors %}
-                                <p style="color: red; font-size: 10px"> {{ error }} </p>
+                            <div class="input-field col s6">
+                                <label for={{ field.id_for_label }}>{{field.label}}</label>
+                                <input data-date-format="Y-m-d H:i"
+                                       data-form-control="datetime"
+                                       data-lang="en"
+                                       id={{field.id_for_label}}
+                                       name={{field.name}}
+                                       type="text"
+                                       value="{{field.initial|date:'Y-m-d H:i'}}"
+                                       {% if disabled|index:forloop.counter0 %}
+                                           disabled
+                                       {% endif %}>
+
+                                {% for error in field.errors %}
+                                    <p style="color: red; font-size: 10px"> {{ error }} </p>
                                 {% endfor %}
-                        </div>
-                            </dmc-datetime>
-                        <label>
-                            <div class="checkbox-field col s6">
-                            <input class="filled-in " id={{next_field.id_for_label}} name={{next_field.name}} type="checkbox"
-                             {% if disabled|index:forloop.counter0 %} checked disabled{% endif %}><span
-                                for={{next_field.id_for_label}}>Completed?</span>
                             </div>
-                        </label>
+                            </dmc-datetime>
+
+                        {# "Completed?" Checkbox #}
+                            {% with next_field=form|next:forloop.counter0 %}
+                            <label>
+                            <div class="checkbox-field col s6">
+
+                                <input class="filled-in "
+                                   id={{next_field.id_for_label}}
+                                   name={{next_field.name}}
+                                {% if hidden|index:forloop.counter0  %}
+                                   type="hidden"
+                                {% else %}
+                                   type="checkbox"
+                                {% endif %}
+
+                                {% if disabled|index:forloop.counter0 %}
+                                   checked disabled
+                                {% endif %}>
+
+                                <span for={{next_field.id_for_label}}>
+                                {% if hidden|index:forloop.counter0  %}
+                                    <!--No text label if this box is hidden-->
+                                {% else %}
+                                    Completed?
+                                {% endif %}</span>
+                            </div>
+                            </label>
+                            {% endwith %}
+
                     </div>
-                        {% endwith %}
+
                     {% endif %}
                 {% endif %}
             {% endfor %}
+
+            {# Back button #}
             <button class="btn" onclick="window.location.href = `/remind/`;
             return false;">Back</button>
+
+            {# Submit button #}
             <button type="submit" name="_submit" class="btn">Submit</button>
+
         </form>
     </div>
 </div>
