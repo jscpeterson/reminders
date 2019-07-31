@@ -27,10 +27,10 @@ class RuleList extends React.Component {
           field: 'defense-attorney' ,
           editable: 'never' },
 
-        { title: 'Witness List',
-          field: 'witness-list',
+        { title: 'Initial Witness List',
+          field: 'initial-witness-list',
           type:'date',
-          render: rowData => <span>{this.displayDate(rowData,'witness-list')}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'initial-witness-list')}</span>,
           editable: 'never' },
         { title: 'Scheduling Conference',
           field: 'scheduling-conference',
@@ -63,10 +63,10 @@ class RuleList extends React.Component {
           type: 'date',
           render: rowData => <span>{this.displayDate(rowData,'pretrial-motion-filing')}</span>,
           editable: 'never' },
-        { title: 'Pretrial Conference',
-          field: 'pretrial-conference',
+        { title: 'PTC/Docket Call',
+          field: 'ptc/docket-call',
           type: 'date',
-          render: rowData => <span>{this.displayDate(rowData,'pretrial-conference')}</span>,
+          render: rowData => <span>{this.displayDate(rowData,'ptc/docket-call')}</span>,
           editable: 'never' },
         { title: 'Final Witness List',
           field: 'final-witness-list',
@@ -371,6 +371,8 @@ class RuleList extends React.Component {
             //     tooltip: 'Debug',
             //     onClick: (event, rowData) => {
             //       console.log(rowData);
+            //       console.log(this.state.tableData);
+            //       console.log(this.state.jsonData);
             //     }
             // },
         ]}
