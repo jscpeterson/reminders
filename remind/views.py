@@ -142,23 +142,24 @@ def scheduling(request, *args, **kwargs):
 ################################################################################
 # Populate Scheduling Order Sequence
 
-class UpdateTrackView(LoginRequiredMixin, FormView):
+
+@login_required
+def scheduling_order_select_case(request, *args, **kwargs):
     """ This page allows the user to select a case to update its track (deadlines) """
+    if request.method == 'POST':
+        form = UpdateTrackForm(request.POST, user=request.user)
 
-    template_name = 'remind/update_track_form.html'
-    form_class = UpdateTrackForm
-    case_number = ''
+        if form.is_valid():
+            return HttpResponseRedirect(reverse('remind:track', kwargs={'case_number': form.cleaned_data['case_number']}))
 
-    def form_valid(self, form):
-        self.case_number = form.cleaned_data['case_number']
-        return HttpResponseRedirect(self.get_success_url())
+    else:
+        form = UpdateTrackForm(user=request.user)
 
-    def get_success_url(self):
-        return reverse('remind:track', kwargs={'case_number': self.case_number})
+    return render(request, 'remind/update_track_form.html', {'form': form})
 
 
 @login_required
-def track(request, *args, **kwargs):
+def scheduling_order_track(request, *args, **kwargs):
     """
     The user updates the scheduling conference date and sets the track for the case.
     The deadline to request PTIs is also created here.
@@ -207,7 +208,7 @@ def track(request, *args, **kwargs):
 
 
 @login_required
-def trial(request, *args, **kwargs):
+def scheduling_order_trial(request, *args, **kwargs):
     """
     The user sets the trial date here.
     A deadline is created for the trial.
@@ -239,7 +240,7 @@ def trial(request, *args, **kwargs):
 
 
 @login_required
-def order(request, *args, **kwargs):
+def scheduling_order_deadlines(request, *args, **kwargs):
     """
     The user populates the scheduling order by entering the dates for
     multiple deadlines for the case on this page. A deadline is created
@@ -311,19 +312,20 @@ def request_pti(request, *args, **kwargs):
 ################################################################################
 # Update Case Deadlines Sequence
 
-# TODO Only select user cases
-class UpdateCaseView(LoginRequiredMixin, FormView):
+
+@login_required
+def update_select_case(request, *args, **kwargs):
     """ This form asks the user what case they want to update """
-    template_name = 'remind/update_case_form.html'
-    form_class = UpdateCaseForm
-    case_number = ''
+    if request.method == 'POST':
+        form = UpdateCaseForm(request.POST, user=request.user)
 
-    def form_valid(self, form):
-        self.case_number = form.cleaned_data['case_number']
-        return HttpResponseRedirect(self.get_success_url())
+        if form.is_valid():
+            return HttpResponseRedirect(reverse('remind:update', kwargs={'case_number': form.cleaned_data['case_number']}))
 
-    def get_success_url(self):
-        return reverse('remind:update', kwargs={'case_number': self.case_number})
+    else:
+        form = UpdateCaseForm(user=request.user)
+
+    return render(request, 'remind/update_case_form.html', {'form': form})
 
 
 @login_required
@@ -446,25 +448,26 @@ def update_confirm(request, *args, **kwargs):
 ################################################################################
 # Create Motion Sequence
 
-# TODO Pass user info in
-class CreateMotionView(LoginRequiredMixin, FormView):
+
+@login_required
+def create_motion_select_case(request, *args, **kwargs):
     """ This form allows the user to record a motion filed for a case. """
+    if request.method == 'POST':
+        form = MotionForm(request.POST, user=request.user)
 
-    template_name = 'remind/create_motion_form.html'
-    form_class = MotionForm
-    case_number = ''
+        if form.is_valid():
+            motion = Motion.objects.create(
+                title=form.cleaned_data.get('motion_title'),
+                case=Case.objects.get(case_number=form.cleaned_data['case_number']),
+                type=form.cleaned_data['motion_type'],
+                date_received=form.cleaned_data['date_filed'],
+            )
+            return HttpResponseRedirect(reverse('remind:motion_deadline', kwargs={'motion_pk': motion.pk}))
 
-    def form_valid(self, form):
-        self.motion = Motion.objects.create(
-            title=form.cleaned_data.get('motion_title'),
-            case=Case.objects.get(case_number=form.cleaned_data['case_number']),
-            type=form.cleaned_data['motion_type'],
-            date_received=form.cleaned_data['date_filed'],
-        )
-        return HttpResponseRedirect(self.get_success_url())
+    else:
+        form = MotionForm(user=request.user)
 
-    def get_success_url(self):
-        return reverse('remind:motion_deadline', kwargs={'motion_pk': self.motion.pk})
+    return render(request, 'remind/create_motion_form.html', {'form': form})
 
 
 class CreateMotionViewWithCase(LoginRequiredMixin, FormView):

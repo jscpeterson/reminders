@@ -1,6 +1,7 @@
 import re
 
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.forms import ModelForm, Form
 from .models import Case, Deadline, Motion
 from datetime import timedelta, datetime
@@ -23,7 +24,7 @@ class CaseForm(ModelForm):
     case_number = forms.CharField(
         label='CR#',
         help_text='Use format *{year}-xxxxx-y-z, where *, -y, and -z are optional'.format(year=datetime.now().year),
-        )
+    )
     override = forms.BooleanField(label="Override invalid case number formatting?", required=False)
     judge = forms.ChoiceField(choices=JUDGES, )
 
@@ -53,13 +54,23 @@ class CaseForm(ModelForm):
 
 
 class MotionForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(MotionForm, self).__init__(*args, **kwargs)
+        self.fields['case_number'] = forms.ModelChoiceField(
+            queryset=Case.objects
+            .exclude(trial_date__isnull=True)
+            .filter(
+                Q(supervisor=user) |
+                Q(prosecutor=user) |
+                Q(secretary=user)
+            ),
+            help_text='Only cases with a scheduling order will appear here.'
+        )
+
     motion_title = forms.CharField(
         label='Title of the motion'
-    )
-
-    case_number = forms.ModelChoiceField(
-        queryset=Case.objects.exclude(trial_date__isnull=True),
-        help_text='Only cases with a scheduling order will appear here.'
     )
 
     date_filed = forms.DateTimeField(
@@ -420,7 +431,8 @@ class UpdateForm(Form):
             key = '{}'.format(index)
 
             # check if deadline has been changed and deadline is not inactive
-            if cleaned_data.get(key) is not None and deadline.datetime != cleaned_data.get(key) and deadline.status == Deadline.ACTIVE:
+            if cleaned_data.get(key) is not None and deadline.datetime != cleaned_data.get(
+                    key) and deadline.status == Deadline.ACTIVE:
                 deadline.datetime = cleaned_data.get(key)  # temporarily changing this should be fine if we're never
                 # actually saving it
 
@@ -432,9 +444,18 @@ class UpdateForm(Form):
 
 
 class UpdateCaseForm(Form):
-    case_number = forms.ModelChoiceField(
-        queryset=Case.objects.all(),
-    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(UpdateCaseForm, self).__init__(*args, **kwargs)
+
+        self.fields['case_number'] = forms.ModelChoiceField(
+            queryset=Case.objects.filter(
+                Q(supervisor=user) |
+                Q(prosecutor=user) |
+                Q(secretary=user)
+            ),
+        )
 
 
 class CompleteForm(Form):
@@ -487,6 +508,18 @@ class JudgeConfirmedForm(Form):
 
 
 class UpdateTrackForm(Form):
-    case_number = forms.ModelChoiceField(
-        queryset=Case.objects.all(),
-    )
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
+        super(UpdateTrackForm, self).__init__(*args, **kwargs)
+
+        self.fields['case_number'] = forms.ModelChoiceField(
+            queryset=Case.objects
+                .exclude(trial_date__isnull=False)
+                .filter(
+                    Q(supervisor=user) |
+                    Q(prosecutor=user) |
+                    Q(secretary=user)
+                ),
+            help_text='Only cases without a scheduling order will appear here.',
+        )

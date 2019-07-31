@@ -11,19 +11,19 @@ urlpatterns = [
     path('scheduling/<str:case_number>', views.scheduling, name='scheduling'),
 
     # Scheduling Order Flow
-    path('track/', views.UpdateTrackView.as_view(), name='enter-sched'),
-    path('track/<str:case_number>', views.track, name='track'),
-    path('trial/<str:case_number>', views.trial, name='trial'),
-    path('order/<str:case_number>', views.order, name='order'),
+    path('track/', views.scheduling_order_select_case, name='enter-sched'),
+    path('track/<str:case_number>', views.scheduling_order_track, name='track'),
+    path('trial/<str:case_number>', views.scheduling_order_trial, name='trial'),
+    path('order/<str:case_number>', views.scheduling_order_deadlines, name='order'),
 
     # Motion Flow
-    path('motion/', views.CreateMotionView.as_view(), name='create-motion'),
+    path('motion/', views.create_motion_select_case, name='create-motion'),
     path('motion/<str:case_number>', views.CreateMotionViewWithCase.as_view(), name='create-motion-with-case'),
     path('motion_deadline/<int:motion_pk>', views.motion_deadline, name='motion_deadline'),
     path('motion_created/<int:motion_pk>', views.motion_created, name='motion_created'),
     path('motion_response/<int:motion_pk>', views.motion_response, name='motion_response'),
 
-    path('update/', views.UpdateCaseView.as_view(), name='update-case'),
+    path('update/', views.update_select_case, name='update-case'),
     path('update/<str:case_number>', views.update, name='update'),
     path('update_confirm/<str:case_number>', views.update_confirm, name='update_confirm'),
 
