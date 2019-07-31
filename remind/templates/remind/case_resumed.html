@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load material_form %}
+
+{% block content %}
+    <div class="content container">
+
+        <div class="row">
+            <h3>Resuming case {{ case_number }}</h3>
+        </div>
+
+        <form method="POST">
+            <div class="row">
+                {% csrf_token %}
+            You are resuming case {{ case_number }} involving <b>{{ defendant }}</b>. Continue to enter updated scheduling information.
+            <br /><br />
+                <button class="btn" onclick="window.location.href = `/remind/`;
+                return false;">Back</button>
+                <input type="submit" name="_submit" class="btn" value="Continue">
+            </div>
+        </form>
+
+    </div>
+{% endblock %}

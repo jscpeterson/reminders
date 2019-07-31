@@ -351,7 +351,7 @@ class RuleList extends React.Component {
                   if (!rowData['stayed']) {
                     window.location.href = `stay_case/${case_number}`;
                   } else {
-                    window.location.href = `update/${case_number}`;
+                    window.location.href = `resume_case/${case_number}`;
                   }
                 }
             },

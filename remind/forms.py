@@ -59,6 +59,7 @@ class MotionForm(Form):
 
     case_number = forms.ModelChoiceField(
         queryset=Case.objects.exclude(trial_date__isnull=True),
+        help_text='Only cases with a scheduling order will appear here.'
     )
 
     date_filed = forms.DateTimeField(

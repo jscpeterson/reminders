@@ -1,4 +1,5 @@
 from dateutil import parser
+from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.urls import reverse
@@ -141,7 +142,6 @@ def scheduling(request, *args, **kwargs):
 ################################################################################
 # Populate Scheduling Order Sequence
 
-# TODO Only select user cases
 class UpdateTrackView(LoginRequiredMixin, FormView):
     """ This page allows the user to select a case to update its track (deadlines) """
 
@@ -311,7 +311,7 @@ def request_pti(request, *args, **kwargs):
 ################################################################################
 # Update Case Deadlines Sequence
 
-# TODO change to update_select_case
+# TODO Only select user cases
 class UpdateCaseView(LoginRequiredMixin, FormView):
     """ This form asks the user what case they want to update """
     template_name = 'remind/update_case_form.html'
@@ -330,7 +330,7 @@ class UpdateCaseView(LoginRequiredMixin, FormView):
 def update(request, *args, **kwargs):
     """ The user can update all the deadlines for a case here. """
     case = Case.objects.get(case_number=kwargs.get('case_number'))
-
+    messages_list = list()
     sorted_judges = utils.sort_judges(case)
 
     if not request.user.has_perm('change_case', case):
@@ -356,19 +356,21 @@ def update(request, *args, **kwargs):
             judge = JUDGES[int(form.cleaned_data.get('judge')) - 1][1]
             defense_attorney = form.cleaned_data.get('defense_attorney')
 
-            # If case is stayed, unfreeze case and all deadlines.
-            if case.stayed:
-                utils.resume_case(case)
-
             if case.judge != judge:
                 case.judge = judge
                 case.updated_by = request.user
                 case.save(update_fields=['judge'])
+                messages.add_message(request, messages.INFO, 'Judge has been changed to {}.'.format(
+                    case.judge
+                ))
 
-            if case.defense_attorney != form:
+            if case.defense_attorney != defense_attorney:
                 case.defense_attorney = defense_attorney
                 case.updated_by = request.user
                 case.save(update_fields=['defense_attorney'])
+                messages.add_message(request, messages.INFO, 'Defense attorney has been changed to {}.'.format(
+                    case.defense_attorney
+                ))
 
             for index, deadline in enumerate(Deadline.objects.filter(case=case).order_by('datetime')):
                 key = '{}'.format(index)
@@ -379,16 +381,30 @@ def update(request, *args, **kwargs):
                     deadline.updated_by = request.user
                     deadline.invalid_notice_sent = False
                     deadline.save(update_fields=['datetime', 'updated_by', 'invalid_notice_sent'])
+                    messages.add_message(request, messages.INFO,
+                                         '{deadline_desc} date has been changed to {date}.'.format(
+                                             deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
+                                             date=deadline.datetime.strftime('%c')
+                                         ))
 
                 if form.cleaned_data.get(completed_key):
+                    # append deadline completed message
                     deadline.status = Deadline.COMPLETED
                     deadline.updated_by = request.user
                     deadline.save(update_fields=['status', 'updated_by'])
+                    messages.add_message(request, messages.INFO, '{deadline_desc} has been completed.'.format(
+                        deadline_desc=DEADLINE_DESCRIPTIONS[str(deadline.type)].capitalize(),
+                    ))
 
             case.updated_by = request.user
             case.save(update_fields=['updated_by'])
 
-            return HttpResponseRedirect(reverse('remind:dashboard'))
+            if len(messages.get_messages(request)) == 0:
+                return HttpResponseRedirect(reverse('remind:dashboard'))
+            else:
+                return HttpResponseRedirect(reverse('remind:update_confirm', kwargs={
+                    'case_number': case.case_number,
+                }))
 
         else:  # Form is invalid - error handling may go here
             pass
@@ -402,13 +418,29 @@ def update(request, *args, **kwargs):
     override_index = len(form.fields)
     disabled = utils.get_disabled_fields(case)
     hidden = utils.get_hidden_fields(case)
-    return render(request, 'remind/update_form.html',
-                  {'form': form,
-                   'case_number': case.case_number,
-                   'disabled': disabled,
-                   'hidden': hidden,
-                   'judges': sorted_judges,
-                   'override_index': override_index})
+    return render(request, 'remind/update_form.html', {
+        'form': form,
+        'case_number': case.case_number,
+        'disabled': disabled,
+        'hidden': hidden,
+        'judges': sorted_judges,
+        'override_index': override_index
+    })
+
+
+@login_required
+def update_confirm(request, *args, **kwargs):
+    """ This page confirms that the case was created """
+
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+    if request.method == 'POST':
+        return HttpResponseRedirect(reverse('remind:dashboard'))
+
+    return render(request, 'remind/update_confirm.html', {
+        'case_number': case.case_number,
+        'messages': messages.get_messages(request),
+    })
 
 
 ################################################################################
@@ -514,11 +546,29 @@ def motion_deadline(request, *args, **kwargs):
             )
             utils.complete_old_deadline(deadline)
 
-            return HttpResponseRedirect(reverse('remind:dashboard'))
+            return HttpResponseRedirect(reverse('remind:motion_created', kwargs={'motion_pk': motion.pk}))
     else:
         form = MotionDateForm(motion_pk=kwargs.get('motion_pk'))
 
     return render(request, 'remind/motion_date_form.html', {'form': form})
+
+
+@login_required
+def motion_created(request, *args, **kwargs):
+    """
+    Confirmation view displaying results of the newly created motion.
+    """
+    motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
+
+    if request.method == 'POST':
+        return HttpResponseRedirect(reverse('remind:dashboard'))
+
+    return render(request, 'remind/motion_created.html', {
+        'motion_title': motion.title,
+        'case_number': motion.case.case_number,
+        'motion_hearing': motion.date_hearing,
+        'motion_response_deadline': motion.response_deadline
+    })
 
 
 ################################################################################
@@ -551,8 +601,7 @@ def motion_response(request, *args, **kwargs):
 
     return render(
         request,
-        'remind/motion_response_form.html',
-        {
+        'remind/motion_response_form.html', {
             'form': form,
             'motion_title': motion.title,
             'case_number': motion.case.case_number,
@@ -590,8 +639,7 @@ def complete(request, *args, **kwargs):
 
     return render(
         request,
-        'remind/complete_form.html',
-        {
+        'remind/complete_form.html', {
             'form': form,
             'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
             'case_number': deadline.case.case_number,
@@ -626,8 +674,7 @@ def extension(request, *args, **kwargs):
 
     return render(
         request,
-        'remind/extension_form.html',
-        {
+        'remind/extension_form.html', {
             'form': form,
             'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
             'case_number': deadline.case.case_number,
@@ -658,8 +705,7 @@ def judge_confirmed(request, *args, **kwargs):
 
     return render(
         request,
-        'remind/judge_confirmed_form.html',
-        {
+        'remind/judge_confirmed_form.html', {
             'form': form,
             'deadline_desc': DEADLINE_DESCRIPTIONS[str(deadline.type)],
             'case_number': deadline.case.case_number,
@@ -680,8 +726,7 @@ def case_closed(request, *args, **kwargs):
     utils.close_case(case)
 
     return render(
-        request, 'remind/case_closed.html',
-        {
+        request, 'remind/case_closed.html', {
             'case_number': case.case_number,
             'defendant': case.defendant,
             'support_email': SUPPORT_EMAIL,  # Should this be changed to "your supervisor"?
@@ -701,8 +746,24 @@ def stay_case(request, *args, **kwargs):
     utils.stay_case(case)
 
     return render(
-        request, 'remind/case_stayed.html',
-        {
+        request, 'remind/case_stayed.html', {
+            'case_number': case.case_number,
+            'defendant': case.defendant,
+        }
+    )
+
+
+@login_required
+def resume_case(request, *args, **kwargs):
+    case = Case.objects.get(case_number=kwargs.get('case_number'))
+
+    if request.method == 'POST':
+        utils.resume_case(case)
+        # Should this be treated as a new scheduling order instead of going straight to UpdateView?
+        return HttpResponseRedirect(reverse('remind:update', kwargs={'case_number': case.case_number}))
+
+    return render(
+        request, 'remind/case_resumed.html', {
             'case_number': case.case_number,
             'defendant': case.defendant,
         }
