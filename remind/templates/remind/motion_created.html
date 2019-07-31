@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load material_form %}
+
+{% block content %}
+    <div class="content container">
+        <div class="row">
+            <h3>New motion created</h3>
+        </div>
+        <div class="row">
+            <form method="POST">
+                {% csrf_token %}
+                {{ motion_title }} has been created for case {{ case_number }}.
+                <br /><br />
+                The hearing will be on {{ motion_hearing }} and the deadline to file a response will be on {{ motion_response_deadline }}.
+                <br /><br />
+                <input type="submit" name="_submit" class="btn" value="Continue">
+            </form>
+        </div>
+    </div>
+{% endblock %}

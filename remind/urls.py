@@ -20,12 +20,12 @@ urlpatterns = [
     path('motion/', views.CreateMotionView.as_view(), name='create-motion'),
     path('motion/<str:case_number>', views.CreateMotionViewWithCase.as_view(), name='create-motion-with-case'),
     path('motion_deadline/<int:motion_pk>', views.motion_deadline, name='motion_deadline'),
-    # path('motion_created/<int:motion_pk>', views.motion_created, name='motion_created'),
+    path('motion_created/<int:motion_pk>', views.motion_created, name='motion_created'),
     path('motion_response/<int:motion_pk>', views.motion_response, name='motion_response'),
 
     path('update/', views.UpdateCaseView.as_view(), name='update-case'),
     path('update/<str:case_number>', views.update, name='update'),
-    # path('update_confirm/<str:case_number>', views.update_confirm, name='update-confirm'),
+    path('update_confirm/<str:case_number>', views.update_confirm, name='update_confirm'),
 
     path('request_pti/<str:case_number>', views.request_pti, name='request_pti'),
     path('complete/<int:deadline_pk>', views.complete, name='complete'),
@@ -33,5 +33,5 @@ urlpatterns = [
     path('judge_confirmed/<int:deadline_pk>', views.judge_confirmed, name='judge_confirmed'),
     path('case_closed/<str:case_number>', views.case_closed, name='case_closed'),
     path('stay_case/<str:case_number>', views.stay_case, name='stay_case'),
-    # path('case_resumed/<str:case_number>', view.case_resumed, name='case_resumed'),
+    path('resume_case/<str:case_number>', views.resume_case, name='resume_case'),
 ]
