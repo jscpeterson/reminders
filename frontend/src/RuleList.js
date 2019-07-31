@@ -383,7 +383,7 @@ class RuleList extends React.Component {
         <TextField
           // helperText={<HelperText>Save</HelperText>}
           onTrailingIconSelect={() => {this.putNotes(rowData)}}
-          trailingIcon={<MaterialIcon aria-label="Save" role="button" icon="edit" hasRipple={true}/>}
+          trailingIcon={<MaterialIcon aria-label="Save" role="button" icon="check" hasRipple={true}/>}
         ><Input
             // disableUnderline={ true }
             value={ rowData['notes'] }
