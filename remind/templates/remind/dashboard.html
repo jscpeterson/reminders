@@ -6,72 +6,160 @@
 
 {% block head %}
     <link href="//cdn.muicss.com/mui-0.9.42/css/mui.min.css" rel="stylesheet" type="text/css" media="screen" /0>
-<title> ReminderBot Dashboard </title>
+    <title> ReminderBot Dashboard </title>
 
-<style>
-       html{
-           background: darkcyan;
+    <style>
+        html {
+            background: darkcyan;
         }
 
-        nav{
-            background: rgba(0,0,0,.8)
+        nav {
+            background: rgba(0, 0, 0, .8)
         }
+
         .login {
             margin-top: 100px;
         }
-        .login .card{
+
+        .login .card {
             background: rgba(255, 255, 255, .4)
         }
-</style>
+
+        .legend {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .horizontal-bar-tip {
+            padding-left: 1%;
+        }
+
+        .box {
+            float: left;
+            width: 20px;
+            height: 20px;
+            margin: 5px;
+            border: 1px solid rgba(0, 0, 0, .2);
+        }
+
+        .stayed {
+            background: #C0C0C0;
+            float: left;
+            width: 15%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .expired {
+            background: #808080;
+            float: left;
+            width: 15%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .completed {
+            background: #66B2FF;
+            float: left;
+            width: 15%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .ontrack {
+            background: #66FF66;
+            float: left;
+            width: 15%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .introuble {
+            background: #FFFF66;
+            float: left;
+            width: 15%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .urgent {
+            background: #FF6666;
+            float: left;
+            width: 15%;
+            text-align: center;
+            font-weight: bold;
+        }
+
+    </style>
+
+    <!--
+  "Stayed": "#C0C0C0", // light gray
+  "Expired": "#808080", // dark gray
+  "Completed": "#66B2FF", // light blue
+  "OnTrack": "#66FF66", // light green
+  "InTrouble": "#FFFF66", // light yellow
+  "Urgent": "#FF6666", // light red
+  "Default": "#FFFFFF" // white
+    -->
 
 {% endblock %}
 
 {% block content %}
 
-<nav>
-    <div class="nav-wrapper">
-        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-        <ul class="left hide-on-med-and-down">
-            <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
-            <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
-            <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
-            <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
-        </ul>
-        <ul class="right">
-            <li><i class="material-icons">account_circle</i></li>
-            <li><a class="disabled">{{ user }}</a></li>
-            <li><a href="{% url 'logout' %}">Logout</a></li>
-        </ul>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul class="left hide-on-med-and-down">
+                <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
+                <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
+                <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
+                <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
+            </ul>
+            <ul class="right">
+                <li><i class="material-icons">account_circle</i></li>
+                <li><a class="disabled">{{ user }}</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="root">
+        <i class="fa fa-lg fa-spinner fa-spin"></i><br><br>
+        <i class="pending">Loading components...</i><br><br>
     </div>
-</nav>
 
-<div id="root">
-    <i class="fa fa-lg fa-spinner fa-spin"></i><br><br>
-    <i class="pending">Loading components...</i><br><br>
-</div>
+    <ul class="sidenav" id="mobile-demo">
+        <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
+        <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
+        <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
+        <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
+    </ul>
 
-<ul class="sidenav" id="mobile-demo">
-    <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
-    <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
-    <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
-    <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
-</ul>
+    <div class="row">
 
-<div class="row">
+        <script>
+            {#window.props = {{props|json}};  // make sure to escape your props to prevent XSS! See here for the source for the json filter: https://gist.github.com/pirate/c18bfe4fd96008ffa0aef25001a2e88f#}
+            window.react_mount = document.getElementById('root');
+        </script>
+        <script src="/static/src/{{ component }}">
+            {% csrf_token %}
+        </script>
+
+    </div>
+
+    <div class="horizontal-bar-tip"><p>Scroll horizontally to see more deadlines. Select "Upcoming Deadlines" to see all approaching deadlines and complete as needed.</p></div>
+    <div class="legend">
+        <div class="box completed">TASK COMPLETE</div>
+        <div class="box stayed">DEADLINE PAUSED</div>
+        <div class="box ontrack">DEADLINE DUE</div>
+        <div class="box introuble">DEADLINE APPROACHING</div>
+        <div class="box urgent">DEADLINE URGENT</div>
+        <div class="box expired">DEADLINE EXPIRED</div>
+    </div>
 
     <script>
-        {#window.props = {{props|json}};  // make sure to escape your props to prevent XSS! See here for the source for the json filter: https://gist.github.com/pirate/c18bfe4fd96008ffa0aef25001a2e88f#}
-        window.react_mount = document.getElementById('root');
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+        });
     </script>
-    <script src="/static/src/{{component}}">
-        {% csrf_token %}
-    </script>
-
-</div>
-
-<script>
-    $(document).ready(function(){
-        $('.sidenav').sidenav();
-    });
-</script>
 {% endblock %}
