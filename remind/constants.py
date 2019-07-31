@@ -99,7 +99,7 @@ EVENT_DEADLINES = (
 DEADLINE_DESCRIPTIONS = {
     # str(Deadline.FFA): '',
     str(Deadline.SCHEDULING_CONFERENCE): 'date of the scheduling conference',
-    str(Deadline.WITNESS_LIST): 'deadline to file a witness list',
+    str(Deadline.WITNESS_LIST): 'deadline to file the initial witness list',
     str(Deadline.REQUEST_PTI): 'deadline for the defense to request pretrial interviews',
     str(Deadline.CONDUCT_PTI): 'deadline for the defense to conduct pretrial interviews',
     str(Deadline.WITNESS_PTI): 'deadline to complete witness pretrial interviews',
@@ -107,7 +107,7 @@ DEADLINE_DESCRIPTIONS = {
     str(Deadline.PRETRIAL_MOTION_FILING): 'deadline to file any pretrial motions',
     str(Deadline.PRETRIAL_MOTION_RESPONSE): 'deadline to file a response to a pretrial motion',
     str(Deadline.PRETRIAL_MOTION_HEARING): 'date of a pretrial motion hearing',
-    str(Deadline.PRETRIAL_CONFERENCE): 'date and time of the pretrial conference',
+    str(Deadline.PRETRIAL_CONFERENCE): 'date and time of the pretrial conference/docket call',
     str(Deadline.FINAL_WITNESS_LIST): 'deadline to submit a final witness list',
     str(Deadline.NEED_FOR_INTERPRETER): 'deadline to file notice for language access services',
     str(Deadline.PLEA_AGREEMENT): 'deadline to submit any plea agreement to the Court',

@@ -110,7 +110,7 @@ class Deadline(TimeStampedModel):
     TYPE_CHOICES = (
         (FFA, 'FFA'),
         (SCHEDULING_CONFERENCE, 'Scheduling Conference'),
-        (WITNESS_LIST, 'Witness List'),
+        (WITNESS_LIST, 'Initial Witness List'),
         (REQUEST_PTI, 'PTIs Requested'),
         (CONDUCT_PTI, 'PTIs Conducted'),
         (WITNESS_PTI, 'Witness PTIs'),
@@ -118,7 +118,7 @@ class Deadline(TimeStampedModel):
         (PRETRIAL_MOTION_FILING, 'Pretrial Motion Filing'),
         (PRETRIAL_MOTION_RESPONSE, 'Pretrial Motion Response'),
         (PRETRIAL_MOTION_HEARING, 'Pretrial Motion Hearing'),
-        (PRETRIAL_CONFERENCE, 'Pretrial Conference'),
+        (PRETRIAL_CONFERENCE, 'PTC/Docket Call'),
         (FINAL_WITNESS_LIST, 'Final Witness List'),
         (NEED_FOR_INTERPRETER, 'Need for Interpreter'),
         (PLEA_AGREEMENT, 'Plea Agreement'),
