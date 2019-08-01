@@ -1,7 +1,6 @@
 from .models import Deadline
 from django.conf import settings
 
-
 SOURCE_URL = settings.BASE_URL
 ADMINISTRATION_EMAIL = settings.ADMINISTRATION_EMAIL
 SUPPORT_EMAIL = settings.SUPPORT_EMAIL
@@ -152,11 +151,34 @@ SECOND_REMINDER_DAYS = {
 
 # TODO Not sure what the best way to get this data is
 JUDGES = (
-    (1, 'Ramcyzk'),
-    (2, 'Jaramillo'),
-    (3, 'Hart'),
-    (4, 'Loveless'),
-    (5, 'Gallegos'),
-    (6, 'Brown'),
-    (7, 'Flores'),
+    (1, 'Alaniz'),
+    (2, 'Argyres'),
+    (3, 'Blea-Rivera'),
+    (4, 'Brown'),
+    (5, 'Brown'),
+    (6, 'Candelaria'),
+    (7, 'Chavez'),
+    (8, 'Cosgrove-Aguilar'),
+    (9, 'Dominguez'),
+    (10, 'Dowler'),
+    (11, 'Engel'),
+    (12, 'Flores'),
+    (13, 'Gallegos'),
+    (14, 'Gonzales'),
+    (15, 'Hart'),
+    (16, 'Jaramillo'),
+    (17, 'Leos'),
+    (18, 'Loveless'),
+    (19, 'Malott'),
+    (20, 'Martinez'),
+    (21, 'Murphy'),
+    (22, 'Nash'),
+    (23, 'Parnall'),
+    (24, 'Ramczyk'),
+    (25, 'Rodriguez'),
+    (26, 'Rogers'),
+    (27, 'Torres'),
+    (28, 'Valdez'),
+    (29, 'Weeks'),
+    (30, 'Whitaker'),
 )
