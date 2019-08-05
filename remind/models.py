@@ -33,7 +33,8 @@ class Case(TimeStampedModel):
     )
 
     defendant = models.CharField(max_length=120)
-    case_number = models.CharField(max_length=20, unique=True)  # This is the CR#
+    case_number = models.CharField(max_length=20, unique=True)  # This is the DA Case Number
+    cr_number = models.CharField(max_length=20, unique=True)
     judge = models.CharField(max_length=60, null=True, blank=True)
     defense_attorney = models.CharField(max_length=120, null=True, blank=True)
     notes = models.TextField(default='')
