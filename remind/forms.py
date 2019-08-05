@@ -8,7 +8,8 @@ from datetime import timedelta, datetime
 from users.models import CustomUser
 from django import forms
 from . import utils
-from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, JUDGES, EVENT_DEADLINES
+from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, JUDGES, EVENT_DEADLINES, \
+    SECOND_JUDICIAL_DISTRICT
 
 TRUE_FALSE_CHOICES = (
     (True, 'Yes'),
@@ -22,15 +23,20 @@ class CaseForm(ModelForm):
     secretary = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
     arraignment_date = forms.DateTimeField(input_formats=['%Y-%m-%d %H:%M'])
     case_number = forms.CharField(
-        label='CR#',
-        help_text='Use format *{year}-xxxxx-y-z, where *, -y, and -z are optional'.format(year=datetime.now().year),
+        label='DA Case #',
+        help_text='Enter a case number with a format similar to DA-2019-00000. Year should be current.'.format(year=datetime.now().year),
     )
-    override = forms.BooleanField(label="Override invalid case number formatting?", required=False)
+    cr_number = forms.CharField(
+        label='CR #',
+        help_text='Enter a CR number with a format similar to D-202-AA-2019-00000. Year should be current.',
+    )
+    override = forms.BooleanField(label="Ignore invalid case number formatting?", required=False)
     judge = forms.ChoiceField(choices=JUDGES, )
 
     class Meta:
         model = Case
         fields = ['case_number',
+                  'cr_number',
                   'defendant',
                   'judge',
                   'defense_attorney',
@@ -44,12 +50,25 @@ class CaseForm(ModelForm):
 
         case_number = cleaned_data.get('case_number')
         current_year = datetime.now().year
-        case_number_format = r'^\D?{year}-\d{{5}}(-\w*)?(-\w*)?$'.format(year=current_year)
+        case_number_format = r'^DA-\D?{year}-\d{{5}}(-\w*)?(-\w*)?$'.format(
+            year=current_year
+        )
         case_number_pattern = re.compile(case_number_format)
 
         # If case number does not match pattern and override is not checked
         if not self.cleaned_data.get('override') and not bool(re.match(case_number_pattern, case_number)):
-            raise ValidationError('Case number looks invalid. Check "Override invalid case number formatting?" if you '
+            raise ValidationError('Case number looks invalid. Check "Ignore invalid case number formatting?" if you '
+                                  'want to use it anyway.')
+
+        cr_number = cleaned_data.get('cr_number')
+        cr_number_format = r'^D-{district}-\D{{2}}-{year}-\d{{5}}$'.format(
+            district=SECOND_JUDICIAL_DISTRICT,
+            year=current_year,
+        )
+        cr_number_pattern = re.compile(cr_number_format)
+
+        if not self.cleaned_data.get('override') and not bool(re.match(cr_number_pattern, cr_number)):
+            raise ValidationError('CR number looks invalid. Check "Ignore invalid case number formatting?" if you '
                                   'want to use it anyway.')
 
 
@@ -125,7 +144,7 @@ class MotionDateForm(Form):
         )
 
         self.fields['override'] = forms.BooleanField(
-            label='Override invalid dates?',
+            label='Ignore invalid dates?',
             required=False,
         )
 
@@ -175,7 +194,7 @@ class SchedulingForm(Form):
         required=True
     )
     override = forms.BooleanField(
-        label='Override invalid date?',
+        label='Ignore invalid date?',
         initial=False,
         required=False,
     )
@@ -250,7 +269,7 @@ class TrialForm(Form):
         )
 
         self.fields['override'] = forms.BooleanField(
-            label='Override invalid date?',
+            label='Ignore invalid date?',
             initial=False,
             required=False,
         )
@@ -305,7 +324,7 @@ class OrderForm(Form):
             )
 
         self.fields['override'] = forms.BooleanField(
-            label='Override invalid dates?',
+            label='Ignore invalid dates?',
             initial=False,
             required=False,
         )
@@ -403,7 +422,7 @@ class UpdateForm(Form):
             )
 
         self.fields['override'] = forms.BooleanField(
-            label='Override invalid dates?',
+            label='Ignore invalid dates?',
             required=False,
         )
 

@@ -17,9 +17,12 @@ class RuleList extends React.Component {
         { title: 'Defendant',
           field: 'defendant',
           editable: 'never' },
-        { title: 'CR#',
+        { title: 'DA Case #',
           field: 'case-number',
           editable: 'never' },
+        { title: 'CR #',
+          field: 'cr-number',
+          editable: 'never', },
         { title: 'Judge',
           field: 'judge' ,
           editable: 'never'},
@@ -234,6 +237,7 @@ class RuleList extends React.Component {
       // Populate basic case data
       row['defendant'] = caseJSON['defendant'];
       row['case-number'] = caseJSON['case_number'];
+      row['cr-number'] = caseJSON['cr_number'];
       row['judge'] = caseJSON['judge'];
       row['defense-attorney'] = caseJSON['defense_attorney'];
       row['notes'] = caseJSON['notes'];
