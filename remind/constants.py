@@ -97,6 +97,15 @@ EVENT_DEADLINES = (
     Deadline.PRETRIAL_MOTION_HEARING
 )
 
+IMPORTANT_EVENTS = (
+    Deadline.SCHEDULING_CONFERENCE,
+    Deadline.PRETRIAL_CONFERENCE,
+    Deadline.PRETRIAL_MOTION_HEARING,
+    Deadline.TRIAL,
+)
+
+IMPORTANT_EVENT_REMINDER_DAYS = 2
+
 DEADLINE_DESCRIPTIONS = {
     # str(Deadline.FFA): '',
     str(Deadline.SCHEDULING_CONFERENCE): 'date of the scheduling conference',

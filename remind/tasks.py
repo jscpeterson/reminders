@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 
 from .models import Deadline
-from .constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS, ADMINISTRATION_EMAIL, EVENT_DEADLINES
+from .constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS, ADMINISTRATION_EMAIL, EVENT_DEADLINES, \
+    IMPORTANT_EVENTS, IMPORTANT_EVENT_REMINDER_DAYS
 from .email import Email
 from . import utils
 from django.core.mail import send_mail
@@ -45,8 +46,18 @@ def check_all_deadlines():
             deadline.save(update_fields=['invalid_notice_sent'])
             continue
 
-        # If deadline is in EVENT_DEADLINES it does not need a reminder or a deadline expiry notice
+        # If deadline is in EVENT_DEADLINES it does not need a deadline expiry notice and uses different reminders
         if deadline.type in EVENT_DEADLINES:
+
+            # If it is approaching the deadline and this is an important event, send a courtesy reminder.
+            if deadline.type in IMPORTANT_EVENTS \
+                and days_until.days <= IMPORTANT_EVENT_REMINDER_DAYS \
+                    and deadline.reminders_sent == 0:
+                send_emails(Email.EVENT_REMINDER, deadline)
+                deadline.reminders_sent += 1
+                deadline.save(update_fields=['reminders_sent'])
+                print('Reminder sent for event {} on {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
+
             # If it is past the deadline, send emails in specific cases, otherwise, silently complete the task.
             if days_until <= timedelta(days=0):
                 if deadline.type == Deadline.SCHEDULING_CONFERENCE:
