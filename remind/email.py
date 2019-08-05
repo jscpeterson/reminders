@@ -15,6 +15,7 @@ class Email:
     SCHEDULING_CONFERENCE = 5
     REQUEST_PTI = 6
     CONDUCT_PTI = 7
+    EVENT_REMINDER = 8
 
     EMAIL_TYPES = (
         (DEADLINE_EXPIRED, 'Deadline expired'),
@@ -24,7 +25,8 @@ class Email:
         (SECOND_REMINDER, 'Second reminder'),
         (SCHEDULING_CONFERENCE, 'Day of scheduling conference'),
         (REQUEST_PTI, 'Day defense can no longer request PTI'),
-        (CONDUCT_PTI, 'Day defense can no longer conduct PTI')
+        (CONDUCT_PTI, 'Day defense can no longer conduct PTI'),
+        (EVENT_REMINDER, 'Upcoming event reminder'),
     )
 
     def __init__(self, email_type, recipient, deadline):
@@ -66,6 +68,10 @@ class Email:
             self.SCHEDULING_CONFERENCE: 'Please enter scheduling information.',
             self.REQUEST_PTI: 'PTIs sanctions availability',
             self.CONDUCT_PTI: 'Reminder - 30 days from date of PTI request.',
+            self.EVENT_REMINDER: '{short_desc} starts on {date}.'.format(
+                short_desc=str(self.deadline),
+                date=self.deadline.datetime.date()
+            ),
         }
 
         output += subjects[self.email_type]
@@ -87,6 +93,7 @@ class Email:
             self.SCHEDULING_CONFERENCE: self.get_scheduling_message(),
             self.REQUEST_PTI: self.get_request_pti_message(),
             self.CONDUCT_PTI: self.get_conduct_pti_message(),
+            self.EVENT_REMINDER: self.get_event_reminder_message(),
         }
         body = messages[self.email_type]
 
@@ -245,4 +252,13 @@ scheduled as soon as possible.'''.format(
             indent=INDENT,
             days=conduct_pti_days,
             case_number=self.case.case_number,
+        )
+
+    def get_event_reminder_message(self):
+
+        return '''This is a courtesy reminder that the {short_desc} for case {case_number} is scheduled to start on \
+{datetime}.'''.format(
+            short_desc=str(self.deadline),
+            case_number=self.case.case_number,
+            datetime=self.deadline.datetime.strftime('%c'),
         )
