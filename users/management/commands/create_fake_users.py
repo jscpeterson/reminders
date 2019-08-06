@@ -6,7 +6,7 @@ import configparser
 from faker import Faker
 
 faker = Faker()
-
+SUGGESTED_PASSWORD = 'Remind123'
 
 class Command(BaseCommand):
     help = 'Creates one user per position in database'
@@ -26,13 +26,15 @@ class Command(BaseCommand):
                 first_name = faker.first_name()
                 last_name = faker.last_name()
             
-            CustomUser.objects.create(
+            user = CustomUser.objects.create(
                 first_name=first_name,
                 last_name=last_name,
                 username=first_name[0] + last_name,
                 position=position_index,
                 email=test_emails.get(position_label),
             )
+            user.set_password(SUGGESTED_PASSWORD)
+            user.save(update_fields=['password'])
             print('Created', position_label)
 
     def _get_email_addresses(self):
