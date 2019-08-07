@@ -1,4 +1,6 @@
 from django.db import models
+from localflavor.us.models import USSocialSecurityNumberField
+
 from users.models import CustomUser
 
 
@@ -25,6 +27,48 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+class Defendant(TimeStampedModel):
+    MALE = 1
+    FEMALE = 2
+    SEX_CHOICES = (
+        (MALE, 'Male'),
+        (FEMALE, 'Female'),
+    )
+
+    TIER_1 = 1
+    TIER_2 = 2
+    TIER_3 = 3
+
+    TIER_CHOICES = (
+        (TIER_1, 'Tier 1'),
+        (TIER_2, 'Tier 2'),
+        (TIER_3, 'Tier 3'),
+    )
+
+    mdc_num = models.IntegerField(null=True, blank=True)
+    last_name = models.CharField(max_length=60, )
+    first_name = models.CharField(max_length=60, )
+    middle_name = models.CharField(max_length=60, null=True, blank=True)
+    sex = models.IntegerField(choices=SEX_CHOICES, null=True, blank=True)
+    birth_date = models.DateField()
+
+    ssn = USSocialSecurityNumberField(unique=True)
+    fbi_number = models.CharField(max_length=9, null=True, blank=True)
+    state_id = models.CharField(max_length=8, null=True, blank=True)
+
+    # phone_number = PhoneNumberField(null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+
+    tier = models.IntegerField(choices=TIER_CHOICES, null=True, blank=True)
+
+    def __str__(self):
+        return str(self.first_name) + ' ' + str(self.last_name)
+
+    @property
+    def name(self):
+        return str(self)
+
+
 class Judge(TimeStampedModel):
     # TODO Add courts
 
@@ -43,7 +87,7 @@ class Case(TimeStampedModel):
         (3, '3')
     )
 
-    defendant = models.CharField(max_length=120)
+    defendant = models.ForeignKey(Defendant, on_delete=models.PROTECT, blank=True, null=True)
     case_number = models.CharField(max_length=20, unique=True)  # This is the DA Case Number
     cr_number = models.CharField(max_length=20, unique=True)
     judge = models.ForeignKey(Judge, on_delete=models.PROTECT, null=True, blank=True)

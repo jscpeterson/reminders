@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load material_form %}
+
+{% block content %}
+    <div class="content container">
+        <div class="row">
+            <h3>New defendant created</h3>
+        </div>
+        <div class="row">
+            <form method="POST">
+                {% csrf_token %}
+                <ul>
+                    <li>Defendant name: <b>{{ defendant_name }}</b></li>
+                    <li>Defendant SSN: <b>{{ defendant_ssn }}</b></li>
+                    <li>Defendant DOB: <b>{{ defendant_dob }}</b></li>
+                </ul>
+                Would you like to create a new case using this defendant?
+                <br/>
+                <button class="btn" onclick="window.location.href = `/remind/`;
+                return false;">No</button>
+                <input type="submit" name="_submit" class="btn" value="Yes">
+            </form>
+        </div>
+    </div>
+{% endblock %}

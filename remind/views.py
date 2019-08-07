@@ -6,12 +6,12 @@ from django.urls import reverse
 from django.shortcuts import render, render_to_response
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
-from .models import Case, Deadline, Motion, Judge
+from .models import Case, Deadline, Motion, Defendant, Judge
 from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm, MotionFormWithCase
+    MotionResponseForm, MotionFormWithCase, DefendantForm
 from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, JUDGES, SUPPORT_EMAIL
 from . import utils
 from . import case_utils
@@ -37,33 +37,82 @@ class DashView(LoginRequiredMixin, ListView):
         return context
 
 
+class CreateDefendantView(LoginRequiredMixin, CreateView):
+    """ Case is created on this page, and first deadline for Witness List is set. """
+    model = Defendant
+    form_class = DefendantForm
+
+    def get_success_url(self):
+        return reverse('remind:defendant-created', kwargs={'defendant_pk': self.object.pk})
+
+
+@login_required
+def defendant_created(request, *args, **kwargs):
+    """
+    Confirmation view displaying results of the newly created defendant.
+    """
+    defendant = Defendant.objects.get(pk=kwargs.get('defendant_pk'))
+
+    if request.method == 'POST':
+        return HttpResponseRedirect(reverse('remind:create-case-with-ssn', kwargs={'defendant_pk': defendant.pk}))
+
+    return render(request, 'remind/defendant_created.html', {
+        'defendant_name': defendant,
+        'defendant_ssn': defendant.ssn,
+        'defendant_dob': defendant.birth_date,
+    })
+
+
+# class CreateDefenseView(LoginRequiredMixin, CreateView):
+#     pass
+
+
 ################################################################################
 # Create Case Sequence
 
-
-class CaseCreateView(LoginRequiredMixin, CreateView):
+@login_required
+def create_case(request, *args, **kwargs):
     """ Case is created on this page, and first deadline for Witness List is set. """
-    model = Case
-    form_class = CaseForm
+    if request.method == 'POST':
+        form = CaseForm(request.POST, *args, **kwargs)
 
-    def get_success_url(self):
-        self.object.created_by = self.request.user
-        assign_perm('change_case', self.object.prosecutor, self.object)
-        assign_perm('change_case', self.object.secretary, self.object)
-        assign_perm('change_case', self.object.supervisor, self.object)
+        if form.is_valid():
+            # Create case
+            data = form.cleaned_data
+            case = Case.objects.create(
+                case_number=data.get('case_number'),
+                cr_number=data.get('cr_number'),
+                defendant=Defendant.objects.get(ssn=data.get('defendant_ssn')),
+                judge=data.get('judge'),
+                defense_attorney=data.get('defense_attorney'),
+                supervisor=data.get('supervisor'),
+                prosecutor=data.get('prosecutor'),
+                secretary=data.get('secretary'),
+                arraignment_date=data.get('arraignment_date')
+            )
 
-        # Start first deadline for Witness List
-        deadline = Deadline.objects.create(
-            case=self.object,
-            type=Deadline.WITNESS_LIST,
-            datetime=utils.get_actual_deadline_from_start(
-                start_date=self.object.arraignment_date,
-                days=WITNESS_LIST_DEADLINE_DAYS),
-            created_by=self.request.user
-        )
-        utils.complete_old_deadline(deadline)
+            # Assign permissions
+            assign_perm('change_case', case.prosecutor, case)
+            assign_perm('change_case', case.secretary, case)
+            assign_perm('change_case', case.supervisor, case)
 
-        return reverse('remind:case_created', kwargs={'case_number': self.object.case_number})
+            # Start first deadline for Witness List
+            deadline = Deadline.objects.create(
+                case=case,
+                type=Deadline.WITNESS_LIST,
+                datetime=utils.get_actual_deadline_from_start(
+                    start_date=case.arraignment_date,
+                    days=WITNESS_LIST_DEADLINE_DAYS),
+                created_by=request.user
+            )
+            utils.complete_old_deadline(deadline)
+
+            return HttpResponseRedirect(reverse('remind:case_created', kwargs={'case_number': case.case_number}))
+
+    else:
+        form = CaseForm(*args, **kwargs)
+
+    return render(request, 'remind/case_form.html', {'form': form})
 
 
 class DashView(LoginRequiredMixin, ListView):

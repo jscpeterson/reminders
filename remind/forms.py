@@ -3,7 +3,9 @@ import re
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms import ModelForm, Form
-from .models import Case, Deadline, Motion, Judge
+from localflavor.us.forms import USSocialSecurityNumberField
+
+from .models import Case, Deadline, Motion, Defendant, Judge
 from datetime import timedelta, datetime
 from users.models import CustomUser
 from django import forms
@@ -17,59 +19,125 @@ TRUE_FALSE_CHOICES = (
 )
 
 
-class CaseForm(ModelForm):
-    supervisor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=1), empty_label=None)
-    prosecutor = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=2), empty_label=None)
-    secretary = forms.ModelChoiceField(queryset=CustomUser.objects.filter(position=3), empty_label=None)
-    arraignment_date = forms.DateTimeField(input_formats=['%Y-%m-%d %H:%M'])
-    case_number = forms.CharField(
-        label='DA Case #',
-        help_text='Enter a case number with a format similar to DA-2019-00000. Year should be current.'.format(year=datetime.now().year),
-    )
-    cr_number = forms.CharField(
-        label='CR #',
-        help_text='Enter a CR number with a format similar to D-202-AA-2019-00000. Year should be current.',
-    )
-    override = forms.BooleanField(label="Ignore invalid case number formatting?", required=False)
-    judge = forms.ModelChoiceField(queryset=Judge.objects.order_by('last_name'))
+class DefendantForm(ModelForm):
 
     class Meta:
-        model = Case
-        fields = ['case_number',
-                  'cr_number',
-                  'defendant',
-                  'judge',
-                  'defense_attorney',
-                  'supervisor',
-                  'prosecutor',
-                  'secretary',
-                  'arraignment_date']
+        model = Defendant
+        fields = [
+            'first_name',
+            'last_name',
+            'birth_date',
+            'ssn',
+        ]
+
+
+class CaseForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        defendant_pk = kwargs.pop('defendant_pk', None)
+        if defendant_pk:
+            initial_ssn = Defendant.objects.get(pk=defendant_pk).ssn
+        else:
+            initial_ssn = None
+
+        super(CaseForm, self).__init__(*args, **kwargs)
+        self.fields['case_number'] = forms.CharField(
+            label='DA Case #',
+            help_text='Enter a case number with a format similar to DA-2019-00000. Year should be current.'.format(year=datetime.now().year),
+            required=True,
+        )
+        self.fields['cr_number'] = forms.CharField(
+            label='CR #',
+            help_text='Enter a CR number with a format similar to D-202-AA-2019-00000. Year should be current.',
+            required=True,
+        )
+        self.fields['override'] = forms.BooleanField(label="Ignore invalid case number formatting?", required=False)
+        self.fields['defendant_ssn'] = USSocialSecurityNumberField(
+            label='Defendant SSN',
+            help_text='Enter the defendant\'s social security number similar to XXX-XX-XXXX.',
+            initial=initial_ssn if initial_ssn is not None else '',
+            required=True,
+        )
+        self.fields['judge'] = forms.ModelChoiceField(
+            queryset=Judge.objects.order_by('last_name'),
+            required=True,
+        )
+        self.fields['defense_attorney'] = forms.CharField()  # TODO change to modelchoice
+        self.fields['supervisor'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.SUPERVISOR).order_by('last_name'),
+            required=True,
+        )
+        self.fields['prosecutor'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.PROSECUTOR).order_by('last_name'),
+            required=True,
+        )
+        self.fields['secretary'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.SECRETARY).order_by('last_name'),
+            required=True,
+        )
+        self.fields['arraignment_date'] = forms.DateTimeField(
+            input_formats=['%Y-%m-%d %H:%M'],
+            required=True,
+        )
 
     def clean(self):
         cleaned_data = super(CaseForm, self).clean()
 
         case_number = cleaned_data.get('case_number')
-        current_year = datetime.now().year
-        case_number_format = r'^DA-\D?{year}-\d{{5}}(-\w*)?(-\w*)?$'.format(
-            year=current_year
-        )
-        case_number_pattern = re.compile(case_number_format)
-
-        # If case number does not match pattern and override is not checked
-        if not self.cleaned_data.get('override') and not bool(re.match(case_number_pattern, case_number)):
-            raise ValidationError('Case number looks invalid. Check "Ignore invalid case number formatting?" if you '
-                                  'want to use it anyway.')
-
         cr_number = cleaned_data.get('cr_number')
-        cr_number_format = r'^D-{district}-\D{{2}}-{year}-\d{{5}}$'.format(
-            district=SECOND_JUDICIAL_DISTRICT,
-            year=current_year,
-        )
-        cr_number_pattern = re.compile(cr_number_format)
 
-        if not self.cleaned_data.get('override') and not bool(re.match(cr_number_pattern, cr_number)):
-            raise ValidationError('CR number looks invalid. Check "Ignore invalid case number formatting?" if you '
-                                  'want to use it anyway.')
+        current_year = datetime.now().year
+
+        if case_number:
+            # Check case_number exists
+            if Case.objects.filter(case_number=case_number).exists():
+                self.add_error(
+                    'case_number',
+                    ' Case with this DA case number already exists.'
+                )
+
+            # Check DA Case # pattern
+            case_number_format = r'^DA-\D?{year}-\d{{5}}(-\w*)?(-\w*)?$'.format(
+                year=current_year
+            )
+            case_number_pattern = re.compile(case_number_format)
+
+            if self.cleaned_data.get('override') and not bool(re.match(case_number_pattern, case_number)):
+                self.add_error(
+                    'case_number',
+                    ' DA case number looks invalid. '
+                    'Check "Ignore invalid case number formatting?" if you want to use it anyway. '
+                )
+
+        if cr_number:
+            # Check CR# exists
+            if Case.objects.filter(cr_number=cr_number).exists():
+                self.add_error(
+                    'cr_number',
+                    ' Case with this CR# already exists.'
+                )
+
+            # Check CR# pattern
+            cr_number_format = r'^D-{district}-\D{{2}}-{year}-\d{{5}}$'.format(
+                district=SECOND_JUDICIAL_DISTRICT,
+                year=current_year,
+            )
+            cr_number_pattern = re.compile(cr_number_format)
+
+            if cr_number != '' and not self.cleaned_data.get('override') and not bool(re.match(cr_number_pattern, cr_number)):
+                self.add_error(
+                    'cr_number',
+                    ' CR# looks invalid. '
+                    'Check "Ignore invalid case number formatting?" if you want to use it anyway. '
+                )
+
+        # Check defendant SSN exists
+        if not Defendant.objects.filter(ssn=cleaned_data.get('defendant_ssn')).exists():
+            self.add_error(
+                'defendant_ssn',
+                ' Defendant SSN not found, please double check your entry or return to the dashboard '
+                'and create a new defendant if you have not already.'
+            )
 
 
 class MotionForm(Form):
@@ -128,8 +196,10 @@ class MotionDateForm(Form):
         deadline_dict = utils.get_deadline_dict(self.motion.case.track)
 
         initial_response = utils.get_motion_response_deadline(self.motion)
-        initial_hearing = utils.get_actual_deadline_from_end(self.motion.case.trial_date,
-                                                             deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)], )
+        initial_hearing = utils.get_actual_deadline_from_end(
+            self.motion.case.trial_date,
+            deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)], 
+        )
 
         self.fields['response_deadline'] = forms.DateTimeField(
             input_formats=['%Y-%m-%d'],
@@ -222,10 +292,10 @@ class SchedulingForm(Form):
 
             else:
                 if not utils.is_deadline_within_limits(
-                        deadline=scheduling_conf_date,
-                        event=self.case.arraignment_date,
-                        days=SCHEDULING_ORDER_DEADLINE_DAYS,
-                        future_event=False,
+                    deadline=scheduling_conf_date,
+                    event=self.case.arraignment_date,
+                    days=SCHEDULING_ORDER_DEADLINE_DAYS,
+                    future_event=False,
                 ):
                     self.add_error(
                         'scheduling_conference_date',
@@ -260,8 +330,11 @@ class TrialForm(Form):
 
         deadline_dict = utils.get_deadline_dict(self.case.track)
 
-        initial = utils.get_actual_deadline_from_start(self.case.arraignment_date,
-                                                       deadline_dict[str(Deadline.TRIAL)])
+        initial = utils.get_actual_deadline_from_start(
+            self.case.arraignment_date,
+            deadline_dict[str(Deadline.TRIAL)]
+        )
+
         self.fields['trial_date'] = forms.DateTimeField(
             label='Date and time of the trial\'s first day',
             initial=initial,
@@ -341,10 +414,10 @@ class OrderForm(Form):
             deadline = cleaned_data.get(key)
 
             if not utils.is_deadline_within_limits(
-                    deadline=deadline,
-                    event=self.case.trial_date,
-                    days=deadline_dict[key],
-                    future_event=True
+                deadline=deadline,
+                event=self.case.trial_date,
+                days=deadline_dict[key],
+                future_event=True
             ):
                 self.add_error(
                     key,
@@ -360,8 +433,10 @@ class RequestPTIForm(Form):
 
         deadline_dict = utils.get_deadline_dict(case.track)
 
-        initial = utils.get_actual_deadline_from_start(case.scheduling_conference_date,
-                                                       deadline_dict[str(Deadline.REQUEST_PTI)])
+        initial = utils.get_actual_deadline_from_start(
+            case.scheduling_conference_date,
+            deadline_dict[str(Deadline.REQUEST_PTI)]
+        )
         self.fields['request_pti_date'] = forms.DateTimeField(
             label='Date that the defense requested pretrial interviews',
             initial=initial,

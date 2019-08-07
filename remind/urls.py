@@ -3,10 +3,19 @@ from . import views
 
 app_name = 'remind'
 urlpatterns = [
+    # TODO Fix up the inconsistencies with these URLs (some use snake_case some use kebab-case)
     path('', views.DashView.as_view(), name='dashboard'),
 
+    # Defendant Creation Flow
+    path('create_defendant/', views.CreateDefendantView.as_view(), name='create-defendant'),
+    path('defendant_created/<str:defendant_pk>', views.defendant_created, name='defendant-created'),
+
+    # Defense Attorney Creation Flow
+    # path('create_defense/', views.CreateDefenseView.as_view(), name='create-defense-attorney'),
+
     # Case Creation Flow
-    path('create/', views.CaseCreateView.as_view(), name='create-case'),
+    path('create_case/', views.create_case, name='create-case'),
+    path('create_case/<str:defendant_pk>', views.create_case, name='create-case-with-ssn'),
     path('case_created/<str:case_number>', views.case_created, name='case_created'),
     path('scheduling/<str:case_number>', views.scheduling, name='scheduling'),
 
