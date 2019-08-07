@@ -1,4 +1,4 @@
-from .models import Deadline
+from .models import Deadline, Judge
 from django.conf import settings
 
 SOURCE_URL = settings.BASE_URL
@@ -160,36 +160,16 @@ SECOND_REMINDER_DAYS = {
     Deadline.TRIAL: 7,
 }
 
-# TODO Not sure what the best way to get this data is
-JUDGES = (
-    (1, 'Alaniz'),
-    (2, 'Argyres'),
-    (3, 'Blea-Rivera'),
-    (4, 'Brown'),
-    (5, 'Brown'),
-    (6, 'Candelaria'),
-    (7, 'Chavez'),
-    (8, 'Cosgrove-Aguilar'),
-    (9, 'Dominguez'),
-    (10, 'Dowler'),
-    (11, 'Engel'),
-    (12, 'Flores'),
-    (13, 'Gallegos'),
-    (14, 'Gonzales'),
-    (15, 'Hart'),
-    (16, 'Jaramillo'),
-    (17, 'Leos'),
-    (18, 'Loveless'),
-    (19, 'Malott'),
-    (20, 'Martinez'),
-    (21, 'Murphy'),
-    (22, 'Nash'),
-    (23, 'Parnall'),
-    (24, 'Ramczyk'),
-    (25, 'Rodriguez'),
-    (26, 'Rogers'),
-    (27, 'Torres'),
-    (28, 'Valdez'),
-    (29, 'Weeks'),
-    (30, 'Whitaker'),
-)
+
+def _create_judge_list():
+    """
+    Creates a list similar to what was previously in this class as a constant. Each element has a judge and an index
+    starting at 1.
+    """
+    judges = list()
+    for index, judge in enumerate(start=1, iterable=Judge.objects.order_by('last_name')):
+        judges.append((index, str(judge)))
+    return judges
+
+
+JUDGES = _create_judge_list()

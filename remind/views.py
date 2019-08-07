@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.shortcuts import render, render_to_response
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
-from .models import Case, Deadline, Motion
+from .models import Case, Deadline, Motion, Judge
 from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
@@ -48,9 +48,6 @@ class CaseCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         self.object.created_by = self.request.user
-        judges_dict = dict(JUDGES)
-        self.object.judge = judges_dict[int(self.object.judge)]
-        self.object.save()
         assign_perm('change_case', self.object.prosecutor, self.object)
         assign_perm('change_case', self.object.secretary, self.object)
         assign_perm('change_case', self.object.supervisor, self.object)
@@ -355,11 +352,16 @@ def update(request, *args, **kwargs):
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
 
         if form.is_valid():
-            judge = JUDGES[int(form.cleaned_data.get('judge')) - 1][1]
+            judge_name = JUDGES[int(form.cleaned_data.get('judge')) - 1][1]
+            judge_first_name = judge_name.split(' ')[0]
+            judge_last_name = judge_name.split(' ')[1]
             defense_attorney = form.cleaned_data.get('defense_attorney')
 
-            if case.judge != judge:
-                case.judge = judge
+            if case.judge.last_name != judge_name:
+                case.judge = Judge.objects.get(
+                    first_name=judge_first_name,
+                    last_name=judge_last_name
+                )
                 case.updated_by = request.user
                 case.save(update_fields=['judge'])
                 messages.add_message(request, messages.INFO, 'Judge has been changed to {}.'.format(
