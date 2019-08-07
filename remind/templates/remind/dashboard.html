@@ -110,6 +110,8 @@
         <div class="nav-wrapper">
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul class="left hide-on-med-and-down">
+                <li><a href="{% url 'remind:create-defendant' %}">Create Defendant</a></li>
+{#                <li><a href="{% url 'remind:create-defense-attorney' %}">Create Defense Attorney</a></li>#}
                 <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
                 <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
                 <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>

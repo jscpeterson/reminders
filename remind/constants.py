@@ -161,13 +161,23 @@ SECOND_REMINDER_DAYS = {
 }
 
 
+# TODO Remove this list and access Judges more cleanly
 def _create_judge_list():
     """
     Creates a list similar to what was previously in this class as a constant. Each element has a judge and an index
-    starting at 1.
+    starting at 1. Reads data directly from judges.txt, assumed to be saved locally. Quick fix that should be reworked.
     """
     judges = list()
-    for index, judge in enumerate(start=1, iterable=Judge.objects.order_by('last_name')):
+    file_path = 'judges.txt'
+    with open(file_path) as source:
+        data = [line.replace('\n', '') for line in source]
+    for index, row in enumerate(start=1, iterable=data):
+        judge = ''
+        row = row.split(' ')
+        if len(row) == 2:
+            judge = '{first_name} {last_name}'.format(first_name=row[0], last_name=row[1])
+        elif len(row) == 3:
+            judge = '{first_name} {last_name}'.format(first_name=row[0], last_name=row[2])
         judges.append((index, str(judge)))
     return judges
 
