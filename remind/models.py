@@ -25,6 +25,17 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+class Judge(TimeStampedModel):
+    # TODO Add courts
+
+    last_name = models.CharField(max_length=60, )
+    first_name = models.CharField(max_length=60, )
+    middle_name = models.CharField(max_length=60, null=True, blank=True)
+
+    def __str__(self):
+        return '{first_name} {last_name}'.format(first_name=self.first_name, last_name=self.last_name)
+
+
 class Case(TimeStampedModel):
     TRACK_CHOICES = (
         (1, '1'),
@@ -35,7 +46,7 @@ class Case(TimeStampedModel):
     defendant = models.CharField(max_length=120)
     case_number = models.CharField(max_length=20, unique=True)  # This is the DA Case Number
     cr_number = models.CharField(max_length=20, unique=True)
-    judge = models.CharField(max_length=60, null=True, blank=True)
+    judge = models.ForeignKey(Judge, on_delete=models.PROTECT, null=True, blank=True)
     defense_attorney = models.CharField(max_length=120, null=True, blank=True)
     notes = models.TextField(default='')
 

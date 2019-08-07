@@ -3,7 +3,7 @@ import re
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms import ModelForm, Form
-from .models import Case, Deadline, Motion
+from .models import Case, Deadline, Motion, Judge
 from datetime import timedelta, datetime
 from users.models import CustomUser
 from django import forms
@@ -31,7 +31,7 @@ class CaseForm(ModelForm):
         help_text='Enter a CR number with a format similar to D-202-AA-2019-00000. Year should be current.',
     )
     override = forms.BooleanField(label="Ignore invalid case number formatting?", required=False)
-    judge = forms.ChoiceField(choices=JUDGES, )
+    judge = forms.ModelChoiceField(queryset=Judge.objects.order_by('last_name'))
 
     class Meta:
         model = Case

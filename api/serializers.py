@@ -50,7 +50,11 @@ class DeadlineSerializer(serializers.ModelSerializer):
 
 class CaseSerializer(WritableNestedModelSerializer):
     deadline_set = DeadlineSerializer(many=True)
+    judge = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
         fields = '__all__'
+
+    def get_judge(self, obj):
+        return str(obj.judge)

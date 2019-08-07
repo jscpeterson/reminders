@@ -322,7 +322,7 @@ def sort_judges(case):
     Returns a reorganized version of the JUDGES constant based on a case, where the first entry is the current judge
     on the case. This is a workaround to set the initial judge value in the HTML template.
     """
-    judge = case.judge
+    judge = str(case.judge)
     judges_list = list(JUDGES)
     judge_tuple = judges_list.pop(find_judge_index(judge))
     judges_list.insert(0, judge_tuple)
