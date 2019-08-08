@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from remind.constants import EVENT_DEADLINES
-from remind.models import Deadline, Case
+from cases.models import Case
+from remind.models import Deadline
 from drf_writable_nested import WritableNestedModelSerializer
 from remind.constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS
 

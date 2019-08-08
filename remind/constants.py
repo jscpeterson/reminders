@@ -1,5 +1,7 @@
-from .models import Deadline, Judge
 from django.conf import settings
+
+from .models import Deadline
+from cases.models import Judge
 
 SOURCE_URL = settings.BASE_URL
 ADMINISTRATION_EMAIL = settings.ADMINISTRATION_EMAIL

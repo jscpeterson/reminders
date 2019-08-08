@@ -6,7 +6,8 @@ from django.forms import ModelForm, Form
 from django.utils.safestring import mark_safe
 from localflavor.us.forms import USSocialSecurityNumberField
 
-from .models import Case, Deadline, Motion, Defendant, Judge, DefenseAttorney
+from cases.models import Case, Motion, Defendant, Judge, DefenseAttorney
+from remind.models import Deadline
 from datetime import timedelta, datetime
 from users.models import CustomUser
 from django import forms
@@ -21,6 +22,7 @@ TRUE_FALSE_CHOICES = (
 
 
 class DefendantForm(ModelForm):
+
 
     class Meta:
         model = Defendant

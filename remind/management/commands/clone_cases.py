@@ -1,6 +1,7 @@
 from random import randint
 from django.core.management.base import BaseCommand
-from remind.models import Case, Deadline
+from cases.models import Case
+from remind.models import Deadline
 
 
 class Command(BaseCommand):

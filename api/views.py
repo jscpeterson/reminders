@@ -1,7 +1,8 @@
 from django.db.models import Q
 from rest_framework import viewsets
 from api.serializers import DeadlineSerializer, CaseSerializer
-from remind.models import Deadline, Case
+from cases.models import Case
+from remind.models import Deadline
 
 
 class DeadlineViewSet(viewsets.ModelViewSet):

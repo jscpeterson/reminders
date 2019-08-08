@@ -1,7 +1,7 @@
 import csv
 
 from django.core.management.base import BaseCommand, CommandError
-from remind.models import DefenseAttorney
+from cases.models import DefenseAttorney
 
 
 class ListLengthException(Exception):
