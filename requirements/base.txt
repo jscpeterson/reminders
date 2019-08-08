@@ -1,6 +1,6 @@
 --extra-index-url=https://pypi.viewflow.io/35E6123E2F48/simple/
 celery==4.3.0
-Django==2.1.5
+Django==2.2.4
 django-celery-beat==1.4.0
 django-celery-results==1.0.4
 django-dotenv==1.4.2
