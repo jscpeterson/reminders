@@ -4,12 +4,13 @@
 {% block content %}
     <div class="content container">
         <div class="row">
-            <h3>Enter the date that the defense requested pretrial interviews.</h3>
+            <h3>Enter information about the new defense attorney</h3>
         </div>
         <div class="row">
             <form method="POST">
                 {% csrf_token %}
                 {% form form=form %}{% endform %}
+                <p>If you do not know an attorney's firm, you can look them up at <a href="https://www.nmbar.org/Nmstatebar/FindAnAttorney" target=_blank>the website for the New Mexico State Bar.</a></p>
                 <button class="btn" onclick="window.location.href = {% url 'remind:dashboard' %};;
                 return false;">Back</button>
                 <button type="submit" name="_submit" class="btn">Submit</button>

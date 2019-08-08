@@ -9,8 +9,12 @@
         <div class="row">
             <form method="POST">
                 {% csrf_token %}
-                Case {{ case_number }} created and assigned to {{ prosecutor }}, {{ secretary }}, and {{ supervisor }}.
-                <br /><br />
+                Case {{ case_number }} created and assigned as follows:
+                <ul>
+                    <li>Prosecutor: <b>{{ prosecutor }}</b></li>
+                    <li>Secretary: <b>{{ secretary }}</b></li>
+                    <li>Supervisor: <b>{{ supervisor }}</b></li>
+                </ul>
                 Deadline to file a witness list has been created and is due on <b>{{ witness_deadline }}</b>. {{ witness_deadline_message }}
                 <br /><br />
                 <input type="submit" name="_submit" class="btn" value="Continue">

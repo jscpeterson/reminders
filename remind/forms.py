@@ -3,14 +3,15 @@ import re
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.forms import ModelForm, Form
+from django.utils.safestring import mark_safe
 from localflavor.us.forms import USSocialSecurityNumberField
 
-from .models import Case, Deadline, Motion, Defendant, Judge
+from .models import Case, Deadline, Motion, Defendant, Judge, DefenseAttorney
 from datetime import timedelta, datetime
 from users.models import CustomUser
 from django import forms
 from . import utils
-from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, JUDGES, EVENT_DEADLINES, \
+from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, EVENT_DEADLINES, \
     SECOND_JUDICIAL_DISTRICT
 
 TRUE_FALSE_CHOICES = (
@@ -31,6 +32,17 @@ class DefendantForm(ModelForm):
         ]
 
 
+class DefenseAttorneyForm(ModelForm):
+
+    class Meta:
+        model = DefenseAttorney
+        fields = [
+            'first_name',
+            'last_name',
+            'firm'
+        ]
+
+
 class CaseForm(Form):
 
     def __init__(self, *args, **kwargs):
@@ -43,7 +55,9 @@ class CaseForm(Form):
         super(CaseForm, self).__init__(*args, **kwargs)
         self.fields['case_number'] = forms.CharField(
             label='DA Case #',
-            help_text='Enter a case number with a format similar to DA-2019-00000. Year should be current.'.format(year=datetime.now().year),
+            help_text='Enter a case number with a format similar to DA-{year}-00000. Year should be current.'.format(
+                year=datetime.now().year
+            ),
             required=True,
         )
         self.fields['cr_number'] = forms.CharField(
@@ -54,15 +68,23 @@ class CaseForm(Form):
         self.fields['override'] = forms.BooleanField(label="Ignore invalid case number formatting?", required=False)
         self.fields['defendant_ssn'] = USSocialSecurityNumberField(
             label='Defendant SSN',
-            help_text='Enter the defendant\'s social security number similar to XXX-XX-XXXX.',
+            help_text=mark_safe("Enter the defendant\'s social security number similar to XXX-XX-XXXX.\n"
+                                "If you have not created a defendant yet, create a new one "
+                                "<a href='/remind/create_defendant'target=_blank>here</a>."),
             initial=initial_ssn if initial_ssn is not None else '',
             required=True,
+        )
+        self.fields['defense_attorney'] = forms.ModelChoiceField(
+            label='Defense Attorney',
+            help_text=mark_safe("If you do not see your defense attorney, create a new one "
+                                "<a href='/remind/create_defense_attorney'target=_blank>here</a>."),
+            queryset=DefenseAttorney.objects.order_by('last_name'),
+            required=False,
         )
         self.fields['judge'] = forms.ModelChoiceField(
             queryset=Judge.objects.order_by('last_name'),
             required=True,
         )
-        self.fields['defense_attorney'] = forms.CharField()  # TODO change to modelchoice
         self.fields['supervisor'] = forms.ModelChoiceField(
             queryset=CustomUser.objects.filter(position=CustomUser.SUPERVISOR).order_by('last_name'),
             required=True,
@@ -74,6 +96,12 @@ class CaseForm(Form):
         self.fields['secretary'] = forms.ModelChoiceField(
             queryset=CustomUser.objects.filter(position=CustomUser.SECRETARY).order_by('last_name'),
             required=True,
+        )
+        self.fields['defense_attorney'] = forms.ModelChoiceField(
+            label='Defense Attorney',
+            queryset=DefenseAttorney.objects.order_by('last_name'),
+            help_text=mark_safe("Initial to affirm that you agree to the <a href='/contract.pdf'>contract</a>."),
+            required=False,
         )
         self.fields['arraignment_date'] = forms.DateTimeField(
             input_formats=['%Y-%m-%d %H:%M'],
@@ -102,7 +130,7 @@ class CaseForm(Form):
             )
             case_number_pattern = re.compile(case_number_format)
 
-            if self.cleaned_data.get('override') and not bool(re.match(case_number_pattern, case_number)):
+            if not self.cleaned_data.get('override') and not bool(re.match(case_number_pattern, case_number)):
                 self.add_error(
                     'case_number',
                     ' DA case number looks invalid. '
@@ -450,19 +478,24 @@ class UpdateForm(Form):
         self.case = Case.objects.get(case_number=kwargs.pop('case_number'))
         super().__init__(*args, **kwargs)
 
-        initial_judge = utils.find_judge_index(self.case.judge)
+        judges = utils.get_judge_choices()
+        defense_attorneys = utils.get_defense_attorneys()
+
+        initial_judge = utils.find_choice_index(choice=str(self.case.judge), choices=judges)
+        initial_defense = utils.find_choice_index(choice=str(self.case.defense_attorney), choices=defense_attorneys)
 
         self.fields['judge'] = forms.ChoiceField(
-            choices=JUDGES,
+            choices=judges,
             required=False,
             initial=initial_judge,
             label='Change the judge for this case?',
             disabled=False
         )
 
-        self.fields['defense_attorney'] = forms.CharField(
+        self.fields['defense_attorney'] = forms.ChoiceField(
+            choices=defense_attorneys,
             required=False,
-            initial=self.case.defense_attorney,
+            initial=initial_defense,
             label='Change the defense attorney for this case?',
             disabled=False
         )

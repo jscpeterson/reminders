@@ -10,7 +10,7 @@
                 {% csrf_token %}
             Case {{ case_number }} involving <b>{{ defendant }}</b> has been stayed and all deadlines have been frozen.
             <br /><br />
-                <button class="btn" onclick="window.location.href = `/remind/`;
+                <button class="btn" onclick="window.location.href = {% url 'remind:dashboard' %};;
                 return false;">Back</button>
         </div>
     </div>

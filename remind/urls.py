@@ -11,7 +11,8 @@ urlpatterns = [
     path('defendant_created/<str:defendant_pk>', views.defendant_created, name='defendant-created'),
 
     # Defense Attorney Creation Flow
-    # path('create_defense/', views.CreateDefenseView.as_view(), name='create-defense-attorney'),
+    path('create_defense_attorney/', views.CreateDefenseView.as_view(), name='create-defense'),
+    path('defense_attorney_created/<str:defense_pk>', views.defense_created, name='defense-created'),
 
     # Case Creation Flow
     path('create_case/', views.create_case, name='create-case'),

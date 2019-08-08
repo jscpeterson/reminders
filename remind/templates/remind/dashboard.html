@@ -5,7 +5,7 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block head %}
-    <link href="//cdn.muicss.com/mui-0.9.42/css/mui.min.css" rel="stylesheet" type="text/css" media="screen" /0>
+    <link href="//cdn.muicss.com/mui-0.9.42/css/mui.min.css" rel="stylesheet" type="text/css" media="screen" />
     <title> ReminderBot Dashboard </title>
 
     <style>
@@ -111,11 +111,11 @@
             <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul class="left hide-on-med-and-down">
                 <li><a href="{% url 'remind:create-defendant' %}">Create Defendant</a></li>
-{#                <li><a href="{% url 'remind:create-defense-attorney' %}">Create Defense Attorney</a></li>#}
                 <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
-                <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
                 <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
                 <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
+                <li><a href="{% url 'remind:create-defense' %}">Create Defense Attorney</a></li>
+                <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
             </ul>
             <ul class="right">
                 <li><i class="material-icons">account_circle</i></li>
@@ -131,10 +131,12 @@
     </div>
 
     <ul class="sidenav" id="mobile-demo">
-        <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
-        <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
-        <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
-        <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
+                <li><a href="{% url 'remind:create-defendant' %}">Create Defendant</a></li>
+                <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
+                <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
+                <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
+                <li><a href="{% url 'remind:create-defense' %}">Create Defense Attorney</a></li>
+                <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
     </ul>
 
     <div class="row">
