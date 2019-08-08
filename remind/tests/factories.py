@@ -2,7 +2,7 @@ from faker import Faker
 from random import randint
 
 from remind.constants import JUDGES
-from remind.models import Case
+from cases.models import Case
 from users.models import CustomUser
 
 fake = Faker()

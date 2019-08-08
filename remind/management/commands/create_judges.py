@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from remind.models import Judge
+from cases.models import Judge
 
 
 class ListLengthException(Exception):

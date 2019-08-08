@@ -4,7 +4,8 @@ from datetime import timedelta
 import holidays
 from django.utils import timezone
 
-from .models import Deadline, Judge, DefenseAttorney
+from remind.models import Deadline
+from cases.models import Judge, DefenseAttorney
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
     TRIAL_DEADLINES, RESPONSE_AFTER_FILING_DAYS, DEADLINE_DESCRIPTIONS, EVENT_DEADLINES

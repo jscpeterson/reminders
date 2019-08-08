@@ -3,7 +3,7 @@ from unittest import skip
 from datetime import datetime, timedelta
 from pytz import timezone
 from django.conf import settings
-from remind.models import Case
+from cases.models import Case
 from users.models import CustomUser
 from remind.forms import SchedulingForm
 from . import utils

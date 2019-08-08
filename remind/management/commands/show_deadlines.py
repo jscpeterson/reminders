@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from remind.constants import DEADLINE_DESCRIPTIONS
-from remind.models import Case
+from cases.models import Case
 
 
 class Command(BaseCommand):

@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Case, Deadline, Motion
+from cases.models import Case, Motion
+from remind.models import Deadline
 
 admin.site.register(Case)
 admin.site.register(Deadline)

@@ -1,4 +1,5 @@
-from .models import Case, Deadline
+from cases.models import Case
+from .models import Deadline
 from django.db.models import Q
 
 

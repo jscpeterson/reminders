@@ -6,7 +6,8 @@ from django.urls import reverse
 from django.shortcuts import render, render_to_response
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
-from .models import Case, Deadline, Motion, Defendant, Judge, DefenseAttorney
+from remind.models import Deadline
+from cases.models import Case, Motion, Defendant, Judge, DefenseAttorney
 from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
