@@ -11,7 +11,7 @@
                 {% csrf_token %}
                 The {{ deadline_desc }} on case {{ case_number }} is due on {{ date }}<br/>
                 {% form form=form %}{% endform %}
-                <button class="btn" onclick="window.location.href = `/remind/`;
+                <button class="btn" onclick="window.location.href = {% url 'remind:dashboard' %};;
                 return false;">Back</button>
                 <button type="submit" name="_submit" class="btn">Submit</button>
             </form>

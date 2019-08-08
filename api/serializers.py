@@ -52,6 +52,7 @@ class CaseSerializer(WritableNestedModelSerializer):
     deadline_set = DeadlineSerializer(many=True)
     defendant = serializers.SerializerMethodField()
     judge = serializers.SerializerMethodField()
+    defense_attorney = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
@@ -62,3 +63,6 @@ class CaseSerializer(WritableNestedModelSerializer):
 
     def get_judge(self, obj):
         return str(obj.judge)
+
+    def get_defense_attorney(self, obj):
+        return str(obj.defense_attorney)

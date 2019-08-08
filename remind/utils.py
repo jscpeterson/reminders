@@ -4,10 +4,10 @@ from datetime import timedelta
 import holidays
 from django.utils import timezone
 
-from .models import Deadline
+from .models import Deadline, Judge, DefenseAttorney
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
-    TRIAL_DEADLINES, JUDGES, RESPONSE_AFTER_FILING_DAYS, DEADLINE_DESCRIPTIONS, EVENT_DEADLINES
+    TRIAL_DEADLINES, RESPONSE_AFTER_FILING_DAYS, DEADLINE_DESCRIPTIONS, EVENT_DEADLINES
 
 
 def clear_deadlines(case):
@@ -308,25 +308,48 @@ def is_motion_response_deadline_invalid(motion, motion_response_deadline):
     return check1 or check2
 
 
-def find_judge_index(judge):
+def get_judge_choices():
     """
-    Finds the index of the judge by name in the JUDGES constant. Not an ideal way to go about this.
+    Creates a list of judges that can be used in a choice selection box. Each element has a judge and an index
+    starting at 1.
     """
-    for judge_tuple in JUDGES:
-        if judge == judge_tuple[1]:
-            return judge_tuple[0] - 1
+    judges = list()
+    data = Judge.objects.all().order_by('last_name')
+    for index, judge in enumerate(start=1, iterable=data):
+        judges.append((index, str(judge)))
+    return judges
 
 
-def sort_judges(case):
+def get_defense_attorneys():
     """
-    Returns a reorganized version of the JUDGES constant based on a case, where the first entry is the current judge
+    Creates a list of defense attorneys that can be used in a choice selection box. Each element has a judge and an
+    index starting at 1.
+    """
+    attorneys = list()
+    data = DefenseAttorney.objects.all().order_by('last_name')
+    for index, attorney in enumerate(start=1, iterable=data):
+        attorneys.append((index, str(attorney)))
+    return attorneys
+
+
+def find_choice_index(choice, choices):
+    """
+    Finds the index of an item in a choice list.
+    """
+    for choice_tuple in choices:
+        if choice == choice_tuple[1]:
+            return choice_tuple[0] - 1
+
+
+def sort_choices(choice, choices):
+    """
+    Returns a reorganized version of a choice list, where the first entry is the provided choice.
     on the case. This is a workaround to set the initial judge value in the HTML template.
     """
-    judge = str(case.judge)
-    judges_list = list(JUDGES)
-    judge_tuple = judges_list.pop(find_judge_index(judge))
-    judges_list.insert(0, judge_tuple)
-    return judges_list
+    choices_copy = choices.copy()
+    choice_tuple = choices_copy.pop(find_choice_index(choice, choices_copy))
+    choices_copy.insert(0, choice_tuple)
+    return choices_copy
 
 
 def get_disabled_fields(case):
@@ -395,3 +418,4 @@ def complete_old_deadline(deadline):
     if deadline.datetime < timezone.now():
         deadline.status = Deadline.COMPLETED
         deadline.save(update_fields=['status'])
+

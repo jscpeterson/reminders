@@ -18,6 +18,9 @@ SUNDAY = 6
 
 SECOND_JUDICIAL_DISTRICT = '202'
 
+PUBLIC_DEFENDER_FIRM = 'Law Offices of the Public Defender'
+PUBLIC_DEFENDER_ALTERNATE_PHRASING = ['pd', 'public defender', 'law office of the public defender']
+
 TRACKLESS_DEADLINE_LIMITS = {
     str(Deadline.SCHEDULING_CONFERENCE): SCHEDULING_ORDER_DEADLINE_DAYS,  # Days after arraignment
     str(Deadline.WITNESS_LIST): WITNESS_LIST_DEADLINE_DAYS,  # Days after arraignment
@@ -161,25 +164,4 @@ SECOND_REMINDER_DAYS = {
 }
 
 
-# TODO Remove this list and access Judges more cleanly
-def _create_judge_list():
-    """
-    Creates a list similar to what was previously in this class as a constant. Each element has a judge and an index
-    starting at 1. Reads data directly from judges.txt, assumed to be saved locally. Quick fix that should be reworked.
-    """
-    judges = list()
-    file_path = 'judges.txt'
-    with open(file_path) as source:
-        data = [line.replace('\n', '') for line in source]
-    for index, row in enumerate(start=1, iterable=data):
-        judge = ''
-        row = row.split(' ')
-        if len(row) == 2:
-            judge = '{first_name} {last_name}'.format(first_name=row[0], last_name=row[1])
-        elif len(row) == 3:
-            judge = '{first_name} {last_name}'.format(first_name=row[0], last_name=row[2])
-        judges.append((index, str(judge)))
-    return judges
 
-
-JUDGES = _create_judge_list()

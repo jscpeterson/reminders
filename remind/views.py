@@ -6,13 +6,14 @@ from django.urls import reverse
 from django.shortcuts import render, render_to_response
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
-from .models import Case, Deadline, Motion, Defendant, Judge
+from .models import Case, Deadline, Motion, Defendant, Judge, DefenseAttorney
 from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm, MotionFormWithCase, DefendantForm
-from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, JUDGES, SUPPORT_EMAIL
+    MotionResponseForm, MotionFormWithCase, DefendantForm, DefenseAttorneyForm
+from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, SUPPORT_EMAIL, \
+    PUBLIC_DEFENDER_ALTERNATE_PHRASING, PUBLIC_DEFENDER_FIRM
 from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
@@ -38,19 +39,20 @@ class DashView(LoginRequiredMixin, ListView):
 
 
 class CreateDefendantView(LoginRequiredMixin, CreateView):
-    """ Case is created on this page, and first deadline for Witness List is set. """
+    """ Allows the user to create a new defendant. """
     model = Defendant
     form_class = DefendantForm
 
     def get_success_url(self):
+        self.object.created_by = self.request.user
+        self.object.save(update_fields=['created_by'])
+
         return reverse('remind:defendant-created', kwargs={'defendant_pk': self.object.pk})
 
 
 @login_required
 def defendant_created(request, *args, **kwargs):
-    """
-    Confirmation view displaying results of the newly created defendant.
-    """
+    """ Confirmation view displaying results of the newly created defendant. """
     defendant = Defendant.objects.get(pk=kwargs.get('defendant_pk'))
 
     if request.method == 'POST':
@@ -63,8 +65,31 @@ def defendant_created(request, *args, **kwargs):
     })
 
 
-# class CreateDefenseView(LoginRequiredMixin, CreateView):
-#     pass
+class CreateDefenseView(LoginRequiredMixin, CreateView):
+    """ Allows the user to create a new defense attorney. """
+    model = DefenseAttorney
+    form_class = DefenseAttorneyForm
+
+    def get_success_url(self):
+        self.object.created_by = self.request.user
+
+        if str(self.object.firm).lower() in PUBLIC_DEFENDER_ALTERNATE_PHRASING:
+            self.object.firm = PUBLIC_DEFENDER_FIRM
+
+        self.object.save(update_fields=['created_by', 'firm'])
+
+        return reverse('remind:defense-created', kwargs={'defense_pk': self.object.pk})
+
+
+@login_required
+def defense_created(request, *args, **kwargs):
+    """ Confirmation view displaying results of the newly created defense attorney. """
+    defense_attorney = DefenseAttorney.objects.get(pk=kwargs.get('defense_pk'))
+
+    return render(request, 'remind/defense_created.html', {
+        'defense_name': defense_attorney,
+        'defense_firm': 'None' if defense_attorney.firm is None else defense_attorney.firm,
+    })
 
 
 ################################################################################
@@ -80,6 +105,7 @@ def create_case(request, *args, **kwargs):
             # Create case
             data = form.cleaned_data
             case = Case.objects.create(
+                created_by=request.user,
                 case_number=data.get('case_number'),
                 cr_number=data.get('cr_number'),
                 defendant=Defendant.objects.get(ssn=data.get('defendant_ssn')),
@@ -378,8 +404,12 @@ def update_select_case(request, *args, **kwargs):
 def update(request, *args, **kwargs):
     """ The user can update all the deadlines for a case here. """
     case = Case.objects.get(case_number=kwargs.get('case_number'))
-    messages_list = list()
-    sorted_judges = utils.sort_judges(case)
+
+    judges = utils.get_judge_choices()
+    sorted_judges = utils.sort_choices(choice=str(case.judge), choices=judges)
+
+    defense_attorneys = utils.get_defense_attorneys()
+    sorted_attorneys = utils.sort_choices(choice=str(case.defense_attorney), choices=defense_attorneys)
 
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
@@ -401,26 +431,31 @@ def update(request, *args, **kwargs):
         form = UpdateForm(request.POST, case_number=kwargs.get('case_number'))
 
         if form.is_valid():
-            judge_name = JUDGES[int(form.cleaned_data.get('judge')) - 1][1]
+            judge_name = judges[int(form.cleaned_data.get('judge')) - 1][1]
             judge_first_name = judge_name.split(' ')[0]
             judge_last_name = judge_name.split(' ')[1]
-            defense_attorney = form.cleaned_data.get('defense_attorney')
 
-            if case.judge.last_name != judge_name:
+            if str(case.judge) != judge_name:
                 case.judge = Judge.objects.get(
                     first_name=judge_first_name,
                     last_name=judge_last_name
                 )
                 case.updated_by = request.user
-                case.save(update_fields=['judge'])
+                case.save(update_fields=['judge', 'updated_by'])
                 messages.add_message(request, messages.INFO, 'Judge has been changed to {}.'.format(
                     case.judge
                 ))
+            defense_attorney_name = defense_attorneys[int(form.cleaned_data.get('defense_attorney')) - 1][1]
+            defense_attorney_first_name = defense_attorney_name.split(' ')[0]
+            defense_attorney_last_name = defense_attorney_name.split(' ')[1]
 
-            if case.defense_attorney != defense_attorney:
-                case.defense_attorney = defense_attorney
+            if str(case.defense_attorney) != defense_attorney_name:
+                case.defense_attorney = DefenseAttorney.objects.get(
+                    first_name=defense_attorney_first_name,
+                    last_name=defense_attorney_last_name
+                )
                 case.updated_by = request.user
-                case.save(update_fields=['defense_attorney'])
+                case.save(update_fields=['defense_attorney', 'updated_by'])
                 messages.add_message(request, messages.INFO, 'Defense attorney has been changed to {}.'.format(
                     case.defense_attorney
                 ))
@@ -477,6 +512,7 @@ def update(request, *args, **kwargs):
         'disabled': disabled,
         'hidden': hidden,
         'judges': sorted_judges,
+        'defense_attorneys': sorted_attorneys,
         'override_index': override_index
     })
 
