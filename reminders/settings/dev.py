@@ -21,9 +21,9 @@ DATABASES = {
 
 BASE_URL = os.environ.get('BASE_URL')
 
-INSTALLED_APPS += [
-    'debug_toolbar',
-]
+# INSTALLED_APPS += [
+#     'debug_toolbar',
+# ]
 
 # MIDDLEWARE += [
 #     'debug_toolbar.middleware.DebugToolbarMiddleware'
