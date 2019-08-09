@@ -99,12 +99,6 @@ class CaseForm(Form):
             queryset=CustomUser.objects.filter(position=CustomUser.SECRETARY).order_by('last_name'),
             required=True,
         )
-        self.fields['defense_attorney'] = forms.ModelChoiceField(
-            label='Defense Attorney',
-            queryset=DefenseAttorney.objects.order_by('last_name'),
-            help_text=mark_safe("Initial to affirm that you agree to the <a href='/contract.pdf'>contract</a>."),
-            required=False,
-        )
         self.fields['arraignment_date'] = forms.DateTimeField(
             input_formats=['%Y-%m-%d %H:%M'],
             required=True,
