@@ -79,7 +79,7 @@ class CaseForm(Form):
         self.fields['defense_attorney'] = forms.ModelChoiceField(
             label='Defense Attorney',
             help_text=mark_safe("If you do not see your defense attorney, create a new one "
-                                "<a href='/remind/create_defense_attorney'target=_blank>here</a>."),
+                                "<a href='/remind/create_defense_attorney'target=_blank>here</a> and refresh the page."),
             queryset=DefenseAttorney.objects.order_by('last_name'),
             required=False,
         )
