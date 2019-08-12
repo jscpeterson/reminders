@@ -89,9 +89,6 @@ To deploy in a production environment, do the following steps.
 * Start Docker Compose to build and run your images from docker-compose.yml
 
   `sudo docker-compose up`
-  
-## Updating Changes
-[Instructions for updating changes](https://gitlab.com/da2nd/reminders/wikis/Change-Deployment-Instructions)
 
 ## Built With
 
