@@ -25,6 +25,10 @@ class Command(BaseCommand):
                 random1=randint(10000, 99999),
                 random2=randint(10000, 99999),
             )
+            new_case.cr_number = '2019-{random1}-{random2}'.format(
+        		random2=randint(10000, 99999),
+		        random1=randint(10000, 99999),
+    	    )
 
             # Clones case by resetting its pk
             new_case.pk = None
