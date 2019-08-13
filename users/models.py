@@ -30,7 +30,7 @@ class CustomUser(AbstractUser):
         return dict(((x[0], x[1]) for x in cls.POSITION_CHOICES))
 
     @classmethod
-    def get_position_display(cls, position):
+    def get_position_disp(cls, position):
         """ Returns string representation of position given integer """
         positions_dict = cls.get_positions_dict()
         return positions_dict.get(position)

@@ -4,7 +4,8 @@ from datetime import datetime
 from pytz import timezone
 from remind import utils
 from remind.constants import LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND
-from cases.models import Deadline, Case, Motion
+from cases.models import Case, Motion
+from remind.models import Deadline
 from django.conf import settings
 from users.models import CustomUser
 

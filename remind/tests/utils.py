@@ -17,26 +17,26 @@ def get_test_user_data():
     """ Returns dict for use in user creation function """
     test_emails = get_email_addresses()
     return {
-        CustomUser.get_position_display(CustomUser.SECRETARY): {
+        CustomUser.get_position_disp(CustomUser.SECRETARY): {
             'username': 'palegal',
             'first_name': 'Pear',
             'last_name': 'Alegal',
             'position': CustomUser.SECRETARY,
-            'email': test_emails.get(CustomUser.get_position_display(CustomUser.SECRETARY)),
+            'email': test_emails.get(CustomUser.get_position_disp(CustomUser.SECRETARY)),
         },
-        CustomUser.get_position_display(CustomUser.PROSECUTOR): {
+        CustomUser.get_position_disp(CustomUser.PROSECUTOR): {
             'username': 'pvilla',
             'first_name': 'Pancho',
             'last_name': 'Villa',
             'position': CustomUser.PROSECUTOR,
-            'email': test_emails.get(CustomUser.get_position_display(CustomUser.PROSECUTOR)),
+            'email': test_emails.get(CustomUser.get_position_disp(CustomUser.PROSECUTOR)),
         },
-        CustomUser.get_position_display(CustomUser.SUPERVISOR): {
+        CustomUser.get_position_disp(CustomUser.SUPERVISOR): {
             'username': 'jsuper',
             'first_name': 'John',
             'last_name': 'Super',
             'position': CustomUser.SUPERVISOR,
-            'email': test_emails.get(CustomUser.get_position_display(CustomUser.SUPERVISOR)),
+            'email': test_emails.get(CustomUser.get_position_disp(CustomUser.SUPERVISOR)),
         },
     }
 
