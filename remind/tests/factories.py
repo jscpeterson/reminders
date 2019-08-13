@@ -1,8 +1,11 @@
+from django.conf import settings
 from faker import Faker
-from random import randint
+from random import choice
 
-from remind.constants import JUDGES
-from cases.models import Case
+from pytz import timezone
+
+from cases.models import Case, Judge, Defendant, DefenseAttorney
+from remind.constants import PUBLIC_DEFENDER_FIRM
 from users.models import CustomUser
 
 fake = Faker()
@@ -31,6 +34,51 @@ class UserFactory:
         )
 
 
+class JudgeFactory:
+
+    @staticmethod
+    def create():
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+
+        return Judge.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+        )
+
+
+class DefenseAttorneyFactory:
+
+    @staticmethod
+    def create():
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        firm = PUBLIC_DEFENDER_FIRM if choice([True, False]) else None
+
+        return DefenseAttorney.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            firm=firm
+        )
+
+
+class DefendantFactory:
+
+    @staticmethod
+    def create():
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        ssn = fake.ssn()
+        dob = fake.date_between(start_date='-80y', end_date='-18y')
+
+        return Defendant.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            ssn=ssn,
+            birth_date=dob,
+        )
+
+
 class CaseFactory:
     """ Creates a fake Case with random data """
 
@@ -48,7 +96,9 @@ class CaseFactory:
             secretary=UserFactory.create(CustomUser.SECRETARY),
             supervisor=UserFactory.create(CustomUser.SUPERVISOR),
             case_number=fake.uuid4()[:8],
+            cr_number=fake.uuid4()[:8],
             arraignment_date=fake.date(),
-            judge=JUDGES[randint(0, len(JUDGES)-1)][1],
-            defendant=fake.first_name() + ' ' + fake.last_name(),
+            judge=JudgeFactory.create(),
+            defense_attorney=DefenseAttorneyFactory.create(),
+            defendant=DefendantFactory.create(),
         )
