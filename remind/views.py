@@ -45,8 +45,10 @@ class CreateDefendantView(LoginRequiredMixin, CreateView):
     form_class = DefendantForm
 
     def get_success_url(self):
+        self.object.first_name = self.object.first_name.capitalize()
+        self.object.last_name = self.object.last_name.capitalize()
         self.object.created_by = self.request.user
-        self.object.save(update_fields=['created_by'])
+        self.object.save(update_fields=['created_by', 'first_name', 'last_name'])
 
         return reverse('remind:defendant-created', kwargs={'defendant_pk': self.object.pk})
 
@@ -72,12 +74,14 @@ class CreateDefenseView(LoginRequiredMixin, CreateView):
     form_class = DefenseAttorneyForm
 
     def get_success_url(self):
+        self.object.first_name = self.object.first_name.capitalize()
+        self.object.last_name = self.object.last_name.capitalize()
         self.object.created_by = self.request.user
 
         if str(self.object.firm).lower() in PUBLIC_DEFENDER_ALTERNATE_PHRASING:
             self.object.firm = PUBLIC_DEFENDER_FIRM
 
-        self.object.save(update_fields=['created_by', 'firm'])
+        self.object.save(update_fields=['created_by', 'firm', 'first_name', 'last_name'])
 
         return reverse('remind:defense-created', kwargs={'defense_pk': self.object.pk})
 
