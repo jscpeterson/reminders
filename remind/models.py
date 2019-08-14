@@ -14,11 +14,12 @@ class Deadline(TimeStampedModel):
     PRETRIAL_MOTION_FILING = 7
     PRETRIAL_MOTION_RESPONSE = 8
     PRETRIAL_MOTION_HEARING = 9
-    PRETRIAL_CONFERENCE = 10
-    FINAL_WITNESS_LIST = 11
-    NEED_FOR_INTERPRETER = 12
-    PLEA_AGREEMENT = 13
-    TRIAL = 14
+    FINAL_WITNESS_LIST = 10
+    NEED_FOR_INTERPRETER = 11
+    PLEA_AGREEMENT = 12
+    CERTIFICATION_OF_READINESS = 13
+    PRETRIAL_CONFERENCE = 14
+    TRIAL = 15
 
     TYPE_CHOICES = (
         (FFA, 'FFA'),
@@ -31,10 +32,11 @@ class Deadline(TimeStampedModel):
         (PRETRIAL_MOTION_FILING, 'Pretrial Motion Filing'),
         (PRETRIAL_MOTION_RESPONSE, 'Pretrial Motion Response'),
         (PRETRIAL_MOTION_HEARING, 'Pretrial Motion Hearing'),
-        (PRETRIAL_CONFERENCE, 'PTC/Docket Call'),
         (FINAL_WITNESS_LIST, 'Final Witness List'),
         (NEED_FOR_INTERPRETER, 'Need for Interpreter'),
         (PLEA_AGREEMENT, 'Plea Agreement'),
+        (CERTIFICATION_OF_READINESS, 'Certification of Readiness'),
+        (PRETRIAL_CONFERENCE, 'PTC/Docket Call'),
         (TRIAL, 'Trial'),
     )
 

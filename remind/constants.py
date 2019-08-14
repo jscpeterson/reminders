@@ -39,10 +39,11 @@ TRACK_ONE_DEADLINE_LIMITS = {
     str(Deadline.PRETRIAL_MOTION_FILING): 50,  # Days before trial
     str(Deadline.PRETRIAL_MOTION_RESPONSE): 40,  # Days before trial OR 10 days after filing
     str(Deadline.PRETRIAL_MOTION_HEARING): 35,  # Days before trial
-    str(Deadline.PRETRIAL_CONFERENCE): 15,  # Days before trial
     str(Deadline.FINAL_WITNESS_LIST): 15,  # Days before trial
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
+    str(Deadline.CERTIFICATION_OF_READINESS): 15,  # TODO Should be five (5) days before the PTC/Docket Call
+    str(Deadline.PRETRIAL_CONFERENCE): 15,  # Days before trial
 }
 TRACK_ONE_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
@@ -57,10 +58,11 @@ TRACK_TWO_DEADLINE_LIMITS = {
     str(Deadline.PRETRIAL_MOTION_FILING): 60,  # Days before trial
     str(Deadline.PRETRIAL_MOTION_RESPONSE): 45,  # Days before trial OR 10 days after filing
     str(Deadline.PRETRIAL_MOTION_HEARING): 35,  # Days before trial
-    str(Deadline.PRETRIAL_CONFERENCE): 15,  # Days before trial
     str(Deadline.FINAL_WITNESS_LIST): 15,  # Days before trial
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
+    str(Deadline.CERTIFICATION_OF_READINESS): 15,  # TODO Should be five (5) days before the PTC/Docket Call
+    str(Deadline.PRETRIAL_CONFERENCE): 15,  # Days before trial
 }
 TRACK_TWO_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
@@ -75,10 +77,11 @@ TRACK_THREE_DEADLINE_LIMITS = {
     str(Deadline.PRETRIAL_MOTION_FILING): 70,  # Days before trial
     str(Deadline.PRETRIAL_MOTION_RESPONSE): 55,  # Days before trial OR 10 days after filing
     str(Deadline.PRETRIAL_MOTION_HEARING): 45,  # Days before trial
-    str(Deadline.PRETRIAL_CONFERENCE): 20,  # Days before trial
     str(Deadline.FINAL_WITNESS_LIST): 20,  # Days before trial
     str(Deadline.NEED_FOR_INTERPRETER): 15,  # Days before trial
     str(Deadline.PLEA_AGREEMENT): 10,  # Days before trial
+    str(Deadline.CERTIFICATION_OF_READINESS): 15,  # TODO Should be five (5) days before the PTC/Docket Call
+    str(Deadline.PRETRIAL_CONFERENCE): 15,  # Days before trial
 }
 TRACK_THREE_DEADLINE_LIMITS.update(TRACKLESS_DEADLINE_LIMITS)
 
@@ -86,10 +89,11 @@ TRIAL_DEADLINES = (
     str(Deadline.WITNESS_PTI),
     str(Deadline.SCIENTIFIC_EVIDENCE),
     str(Deadline.PRETRIAL_MOTION_FILING),
-    str(Deadline.PRETRIAL_CONFERENCE),
     str(Deadline.FINAL_WITNESS_LIST),
     str(Deadline.NEED_FOR_INTERPRETER),
+    str(Deadline.CERTIFICATION_OF_READINESS),
     str(Deadline.PLEA_AGREEMENT),
+    str(Deadline.PRETRIAL_CONFERENCE),
 )
 
 # Deadlines that do not require a reminder
@@ -122,10 +126,11 @@ DEADLINE_DESCRIPTIONS = {
     str(Deadline.PRETRIAL_MOTION_FILING): 'deadline to file any pretrial motions',
     str(Deadline.PRETRIAL_MOTION_RESPONSE): 'deadline to file a response to a pretrial motion',
     str(Deadline.PRETRIAL_MOTION_HEARING): 'date of a pretrial motion hearing',
-    str(Deadline.PRETRIAL_CONFERENCE): 'date and time of the pretrial conference/docket call',
     str(Deadline.FINAL_WITNESS_LIST): 'deadline to submit a final witness list',
     str(Deadline.NEED_FOR_INTERPRETER): 'deadline to file notice for language access services',
     str(Deadline.PLEA_AGREEMENT): 'deadline to submit any plea agreement to the Court',
+    str(Deadline.CERTIFICATION_OF_READINESS): 'deadline to submit a certification of readiness form',
+    str(Deadline.PRETRIAL_CONFERENCE): 'date and time of the pretrial conference/docket call',
     str(Deadline.TRIAL): 'date the trial will commence',
 }
 
@@ -140,10 +145,11 @@ FIRST_REMINDER_DAYS = {
     Deadline.PRETRIAL_MOTION_FILING: 14,
     Deadline.PRETRIAL_MOTION_RESPONSE: 14,
     Deadline.PRETRIAL_MOTION_HEARING: 14,
-    Deadline.PRETRIAL_CONFERENCE: 14,
     Deadline.FINAL_WITNESS_LIST: 14,
     Deadline.NEED_FOR_INTERPRETER: 14,
     Deadline.PLEA_AGREEMENT: 14,
+    Deadline.CERTIFICATION_OF_READINESS: 14,
+    Deadline.PRETRIAL_CONFERENCE: 14,
     Deadline.TRIAL: 14,
 }
 
@@ -158,10 +164,11 @@ SECOND_REMINDER_DAYS = {
     Deadline.PRETRIAL_MOTION_FILING: 7,
     Deadline.PRETRIAL_MOTION_RESPONSE: 7,
     Deadline.PRETRIAL_MOTION_HEARING: 7,
-    Deadline.PRETRIAL_CONFERENCE: 7,
     Deadline.FINAL_WITNESS_LIST: 7,
     Deadline.NEED_FOR_INTERPRETER: 7,
     Deadline.PLEA_AGREEMENT: 7,
+    Deadline.CERTIFICATION_OF_READINESS: 7,
+    Deadline.PRETRIAL_CONFERENCE: 7,
     Deadline.TRIAL: 7,
 }
 
