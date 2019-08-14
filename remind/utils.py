@@ -266,10 +266,16 @@ def is_deadline_invalid(deadline):
                                              days=required_days,
                                              future_event=False)
 
-    # These are automatically generated and should not be incorrect.
-    elif deadline.type in [Deadline.REQUEST_PTI]:
+    # Skipping this deadline as it seems to be flexible, however the ruling is:
+    #   Both the prosecutor and defense counsel shall submit a
+    #   certification of readiness form five (5) days before the final pretrial
+    #   conference or docket call, indicating they have been unable to
+    #   reach a plea agreement
+    if deadline.type in [Deadline.CERTIFICATION_OF_READINESS]:
         return False
-    elif deadline.type in [Deadline.CONDUCT_PTI]:
+
+    # These are automatically generated and should not be incorrect.
+    elif deadline.type in [Deadline.REQUEST_PTI, Deadline.CONDUCT_PTI]:
         return False
 
     # Pretrial motion responses have two considerations for their date
