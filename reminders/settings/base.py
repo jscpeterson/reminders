@@ -138,3 +138,8 @@ EMAIL_PORT = 587
 
 ADMINISTRATION_EMAIL = os.environ.get('ADMINISTRATION_EMAIL')
 SUPPORT_EMAIL = os.environ.get('SUPPORT_EMAIL')
+
+# Google OAuth2 variables
+
+OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID')
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET')
