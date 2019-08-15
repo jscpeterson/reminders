@@ -15,15 +15,20 @@
             background-repeat: no-repeat;
             background-size: cover;
         }
-
         nav{
-            background: rgba(0,0,0,.8)
+            background: rgba(0,0,0, .8)
         }
         .login {
             margin-top: 100px;
         }
         .login .card{
-            background: rgba(255, 255, 255, .4)
+            background: rgba(255, 255, 255, .4);
+        }
+        #logocard {
+            width:50%;
+        }
+        #logocard img {
+            margin-left: 50%;
         }
         h4{
             text-shadow: 1px 2px black;
@@ -63,8 +68,8 @@
 <div class="row login">
     <div class="col s8 offset-s2">
         <div class="card">
-            <div class="card-image">
-                <img src="{% static 'logo.png' %}">
+            <div class="card-image" id="logocard">
+                <img src="{% static 'logo.png' %}"/>
             </div>
 
             <div class="card-content">
