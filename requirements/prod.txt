@@ -1,3 +1,4 @@
 -r base.txt
 psycopg2==2.8.2
 redis==3.2.1
+django-auth-ldap==1.6.1
