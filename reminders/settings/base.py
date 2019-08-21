@@ -97,6 +97,9 @@ AUTHENTICATION_BACKENDS = (
     'guardian.backends.ObjectPermissionBackend',
 )
 
+
+
+
 # Custom User model
 AUTH_USER_MODEL = 'users.CustomUser'
 
