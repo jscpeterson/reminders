@@ -1,4 +1,5 @@
 from .base import *
+from celery.schedules import crontab
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -46,7 +47,7 @@ CELERY_CACHE_BACKEND = 'django-cache'
 CELERY_BEAT_SCHEDULE = {
     'check_all_deadlines': {
         'task': 'remind.tasks.check_all_deadlines',
-        'schedule': 10,
+        'schedule': crontab(minute=0, hour=8, day_of_week='mon,tue,wed,thu,fri'),
     }
 }
 

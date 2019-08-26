@@ -1,6 +1,19 @@
 version: '3'
 
 services:
+  nginx:
+    image: nginx:latest
+    container_name: ml-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/app
+      - ./config/nginx:/etc/nginx/conf.d
+      - /var/www:/var/www
+    links:
+      - web
+
   db:
     image: postgres:9.6.5
     env_file:
@@ -21,7 +34,7 @@ services:
     volumes:
       - .:/code
     ports:
-      - "80:80"
+      - "8000:8000"
     depends_on:
       - db
       - redis
