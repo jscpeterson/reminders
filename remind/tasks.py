@@ -97,6 +97,16 @@ def check_all_deadlines():
         # If code has not hit continue, deadline does not need to do anything.
         print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
 
+    # TODO Flesh out daily email to include git info, celery worker info, and emails sent for the day.
+    if settings.BASE_URL == 'http://daapps': # TODO Very clumsy way to check if running on production - change to something more reliable
+        send_mail(
+            subject='Daily report {}'.format(datetime.now()),
+            message='This is a daily report to notify you that the server is sending emails.',
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[ADMINISTRATION_EMAIL], # TODO Change to personal email as new env email
+            fail_silently=True,
+        )
+
 
 @shared_task
 def send_emails(email_type, deadline):
