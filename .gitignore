@@ -88,6 +88,8 @@ celerybeat-schedule
 
 # Environments
 .env
+.env.prod
+.env.dev
 .venv
 env/
 venv/
@@ -147,6 +149,9 @@ model_pickles/
 
 # Process ID files
 *.pid
+
+# Database backup folder
+backups/
 
 # Config files
 *.conf
