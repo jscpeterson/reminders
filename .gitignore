@@ -147,3 +147,6 @@ model_pickles/
 
 # Process ID files
 *.pid
+
+# Config files
+*.conf
