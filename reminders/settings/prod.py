@@ -7,9 +7,9 @@ from celery.schedules import crontab
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
-ALLOWED_HOSTS += ['172.30.143.164', '172.30.141.221', '172.30.141.226', 'sparky', 'daapps']
+ALLOWED_HOSTS += [os.environ.get('SERVER_IP'), os.environ.get('SERVER_NAME')]
 
-BASE_URL = os.environ.get('BASE_URL')
+BASE_URL = 'http://' + os.environ.get('SERVER_NAME')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
