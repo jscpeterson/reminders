@@ -12,7 +12,7 @@ ALLOWED_HOSTS += [os.environ.get('SERVER_IP'), os.environ.get('SERVER_NAME')]
 BASE_URL = 'http://' + os.environ.get('SERVER_NAME')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
