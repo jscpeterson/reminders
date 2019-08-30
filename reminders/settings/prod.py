@@ -94,3 +94,6 @@ AUTH_LDAP_USER_ATTR_MAP = {'username': 'sAMAccountName',
 AUTH_LDAP_FIND_GROUP_PERMS = True
 
 # TODO Add production whitelist
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
