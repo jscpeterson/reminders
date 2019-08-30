@@ -1,15 +1,15 @@
 # redirect all non-encrypted to encrypted
 server {
-    server_name daapps;
+    server_name localhost;
     listen 80;
 
     location / {
-        return 301 https://daapps$request_uri;
+        return 301 https://localhost$request_uri;
     }
 }
 
 server {
-    server_name daapps;
+    server_name localhost;
 
     listen 443 ssl;  # <-
 
@@ -24,8 +24,11 @@ server {
         proxy_set_header Host $http_host;
         proxy_redirect off;
 
-    proxy_pass http://web;
+        proxy_pass http://web:8000;
+    }
 
+    location /static/ {
+        alias /code/static_root/;
     }
 }
 
