@@ -13,6 +13,17 @@ from . import utils
 from django.core.mail import send_mail
 from django.conf import settings
 
+emails_sent = {
+    Email.DEADLINE_NEEDS_EXTENSION: 0,
+    Email.DEADLINE_OUTSIDE_LIMITS: 0,
+    Email.EVENT_REMINDER: 0,
+    Email.SCHEDULING_CONFERENCE: 0,
+    Email.REQUEST_PTI: 0,
+    Email.CONDUCT_PTI: 0,
+    Email.DEADLINE_EXPIRED: 0,
+    Email.FIRST_REMINDER: 0,
+    Email.SECOND_REMINDER: 0,
+}
 
 @shared_task
 def check_past_deadline(deadline):
@@ -26,6 +37,7 @@ def check_past_deadline(deadline):
 @shared_task
 def check_all_deadlines():
     """ Checks to see if any deadlines are past due """
+    
     now = timezone.now()
     print('Now the time is {}'.format(now.strftime('%H:%M:%S.%f')))
 
@@ -97,15 +109,7 @@ def check_all_deadlines():
         # If code has not hit continue, deadline does not need to do anything.
         print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
 
-    # TODO Flesh out daily email to include git info, celery worker info, and emails sent for the day.
-    if settings.BASE_URL == 'http://daapps': # TODO Very clumsy way to check if running on production - change to something more reliable
-        send_mail(
-            subject='Daily report {}'.format(datetime.now()),
-            message='This is a daily report to notify you that the server is sending emails.',
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[ADMINISTRATION_EMAIL], # TODO Change to personal email as new env email
-            fail_silently=True,
-        )
+    send_admin_report()
 
 
 @shared_task
@@ -132,4 +136,22 @@ def send_emails(email_type, deadline):
         recipient_list=recipient_emails,
         fail_silently=True
     )
+
+    emails_sent[email_type] += len(recipient_emails)
     print('Email sent. Type: {}'.format(Email.EMAIL_TYPES[email_type][1]))
+
+
+@shared_task
+def send_admin_report():
+    # TODO Flesh out daily email to include git info, celery worker info, and emails sent for the day.
+    if not settings.DEBUG:
+        message = 'This is a daily report to notify you that the server is sending emails.'
+        message += '\n{num} emails were sent out to users this morning.'.format(num=sum(emails_sent.values()))
+        message += '\n\n - ReminderBot 4000'
+        send_mail(
+            subject='Daily report {}'.format(datetime.now().strftime('%c')),
+            message=message,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[settings.SYSADMIN_EMAIL],
+            fail_silently=True, 
+        )
