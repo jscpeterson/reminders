@@ -148,7 +148,9 @@ def send_emails(email_type, deadline):
 def send_admin_report():
     # TODO Flesh out daily email to include git info, celery worker info, and emails sent for the day.
     if not settings.DEBUG:
-        message = 'This is a daily report to notify you that the server is sending emails.'
+        message = 'This is a daily report to notify you that the \'{server_name}\' server is sending emails.'.format(
+            server_name=settings.SERVER_NAME
+        )
         message += '\n{num} emails were sent out to users this morning.'.format(num=sum(emails_sent.values()))
         message += '\n\n - ReminderBot 4000'
         send_mail(
