@@ -11,9 +11,11 @@
                 {% csrf_token %}
                 Case {{ case_number }} created and assigned as follows:
                 <ul>
-                    <li>Prosecutor: <b>{{ prosecutor }}</b></li>
-                    <li>Secretary: <b>{{ secretary }}</b></li>
                     <li>Supervisor: <b>{{ supervisor }}</b></li>
+                    <li>Prosecutor: <b>{{ prosecutor }}</b></li>
+                    <li>Paralegal: <b>{{ paralegal }}</b></li>
+                    <li>Secretary: <b>{{ secretary }}</b></li>
+                    <li>Victim Advocate: <b>{{ victim_advocate }}</b></li>
                 </ul>
                 Deadline to file a witness list has been created and is due on <b>{{ witness_deadline }}</b>. {{ witness_deadline_message }}
                 <br /><br />

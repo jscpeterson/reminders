@@ -6,11 +6,19 @@ class CustomUser(AbstractUser):
     SUPERVISOR = 1
     PROSECUTOR = 2
     SECRETARY = 3
+    VICTIM_ADVOCATE = 4
+    PARALEGAL = 5
+
     POSITION_CHOICES = (
         (SUPERVISOR, 'Supervisor'),
         (PROSECUTOR, 'Prosecutor'),
-        (SECRETARY, 'Secretary')
+        (SECRETARY, 'Secretary'),
+        (VICTIM_ADVOCATE, 'Victim Advocate'),
+        (PARALEGAL, 'Paralegal')
     )
+
+    POSITION_CHOICES_WITHOUT_SUPERVISOR = POSITION_CHOICES[1:]
+
     first_name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
     position = models.IntegerField(choices=POSITION_CHOICES, null=True)

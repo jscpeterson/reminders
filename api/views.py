@@ -18,7 +18,9 @@ class DeadlineViewSet(viewsets.ModelViewSet):
             return super().get_queryset().filter(
                 Q(case__supervisor=self.request.user) |
                 Q(case__prosecutor=self.request.user) |
-                Q(case__secretary=self.request.user)
+                Q(case__secretary=self.request.user) |
+                Q(case__paralegal=self.request.user) |
+                Q(case__victim_advocate=self.request.user)
             ).filter(
                 status=Deadline.ACTIVE
             ).order_by(
@@ -31,7 +33,9 @@ class DeadlineViewSet(viewsets.ModelViewSet):
             return super().get_queryset().filter(case=case_pk).filter(
                 Q(case__supervisor=self.request.user) |
                 Q(case__prosecutor=self.request.user) |
-                Q(case__secretary=self.request.user)
+                Q(case__secretary=self.request.user) |
+                Q(case__paralegal=self.request.user) |
+                Q(case__victim_advocate=self.request.user)
             )
 
 
@@ -43,7 +47,9 @@ class CaseViewSet(viewsets.ModelViewSet):
         cases = super().get_queryset().filter(
             Q(supervisor=self.request.user) |
             Q(prosecutor=self.request.user) |
-            Q(secretary=self.request.user)
+            Q(secretary=self.request.user) |
+            Q(paralegal=self.request.user) |
+            Q(victim_advocate=self.request.user)
         )
 
         return cases.exclude(closed=True)

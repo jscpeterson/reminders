@@ -119,8 +119,11 @@ def send_emails(email_type, deadline):
 
     recipient_emails = [
         deadline.case.prosecutor.email,
-        deadline.case.secretary.email,
     ]
+
+    for staff_member in [deadline.case.secretary, deadline.case.paralegal, deadline.case.victim_advocate]:
+        if staff_member is not None:
+            recipient_emails.append(staff_member.email)
 
     if email_type == Email.SECOND_REMINDER:
         recipient_emails.append(deadline.case.supervisor.email)
