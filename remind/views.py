@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm, MotionFormWithCase, DefendantForm, DefenseAttorneyForm
+    MotionResponseForm, MotionFormWithCase, DefendantForm, DefenseAttorneyForm, FirstTimeUserForm
 from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, SUPPORT_EMAIL, \
     PUBLIC_DEFENDER_ALTERNATE_PHRASING, PUBLIC_DEFENDER_FIRM
 from . import utils
@@ -23,9 +23,16 @@ from guardian.shortcuts import assign_perm
 
 
 class DashView(LoginRequiredMixin, ListView):
-    """ Dashboard view for user """
-
+    """Dashboard view for user"""
     template_name = 'remind/dashboard.html'
+    component = 'frontend.js'
+
+    def get(self, request, *args, **kwargs):
+        # Redirect to first time user page if user does not have a position assigned.
+        if request.user.position is None:
+            return HttpResponseRedirect(reverse('remind:first-time-user'))
+        else:
+            return super(DashView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
         cases = case_utils.get_cases(self.request.user)
@@ -33,10 +40,24 @@ class DashView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(DashView, self).get_context_data(**kwargs)
-        cases = case_utils.get_cases(self.request.user)
-        closed_cases = case_utils.get_closed(cases)
-        context['closed_cases'] = closed_cases
+        context['component'] = self.component
         return context
+
+
+@login_required
+def first_time_user(request):
+    if request.method == 'POST':
+        form = FirstTimeUserForm(request.POST)
+        if form.is_valid():
+            request.user.position = form.cleaned_data.get('position')
+            request.user.save(update_fields=['position'])
+            return HttpResponseRedirect(reverse('remind:dashboard'))
+    else:
+        form = FirstTimeUserForm()
+        return render(request, 'remind/first_time_user_form.html', {
+            'form': form,
+            'support_email': SUPPORT_EMAIL,
+        })
 
 
 class CreateDefendantView(LoginRequiredMixin, CreateView):
@@ -118,14 +139,22 @@ def create_case(request, *args, **kwargs):
                 defense_attorney=data.get('defense_attorney'),
                 supervisor=data.get('supervisor'),
                 prosecutor=data.get('prosecutor'),
+                paralegal=data.get('paralegal'),
                 secretary=data.get('secretary'),
+                victim_advocate=data.get('victim_advocate'),
                 arraignment_date=data.get('arraignment_date')
             )
 
             # Assign permissions
-            assign_perm('change_case', case.prosecutor, case)
-            assign_perm('change_case', case.secretary, case)
             assign_perm('change_case', case.supervisor, case)
+            assign_perm('change_case', case.prosecutor, case)
+
+            if data.get('paralegal'):
+                assign_perm('change_case', case.paralegal, case)
+            if data.get('secretary'):
+                assign_perm('change_case', case.secretary, case)
+            if data.get('victim_advocate'):
+                assign_perm('change_case', case.victim_advocate, case)
 
             # Start first deadline for Witness List
             deadline = Deadline.objects.create(
@@ -144,20 +173,6 @@ def create_case(request, *args, **kwargs):
         form = CaseForm(*args, **kwargs)
 
     return render(request, 'remind/case_form.html', {'form': form})
-
-
-class DashView(LoginRequiredMixin, ListView):
-    template_name = 'remind/dashboard.html'
-    component = 'frontend.js'
-
-    def get_queryset(self):
-        cases = case_utils.get_cases(self.request.user)
-        return case_utils.get_open(cases)
-
-    def get_context_data(self, **kwargs):
-        context = super(DashView, self).get_context_data(**kwargs)
-        context['component'] = self.component
-        return context
 
 
 @login_required
@@ -180,6 +195,8 @@ def case_created(request, *args, **kwargs):
                    'prosecutor': case.prosecutor,
                    'secretary': case.secretary,
                    'supervisor': case.supervisor,
+                   'paralegal': case.paralegal,
+                   'victim_advocate': case.victim_advocate,
                    'witness_deadline': witness_deadline.datetime.date(),
                    'witness_deadline_message': witness_deadline_message})
 

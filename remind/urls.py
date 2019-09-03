@@ -5,6 +5,7 @@ app_name = 'remind'
 urlpatterns = [
     # TODO Fix up the inconsistencies with these URLs (some use snake_case some use kebab-case)
     path('', views.DashView.as_view(), name='dashboard'),
+    path('first_time_user/', views.first_time_user, name='first-time-user'),
 
     # Defendant Creation Flow
     path('create_defendant/', views.CreateDefendantView.as_view(), name='create-defendant'),

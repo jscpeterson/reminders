@@ -82,9 +82,14 @@ class Case(TimeStampedModel):
     defense_attorney = models.CharField(max_length=120, null=True, blank=True)
     notes = models.TextField(default='')
 
-    prosecutor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='prosecutor')
-    secretary = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='secretary')
     supervisor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='supervisor')
+    prosecutor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='prosecutor')
+    secretary = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='secretary',
+                                  blank=True, null=True)
+    victim_advocate = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='victim_advocate',
+                                  blank=True, null=True)
+    paralegal = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='paralegal',
+                                  blank=True, null=True)
 
     track = models.IntegerField(choices=TRACK_CHOICES, null=True)
     arraignment_date = models.DateTimeField(null=True)

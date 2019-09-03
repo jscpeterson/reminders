@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load material_form %}
+
+{% block content %}
+    <div class="content container">
+        <div class="row">
+            <h3>Welcome new user!</h3>
+        </div>
+
+        <p>Welcome to Reminders!</p>
+        <p>You have not been assigned a position yet, please select one.</p>
+        <p>If you are a supervisor, contact <a href ="mailto:{{ support_email }}">{{ support_email }}</a></p>
+
+        <div class="row">
+            <form method="POST">
+                {% csrf_token %}
+                {% form form=form %}{% endform %}
+                <button type="submit" name="_submit" class="btn">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('select').material_select();
+        });
+    </script>
+
+{% endblock %}

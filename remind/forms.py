@@ -21,8 +21,19 @@ TRUE_FALSE_CHOICES = (
 )
 
 
-class DefendantForm(ModelForm):
+class FirstTimeUserForm(Form):
 
+    def __init__(self, *args, **kwargs):
+        super(FirstTimeUserForm, self).__init__(*args, **kwargs)
+
+        self.fields['position'] = forms.ChoiceField(
+            label='Select a position',
+            choices=CustomUser.POSITION_CHOICES_WITHOUT_SUPERVISOR,
+            required=True,
+        )
+
+
+class DefendantForm(ModelForm):
 
     class Meta:
         model = Defendant
@@ -95,9 +106,17 @@ class CaseForm(Form):
             queryset=CustomUser.objects.filter(position=CustomUser.PROSECUTOR).order_by('last_name'),
             required=True,
         )
+        self.fields['paralegal'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.PARALEGAL).order_by('last_name'),
+            required=False,
+        )
         self.fields['secretary'] = forms.ModelChoiceField(
             queryset=CustomUser.objects.filter(position=CustomUser.SECRETARY).order_by('last_name'),
-            required=True,
+            required=False,
+        )
+        self.fields['victim_advocate'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.VICTIM_ADVOCATE).order_by('last_name'),
+            required=False,
         )
         self.fields['arraignment_date'] = forms.DateTimeField(
             input_formats=['%Y-%m-%d %H:%M'],
@@ -175,7 +194,9 @@ class MotionForm(Form):
             .filter(
                 Q(supervisor=user) |
                 Q(prosecutor=user) |
-                Q(secretary=user)
+                Q(secretary=user) |
+                Q(paralegal=user) |
+                Q(victim_advocate=user)
             ),
             help_text='Only cases with a scheduling order will appear here.'
         )
@@ -576,7 +597,9 @@ class UpdateCaseForm(Form):
             queryset=Case.objects.filter(
                 Q(supervisor=user) |
                 Q(prosecutor=user) |
-                Q(secretary=user)
+                Q(secretary=user) |
+                Q(paralegal=user) |
+                Q(victim_advocate=user)
             ),
         )
 
@@ -642,7 +665,9 @@ class UpdateTrackForm(Form):
                 .filter(
                     Q(supervisor=user) |
                     Q(prosecutor=user) |
-                    Q(secretary=user)
+                    Q(secretary=user) |
+                    Q(paralegal=user) |
+                    Q(victim_advocate=user)
                 ),
             help_text='Only cases without a scheduling order will appear here.',
         )
