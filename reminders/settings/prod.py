@@ -9,7 +9,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 ALLOWED_HOSTS += [os.environ.get('SERVER_IP'), os.environ.get('SERVER_NAME')]
 
-BASE_URL = 'http://' + os.environ.get('SERVER_NAME')
+SERVER_NAME = os.environ.get('SERVER_NAME')
+BASE_URL = 'http://' + SERVER_NAME
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
