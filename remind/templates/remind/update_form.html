@@ -30,16 +30,13 @@
 
                     {# Defense attorney field #}
                     {% elif forloop.counter0 is 1 %}
-                    <dmc-select><div class="row">
-                    <div class="select-field col s8" id="id_defense_attorney_container">
-                        <label for={{ field.id_for_label }}>{{field.label}}</label>
-                        <select id={{ field.id_for_label }} name={{ field.name }}>
-        	            {% for choice in defense_attorneys %}
-        		            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
-    		            {% endfor %}
-		                </select>
+                    <div class="row">
+                        <div class="input-field col s8">
+                            <label for={{ field.id_for_label }}>{{field.label}}</label>
+                            <input type="text" id={{ field.id_for_label }} name={{ field.name }}
+                                   value="{{ field.initial }}">
+                        </div>
                     </div>
-                    </div></dmc-select>
 
                     {# "Deadlines" header #}
                     <div class="row">

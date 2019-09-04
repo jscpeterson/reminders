@@ -7,14 +7,6 @@ urlpatterns = [
     path('', views.DashView.as_view(), name='dashboard'),
     path('first_time_user/', views.first_time_user, name='first-time-user'),
 
-    # Defendant Creation Flow
-    path('create_defendant/', views.CreateDefendantView.as_view(), name='create-defendant'),
-    path('defendant_created/<str:defendant_pk>', views.defendant_created, name='defendant-created'),
-
-    # Defense Attorney Creation Flow
-    path('create_defense_attorney/', views.CreateDefenseView.as_view(), name='create-defense'),
-    path('defense_attorney_created/<str:defense_pk>', views.defense_created, name='defense-created'),
-
     # Case Creation Flow
     path('create_case/', views.create_case, name='create-case'),
     path('create_case/<str:defendant_pk>', views.create_case, name='create-case-with-ssn'),

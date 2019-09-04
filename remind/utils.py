@@ -5,7 +5,7 @@ import holidays
 from django.utils import timezone
 
 from remind.models import Deadline
-from cases.models import Judge, DefenseAttorney
+from cases.models import Judge
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
     TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
     TRIAL_DEADLINES, RESPONSE_AFTER_FILING_DAYS, DEADLINE_DESCRIPTIONS, EVENT_DEADLINES
@@ -325,18 +325,6 @@ def get_judge_choices():
     for index, judge in enumerate(start=1, iterable=data):
         judges.append((index, str(judge)))
     return judges
-
-
-def get_defense_attorneys():
-    """
-    Creates a list of defense attorneys that can be used in a choice selection box. Each element has a judge and an
-    index starting at 1.
-    """
-    attorneys = list()
-    data = DefenseAttorney.objects.all().order_by('last_name')
-    for index, attorney in enumerate(start=1, iterable=data):
-        attorneys.append((index, str(attorney)))
-    return attorneys
 
 
 def find_choice_index(choice, choices):

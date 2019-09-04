@@ -1,14 +1,11 @@
 import re
 
-from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.forms import ModelForm, Form
-from django.utils.safestring import mark_safe
-from localflavor.us.forms import USSocialSecurityNumberField
+from django.forms import Form
 
-from cases.models import Case, Motion, Defendant, Judge, DefenseAttorney
+from cases.models import Case, Motion, Judge
 from remind.models import Deadline
-from datetime import timedelta, datetime
+from datetime import datetime
 from users.models import CustomUser
 from django import forms
 from . import utils
@@ -33,37 +30,9 @@ class FirstTimeUserForm(Form):
         )
 
 
-class DefendantForm(ModelForm):
-
-    class Meta:
-        model = Defendant
-        fields = [
-            'first_name',
-            'last_name',
-            'birth_date',
-            'ssn',
-        ]
-
-
-class DefenseAttorneyForm(ModelForm):
-
-    class Meta:
-        model = DefenseAttorney
-        fields = [
-            'first_name',
-            'last_name',
-            'firm'
-        ]
-
-
 class CaseForm(Form):
 
     def __init__(self, *args, **kwargs):
-        defendant_pk = kwargs.pop('defendant_pk', None)
-        if defendant_pk:
-            initial_ssn = Defendant.objects.get(pk=defendant_pk).ssn
-        else:
-            initial_ssn = None
 
         super(CaseForm, self).__init__(*args, **kwargs)
         self.fields['case_number'] = forms.CharField(
@@ -79,19 +48,10 @@ class CaseForm(Form):
             required=True,
         )
         self.fields['override'] = forms.BooleanField(label="Ignore invalid case number formatting?", required=False)
-        self.fields['defendant_ssn'] = USSocialSecurityNumberField(
-            label='Defendant SSN',
-            help_text=mark_safe("Enter the defendant\'s social security number similar to XXX-XX-XXXX.\n"
-                                "If you have not created a defendant yet, create a new one "
-                                "<a href='/remind/create_defendant'target=_blank>here</a>."),
-            initial=initial_ssn if initial_ssn is not None else '',
+        self.fields['defendant'] = forms.CharField(
             required=True,
         )
-        self.fields['defense_attorney'] = forms.ModelChoiceField(
-            label='Defense Attorney',
-            help_text=mark_safe("If you do not see your defense attorney, create a new one "
-                                "<a href='/remind/create_defense_attorney'target=_blank>here</a> and refresh the page."),
-            queryset=DefenseAttorney.objects.order_by('last_name'),
+        self.fields['defense_attorney'] = forms.CharField(
             required=False,
         )
         self.fields['judge'] = forms.ModelChoiceField(
@@ -173,14 +133,6 @@ class CaseForm(Form):
                     ' CR# looks invalid. '
                     'Check "Ignore invalid case number formatting?" if you want to use it anyway. '
                 )
-
-        # Check defendant SSN exists
-        if not Defendant.objects.filter(ssn=cleaned_data.get('defendant_ssn')).exists():
-            self.add_error(
-                'defendant_ssn',
-                ' Defendant SSN not found, please double check your entry or return to the dashboard '
-                'and create a new defendant if you have not already.'
-            )
 
 
 class MotionForm(Form):
@@ -496,11 +448,7 @@ class UpdateForm(Form):
         super().__init__(*args, **kwargs)
 
         judges = utils.get_judge_choices()
-        defense_attorneys = utils.get_defense_attorneys()
-
         initial_judge = utils.find_choice_index(choice=str(self.case.judge), choices=judges)
-        initial_defense = utils.find_choice_index(choice=str(self.case.defense_attorney), choices=defense_attorneys)
-
         self.fields['judge'] = forms.ChoiceField(
             choices=judges,
             required=False,
@@ -509,12 +457,11 @@ class UpdateForm(Form):
             disabled=False
         )
 
-        self.fields['defense_attorney'] = forms.ChoiceField(
-            choices=defense_attorneys,
+        self.fields['defense_attorney'] = forms.CharField(
             required=False,
-            initial=initial_defense,
+            initial=self.case.defense_attorney,
             label='Change the defense attorney for this case?',
-            disabled=False
+            disabled=False,
         )
 
         for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):

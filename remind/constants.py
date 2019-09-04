@@ -1,7 +1,6 @@
 from django.conf import settings
 
 from .models import Deadline
-from cases.models import Judge
 
 SOURCE_URL = settings.BASE_URL
 ADMINISTRATION_EMAIL = settings.ADMINISTRATION_EMAIL
@@ -19,9 +18,6 @@ SATURDAY = 5
 SUNDAY = 6
 
 SECOND_JUDICIAL_DISTRICT = '202'
-
-PUBLIC_DEFENDER_FIRM = 'Law Offices of the Public Defender'
-PUBLIC_DEFENDER_ALTERNATE_PHRASING = ['pd', 'public defender', 'law office of the public defender']
 
 TRACKLESS_DEADLINE_LIMITS = {
     str(Deadline.SCHEDULING_CONFERENCE): SCHEDULING_ORDER_DEADLINE_DAYS,  # Days after arraignment
