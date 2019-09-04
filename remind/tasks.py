@@ -25,6 +25,7 @@ emails_sent = {
     Email.SECOND_REMINDER: 0,
 }
 
+
 @shared_task
 def check_past_deadline(deadline):
     """ Checks to see if past deadline """
@@ -107,7 +108,7 @@ def check_all_deadlines():
                 continue
 
         # If code has not hit continue, deadline does not need to do anything.
-        print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
+        # print('Deadline {} NOT expired: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
 
     send_admin_report()
 
@@ -141,18 +142,27 @@ def send_emails(email_type, deadline):
     )
 
     emails_sent[email_type] += len(recipient_emails)
-    print('Email sent. Type: {}'.format(Email.EMAIL_TYPES[email_type][1]))
+    print('\nCASE: {case_num} TYPE: {email_type} {num_recipients} emails sent to {recipients}.'.format(
+        case_num=deadline.case.case_number,
+        email_type=Email.EMAIL_TYPES[email_type][1],
+        num_recipients=len(recipient_emails),
+        recipients=str(recipient_emails),
+    ))
 
 
 @shared_task
 def send_admin_report():
-    # TODO Flesh out daily email to include git info, celery worker info, and emails sent for the day.
+    # TODO Flesh out daily email to include git info, celery worker info.
     if not settings.DEBUG:
+
         message = 'This is a daily report to notify you that the \'{server_name}\' server is sending emails.'.format(
             server_name=settings.SERVER_NAME
         )
-        message += '\n{num} emails were sent out to users this morning.'.format(num=sum(emails_sent.values()))
+        message += '\n{num_emails} emails were sent out to users this morning.'.format(
+            num_emails=sum(emails_sent.values())
+        )
         message += '\n\n - ReminderBot 4000'
+
         send_mail(
             subject='Daily report {}'.format(datetime.now().strftime('%c')),
             message=message,
@@ -160,3 +170,4 @@ def send_admin_report():
             recipient_list=[settings.SYSADMIN_EMAIL],
             fail_silently=True, 
         )
+        print('Daily report email sent.')
