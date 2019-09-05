@@ -2,10 +2,30 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+class Position(models.Model):
+
+    SUPERVISOR = 1
+    PROSECUTOR = 2
+    SECRETARY = 3
+    VICTIM_ADVOCATE = 4
+    PARALEGAL = 5
+
+    POSITION_CHOICES = (
+        (SUPERVISOR, 'Supervisor'),
+        (PROSECUTOR, 'Prosecutor'),
+        (SECRETARY, 'Secretary'),
+        (VICTIM_ADVOCATE, 'Victim Advocate'),
+        (PARALEGAL, 'Paralegal')
+    )
+
+    role = models.CharField(max_length=120)
+
+
 class CustomUser(AbstractUser):
 
     first_name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
+    position = models.ManyToManyField(Position, related_name='users')
 
     def __str__(self):
         display_name = self.first_name + " " + self.last_name
@@ -28,7 +48,3 @@ class CustomUser(AbstractUser):
     #     return positions_dict.get(position)
 
 
-class Position(models.Model):
-
-    role = models.CharField()
-    users = models.ManyToManyField(CustomUser, related_name='position')
