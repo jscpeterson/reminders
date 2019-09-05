@@ -18,7 +18,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
     position = models.IntegerField(choices=POSITION_CHOICES, null=True)
-    is_superuser = models.BooleanField()
+    is_supervisor = models.BooleanField(default=False)
 
     def __str__(self):
         display_name = self.first_name + " " + self.last_name
