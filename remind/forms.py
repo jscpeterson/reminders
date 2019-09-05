@@ -6,7 +6,7 @@ from django.forms import Form
 from cases.models import Case, Motion, Judge
 from remind.models import Deadline
 from datetime import datetime
-from users.models import CustomUser
+from users.models import Position
 from django import forms
 from . import utils
 from .constants import SCHEDULING_ORDER_DEADLINE_DAYS, TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, EVENT_DEADLINES, \
@@ -25,7 +25,7 @@ class FirstTimeUserForm(Form):
 
         self.fields['position'] = forms.ChoiceField(
             label='Select a position',
-            choices=CustomUser.POSITION_CHOICES_WITHOUT_SUPERVISOR,
+            choices=Position.POSITION_CHOICES_WITHOUT_SUPERVISOR,
             required=True,
         )
 
@@ -59,23 +59,23 @@ class CaseForm(Form):
             required=True,
         )
         self.fields['supervisor'] = forms.ModelChoiceField(
-            queryset=CustomUser.objects.filter(position=CustomUser.SUPERVISOR).order_by('last_name'),
+            queryset=Position.objects.filter(position=Position.SUPERVISOR).order_by('last_name'),
             required=True,
         )
         self.fields['prosecutor'] = forms.ModelChoiceField(
-            queryset=CustomUser.objects.filter(position=CustomUser.PROSECUTOR).order_by('last_name'),
+            queryset=Position.objects.filter(position=Position.PROSECUTOR).order_by('last_name'),
             required=True,
         )
         self.fields['paralegal'] = forms.ModelChoiceField(
-            queryset=CustomUser.objects.filter(position=CustomUser.PARALEGAL).order_by('last_name'),
+            queryset=Position.objects.filter(position=Position.PARALEGAL).order_by('last_name'),
             required=False,
         )
         self.fields['secretary'] = forms.ModelChoiceField(
-            queryset=CustomUser.objects.filter(position=CustomUser.SECRETARY).order_by('last_name'),
+            queryset=Position.objects.filter(position=Position.SECRETARY).order_by('last_name'),
             required=False,
         )
         self.fields['victim_advocate'] = forms.ModelChoiceField(
-            queryset=CustomUser.objects.filter(position=CustomUser.VICTIM_ADVOCATE).order_by('last_name'),
+            queryset=Position.objects.filter(position=Position.VICTIM_ADVOCATE).order_by('last_name'),
             required=False,
         )
         self.fields['arraignment_date'] = forms.DateTimeField(
