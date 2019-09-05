@@ -7,14 +7,13 @@ from django.shortcuts import render, render_to_response
 from django.views.generic.edit import CreateView, FormView
 from django.views.generic.list import ListView
 from remind.models import Deadline
-from cases.models import Case, Motion, Defendant, Judge, DefenseAttorney
+from cases.models import Case, Motion, Judge
 from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm, MotionFormWithCase, DefendantForm, DefenseAttorneyForm, FirstTimeUserForm
-from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, SUPPORT_EMAIL, \
-    PUBLIC_DEFENDER_ALTERNATE_PHRASING, PUBLIC_DEFENDER_FIRM
+    MotionResponseForm, MotionFormWithCase, FirstTimeUserForm
+from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, SUPPORT_EMAIL
 from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
@@ -60,64 +59,6 @@ def first_time_user(request):
         })
 
 
-class CreateDefendantView(LoginRequiredMixin, CreateView):
-    """ Allows the user to create a new defendant. """
-    model = Defendant
-    form_class = DefendantForm
-
-    def get_success_url(self):
-        self.object.first_name = self.object.first_name.capitalize()
-        self.object.last_name = self.object.last_name.capitalize()
-        self.object.created_by = self.request.user
-        self.object.save(update_fields=['created_by', 'first_name', 'last_name'])
-
-        return reverse('remind:defendant-created', kwargs={'defendant_pk': self.object.pk})
-
-
-@login_required
-def defendant_created(request, *args, **kwargs):
-    """ Confirmation view displaying results of the newly created defendant. """
-    defendant = Defendant.objects.get(pk=kwargs.get('defendant_pk'))
-
-    if request.method == 'POST':
-        return HttpResponseRedirect(reverse('remind:create-case-with-ssn', kwargs={'defendant_pk': defendant.pk}))
-
-    return render(request, 'remind/defendant_created.html', {
-        'defendant_name': defendant,
-        'defendant_ssn': defendant.ssn,
-        'defendant_dob': defendant.birth_date,
-    })
-
-
-class CreateDefenseView(LoginRequiredMixin, CreateView):
-    """ Allows the user to create a new defense attorney. """
-    model = DefenseAttorney
-    form_class = DefenseAttorneyForm
-
-    def get_success_url(self):
-        self.object.first_name = self.object.first_name.capitalize()
-        self.object.last_name = self.object.last_name.capitalize()
-        self.object.created_by = self.request.user
-
-        if str(self.object.firm).lower() in PUBLIC_DEFENDER_ALTERNATE_PHRASING:
-            self.object.firm = PUBLIC_DEFENDER_FIRM
-
-        self.object.save(update_fields=['created_by', 'firm', 'first_name', 'last_name'])
-
-        return reverse('remind:defense-created', kwargs={'defense_pk': self.object.pk})
-
-
-@login_required
-def defense_created(request, *args, **kwargs):
-    """ Confirmation view displaying results of the newly created defense attorney. """
-    defense_attorney = DefenseAttorney.objects.get(pk=kwargs.get('defense_pk'))
-
-    return render(request, 'remind/defense_created.html', {
-        'defense_name': defense_attorney,
-        'defense_firm': 'None' if defense_attorney.firm is None else defense_attorney.firm,
-    })
-
-
 ################################################################################
 # Create Case Sequence
 
@@ -134,7 +75,7 @@ def create_case(request, *args, **kwargs):
                 created_by=request.user,
                 case_number=data.get('case_number'),
                 cr_number=data.get('cr_number'),
-                defendant=Defendant.objects.get(ssn=data.get('defendant_ssn')),
+                defendant=data.get('defendant'),
                 judge=data.get('judge'),
                 defense_attorney=data.get('defense_attorney'),
                 supervisor=data.get('supervisor'),
@@ -430,9 +371,6 @@ def update(request, *args, **kwargs):
     judges = utils.get_judge_choices()
     sorted_judges = utils.sort_choices(choice=str(case.judge), choices=judges)
 
-    defense_attorneys = utils.get_defense_attorneys()
-    sorted_attorneys = utils.sort_choices(choice=str(case.defense_attorney), choices=defense_attorneys)
-
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
     if request.method == 'POST':
@@ -467,17 +405,11 @@ def update(request, *args, **kwargs):
                 messages.add_message(request, messages.INFO, 'Judge has been changed to {}.'.format(
                     case.judge
                 ))
-            defense_attorney_name = defense_attorneys[int(form.cleaned_data.get('defense_attorney')) - 1][1]
-            defense_attorney_first_name = defense_attorney_name.split(' ')[0]
-            defense_attorney_last_name = defense_attorney_name.split(' ')[1]
 
-            if str(case.defense_attorney) != defense_attorney_name:
-                case.defense_attorney = DefenseAttorney.objects.get(
-                    first_name=defense_attorney_first_name,
-                    last_name=defense_attorney_last_name
-                )
-                case.updated_by = request.user
-                case.save(update_fields=['defense_attorney', 'updated_by'])
+            defense_attorney = form.cleaned_data.get('defense_attorney')
+            if case.defense_attorney != defense_attorney:
+                case.defense_attorney = defense_attorney
+                case.save(update_fields=['defense_attorney'])
                 messages.add_message(request, messages.INFO, 'Defense attorney has been changed to {}.'.format(
                     case.defense_attorney
                 ))
@@ -534,7 +466,6 @@ def update(request, *args, **kwargs):
         'disabled': disabled,
         'hidden': hidden,
         'judges': sorted_judges,
-        'defense_attorneys': sorted_attorneys,
         'override_index': override_index
     })
 
