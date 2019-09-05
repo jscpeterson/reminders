@@ -45,6 +45,9 @@ class Command(BaseCommand):
             email=supervisor_email,
             is_supervisor=True,
         )
+        user.set_password(SUGGESTED_PASSWORD)
+        user.save(update_fields=['password'])
+        print('Created supervisor')
 
     def _get_email_addresses(self):
         """ Returns dictionary of email addresses to use for each position """
