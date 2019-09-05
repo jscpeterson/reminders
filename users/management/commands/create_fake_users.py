@@ -16,10 +16,10 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         """ Handles creating users """
 
+        self._create_supervisor(self._load_emails()['supervisor_email'])
+
         positions = dict(((x[1], x[0]) for x in CustomUser.POSITION_CHOICES))
         test_emails = self._get_email_addresses()
-
-        self._create_supervisor(test_emails.get('supervisor'))
 
         for position_label, position_index in positions.items():
             first_name = faker.first_name()
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         )
         user.set_password(SUGGESTED_PASSWORD)
         user.save(update_fields=['password'])
-        print('Created supervisor')
+        print('Created Supervisor')
 
     def _get_email_addresses(self):
         """ Returns dictionary of email addresses to use for each position """
