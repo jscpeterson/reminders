@@ -6,9 +6,10 @@ class Command(BaseCommand):
     help = 'Changes a staff member\'s position, for example \'change_user_position "Joseph Peterson" "supervisor"\' '
 
     positions = {
-            'supervisor': CustomUser.SUPERVISOR,
             'prosecutor': CustomUser.PROSECUTOR,
             'secretary': CustomUser.SECRETARY,
+            'paralegal': CustomUser.PARALEGAL,
+            'victim advocate': CustomUser.VICTIM_ADVOCATE,
     }
 
     def add_arguments(self, parser):
@@ -28,8 +29,12 @@ class Command(BaseCommand):
             ))
 
         # Check position is accurate
-        if not position in self.positions.keys():
-            raise Exception('{position} not recognized as a valid position.'.format(position=position))
+        if position not in self.positions.keys():
+            raise Exception('{position} not recognized as a valid position.'
+                            'Please enter one of the following positions: {positions}'.format(
+                                position=position,
+                                positions=self.positions.keys(),
+                            ))
 
         user = CustomUser.objects.get(first_name=first_name, last_name=last_name)
         user.position = self.positions[position]
