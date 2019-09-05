@@ -59,7 +59,7 @@ class CaseForm(Form):
             required=True,
         )
         self.fields['supervisor'] = forms.ModelChoiceField(
-            queryset=CustomUser.objects.filter(is_staff=True).order_by('last_name'),
+            queryset=CustomUser.objects.filter(is_supervisor=True).order_by('last_name'),
             required=True,
         )
         self.fields['prosecutor'] = forms.ModelChoiceField(

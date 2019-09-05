@@ -40,10 +40,10 @@ class Command(BaseCommand):
         user = CustomUser.objects.create(
             first_name=faker.first_name(),
             last_name=faker.last_name(),
-            username='supervisor{}'.format(len(CustomUser.objects.filter(is_staff=True))+1),
+            username='supervisor{}'.format(len(CustomUser.objects.filter(is_supervisor=True))+1),
             position=CustomUser.PROSECUTOR,
             email=supervisor_email,
-            is_staff=True,
+            is_supervisor=True,
         )
 
     def _get_email_addresses(self):

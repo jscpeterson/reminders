@@ -3,14 +3,12 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    # SUPERVISOR = 1 Supervisor moved to is_staff position
     PROSECUTOR = 2
     SECRETARY = 3
     VICTIM_ADVOCATE = 4
     PARALEGAL = 5
 
     POSITION_CHOICES = (
-        # (SUPERVISOR, 'Supervisor'), Supervisor moved to is_staff position
         (PROSECUTOR, 'Prosecutor'),
         (SECRETARY, 'Secretary'),
         (VICTIM_ADVOCATE, 'Victim Advocate'),
@@ -20,6 +18,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=60)
     last_name = models.CharField(max_length=60)
     position = models.IntegerField(choices=POSITION_CHOICES, null=True)
+    is_superuser = models.BooleanField()
 
     def __str__(self):
         display_name = self.first_name + " " + self.last_name
