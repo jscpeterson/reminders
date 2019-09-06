@@ -11,7 +11,7 @@ class App extends React.Component {
        super(props);
 
        this.state = {
-            position: 0,
+            is_superuser: false,
             is_supervisor: false
        }
   }
@@ -24,7 +24,7 @@ class App extends React.Component {
 
     saveUserData(userData) {
         this.setState({
-            position:userData[0]['position'],
+            is_superuser:userData[0]['is_superuser'],
             is_supervisor:userData[0]['is_supervisor']
         })
     }
@@ -41,16 +41,15 @@ class App extends React.Component {
 
     renderStaffDeadlines() {
         return <Tab value="pane-4" label="Staff Deadlines">
-                    <UpcomingDeadlines/> 
+                    <UpcomingDeadlines/>
                </Tab>
     }
 
   render() {
-      const DEVELOPER = 99;
       let staffRuleList;
       let staffDeadlines;
 
-      if (this.state.is_supervisor || this.state.position === DEVELOPER) {
+      if (this.state.is_supervisor || this.state.is_superuser) {
           staffRuleList = this.renderStaffRuleList();
           staffDeadlines = this.renderStaffDeadlines();
       }
