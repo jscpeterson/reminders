@@ -3,13 +3,14 @@ from users.models import CustomUser
 
 
 class Command(BaseCommand):
-    help = 'Changes a staff member\'s position, for example \'change_user_position "Joseph Peterson" "supervisor"\' '
+    help = 'Changes a staff member\'s position, for example \'change_user_position "Joseph Peterson" "developer"\' '
 
     positions = {
             'prosecutor': CustomUser.PROSECUTOR,
             'secretary': CustomUser.SECRETARY,
             'paralegal': CustomUser.PARALEGAL,
             'victim advocate': CustomUser.VICTIM_ADVOCATE,
+            'developer': CustomUser.DEVELOPER,
     }
 
     def add_arguments(self, parser):

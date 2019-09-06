@@ -3,10 +3,13 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
+
     PROSECUTOR = 2
     SECRETARY = 3
     VICTIM_ADVOCATE = 4
     PARALEGAL = 5
+
+    DEVELOPER = 99
 
     POSITION_CHOICES = (
         (PROSECUTOR, 'Prosecutor'),
