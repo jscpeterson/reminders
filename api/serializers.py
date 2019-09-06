@@ -55,6 +55,10 @@ class CaseSerializer(WritableNestedModelSerializer):
     defendant = serializers.SerializerMethodField()
     judge = serializers.SerializerMethodField()
     defense_attorney = serializers.SerializerMethodField()
+    prosecutor = serializers.SerializerMethodField()
+    secretary = serializers.SerializerMethodField()
+    paralegal = serializers.SerializerMethodField()
+    victim_advocate = serializers.SerializerMethodField()
 
     class Meta:
         model = Case
@@ -68,6 +72,18 @@ class CaseSerializer(WritableNestedModelSerializer):
 
     def get_defense_attorney(self, obj):
         return str(obj.defense_attorney)
+
+    def get_prosecutor(self, obj):
+        return str(obj.prosecutor)
+
+    def get_secretary(self, obj):
+        return str(obj.prosecutor)
+
+    def get_paralegal(self, obj):
+        return str(obj.prosecutor)
+
+    def get_victim_advocate(self, obj):
+        return str(obj.victim_advocate)
 
 
 class UserSerializer(WritableNestedModelSerializer):

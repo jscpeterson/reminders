@@ -15,6 +15,33 @@ class RuleList extends React.Component {
     this.state = {
       management: this.props.management,
       columns: [
+        // Staff columns - only supervisors/superusers should see these
+        {
+          title: 'Prosecutor',
+          field: 'prosecutor',
+          editable: 'never',
+          hidden: !this.props.management
+        },
+        {
+          title: 'Secretary',
+          field: 'secretary',
+          editable: 'never',
+          hidden: !this.props.management
+        },
+        {
+          title: 'Paralegal',
+          field: 'paralegal',
+          editable: 'never',
+          hidden: !this.props.management
+        },
+        {
+          title: 'Victim Advocate',
+          field: 'victim_advocate',
+          editable: 'never',
+          hidden: !this.props.management
+        },
+
+        // Case Information
         { title: 'Defendant',
           field: 'defendant',
           editable: 'never' },
@@ -31,6 +58,7 @@ class RuleList extends React.Component {
           field: 'defense-attorney' ,
           editable: 'never' },
 
+        // Deadlines
         { title: 'Initial Witness List',
           field: 'initial-witness-list',
           type:'date',
@@ -99,6 +127,7 @@ class RuleList extends React.Component {
           render: rowData => <span>{this.displayDate(rowData,'trial')}</span>,
           editable: 'never' },
 
+        // These columns are only for storing data - user shouldn't see these.
         {
           title: 'Stayed Case - YOU SHOULDN\'T SEE THIS',
           field: 'stayed',
@@ -233,6 +262,8 @@ class RuleList extends React.Component {
 
   populateTable(cases) {
 
+    let self = this;
+
     // Save JSON Data to state
     this.setState({jsonData : cases});
 
@@ -240,6 +271,12 @@ class RuleList extends React.Component {
     let dataArray = [];
     cases.forEach(function(caseJSON){
       let row = {};
+
+      // Populate staff column
+      row['prosecutor'] = caseJSON['prosecutor'];
+      row['secretary'] = caseJSON['secretary'];
+      row['paralegal'] = caseJSON['paralegal'];
+      row['victim_advocate'] = caseJSON['victim_advocate'];
 
       // Populate basic case data
       row['defendant'] = caseJSON['defendant'];
