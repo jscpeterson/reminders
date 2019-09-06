@@ -3,12 +3,14 @@ from users.models import CustomUser
 
 
 class Command(BaseCommand):
-    help = 'Changes a staff member\'s position, for example \'change_user_position "Joseph Peterson" "supervisor"\' '
+    help = 'Changes a staff member\'s position, for example \'change_user_position "Joseph Peterson" "developer"\' '
 
     positions = {
-            'supervisor': CustomUser.SUPERVISOR,
             'prosecutor': CustomUser.PROSECUTOR,
             'secretary': CustomUser.SECRETARY,
+            'paralegal': CustomUser.PARALEGAL,
+            'victim advocate': CustomUser.VICTIM_ADVOCATE,
+            'developer': CustomUser.DEVELOPER,
     }
 
     def add_arguments(self, parser):
@@ -28,14 +30,18 @@ class Command(BaseCommand):
             ))
 
         # Check position is accurate
-        if not position in self.positions.keys():
-            raise Exception('{position} not recognized as a valid position.'.format(position=position))
+        if position not in self.positions.keys():
+            raise Exception('{position} not recognized as a valid position.'
+                            'Please enter one of the following positions: {positions}'.format(
+                                position=position,
+                                positions=self.positions.keys(),
+                            ))
 
         user = CustomUser.objects.get(first_name=first_name, last_name=last_name)
         user.position = self.positions[position]
         user.save()
         print('{user} is now a {position}.'.format(
                 user=user,
-                position=user.get_position_disp(user.position)
+                position='Developer' if user.position == CustomUser.DEVELOPER else user.get_position_disp(user.position)
              ))
 

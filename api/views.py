@@ -16,7 +16,7 @@ class DeadlineViewSet(viewsets.ModelViewSet):
             # No case number specified
             # Get all active cases belonging to the user sorted by soonest to expire
             return super().get_queryset().filter(
-                Q(case__supervisor=self.request.user) |
+                Q(case__supervisor=self.request.user) |  # TODO Separate supervisor calls from prosecutor/staff calls
                 Q(case__prosecutor=self.request.user) |
                 Q(case__secretary=self.request.user) |
                 Q(case__paralegal=self.request.user) |
@@ -31,7 +31,7 @@ class DeadlineViewSet(viewsets.ModelViewSet):
         else:
             case_pk = Case.objects.get(case_number=case_number).pk
             return super().get_queryset().filter(case=case_pk).filter(
-                Q(case__supervisor=self.request.user) |
+                Q(case__supervisor=self.request.user) |  # TODO Separate supervisor calls from prosecutor/staff calls
                 Q(case__prosecutor=self.request.user) |
                 Q(case__secretary=self.request.user) |
                 Q(case__paralegal=self.request.user) |
@@ -45,7 +45,7 @@ class CaseViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         cases = super().get_queryset().filter(
-            Q(supervisor=self.request.user) |
+            Q(supervisor=self.request.user) |  # TODO Separate supervisor calls from prosecutor/staff calls
             Q(prosecutor=self.request.user) |
             Q(secretary=self.request.user) |
             Q(paralegal=self.request.user) |
