@@ -42,6 +42,6 @@ class Command(BaseCommand):
         user.save()
         print('{user} is now a {position}.'.format(
                 user=user,
-                position=user.get_position_disp(user.position)
+                position='Developer' if user.position == CustomUser.DEVELOPER else user.get_position_disp(user.position)
              ))
 
