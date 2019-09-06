@@ -5,6 +5,7 @@ from cases.models import Case
 from remind.models import Deadline
 from drf_writable_nested import WritableNestedModelSerializer
 from remind.constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS
+from users.models import CustomUser
 
 
 class DeadlineSerializer(serializers.ModelSerializer):
@@ -67,3 +68,10 @@ class CaseSerializer(WritableNestedModelSerializer):
 
     def get_defense_attorney(self, obj):
         return str(obj.defense_attorney)
+
+
+class UserSerializer(WritableNestedModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = '__all__'
