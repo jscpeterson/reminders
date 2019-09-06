@@ -13,6 +13,7 @@ class RuleList extends React.Component {
     super(props);
 
     this.state = {
+      management: this.props.management,
       columns: [
         { title: 'Defendant',
           field: 'defendant',
@@ -267,7 +268,12 @@ class RuleList extends React.Component {
   }
 
   fetchCases() {
-    return fetch("/api/cases/")
+    let url = "/api/cases";
+    if (this.state.management) {
+        url = "/api/staff_cases";
+    }
+
+    return fetch(url)
       .then(response => response.json())
       .then(cases => this.populateTable(cases))
   }

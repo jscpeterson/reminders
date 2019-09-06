@@ -35,13 +35,13 @@ class App extends React.Component {
 
     renderStaffRuleList() {
         return <Tab value="pane-3" label="Staff Rule List">
-                    <RuleList/>
+                    <RuleList management={true}/>
                </Tab>
     }
 
     renderStaffDeadlines() {
         return <Tab value="pane-4" label="Staff Deadlines">
-                    <UpcomingDeadlines/>
+                    <UpcomingDeadlines management={true}/>
                </Tab>
     }
 
@@ -58,11 +58,11 @@ class App extends React.Component {
       return (
       <Tabs justified={true}>
         <Tab value="pane-1" label="Rule List">
-          <RuleList/>
+          <RuleList management={false}/>
         </Tab>
           { staffRuleList }
         <Tab value="pane-2" label="Upcoming Deadlines">
-          <UpcomingDeadlines/>
+          <UpcomingDeadlines management={false}/>
         </Tab>
           { staffDeadlines }
       </Tabs>

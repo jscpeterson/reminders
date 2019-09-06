@@ -5,6 +5,7 @@ class UpcomingDeadlines extends React.Component {
     constructor(props) {
       super(props);
       this.state = {
+          management: this.props.management,
           columns: [
               { title: 'Due Date',
                 field: 'datetime',
@@ -73,7 +74,12 @@ class UpcomingDeadlines extends React.Component {
   }
 
   fetchDeadlines() {
-      return fetch("/api/deadlines")
+      let url = "/api/deadlines";
+      if (this.state.management) {
+          url = "/api/staff_deadlines";
+      }
+
+      return fetch(url)
           .then(response => response.json())
           .then(deadlines => this.populateTable(deadlines))
   }

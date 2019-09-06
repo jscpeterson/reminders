@@ -19,7 +19,9 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r'deadlines', views.DeadlineViewSet, 'deadline')
+router.register(r'staff_deadlines', views.StaffDeadlineViewSet, 'staff-deadline')
 router.register(r'cases', views.CaseViewSet, 'case')
+router.register(r'staff_cases', views.StaffCaseViewSet, 'staff-case')
 router.register(r'user', views.UserSet, 'user')
 
 
