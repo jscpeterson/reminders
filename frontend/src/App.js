@@ -60,10 +60,10 @@ class App extends React.Component {
         <Tab value="pane-1" label="Rule List">
           <RuleList management={false}/>
         </Tab>
-          { staffRuleList }
         <Tab value="pane-2" label="Upcoming Deadlines">
           <UpcomingDeadlines management={false}/>
         </Tab>
+          { staffRuleList }
           { staffDeadlines }
       </Tabs>
     )

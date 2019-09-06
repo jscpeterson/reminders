@@ -15,6 +15,23 @@ class RuleList extends React.Component {
     this.state = {
       management: this.props.management,
       columns: [
+        // Case Information
+        { title: 'Defendant',
+          field: 'defendant',
+          editable: 'never' },
+        { title: 'DA Case #',
+          field: 'case-number',
+          editable: 'never' },
+        { title: 'CR #',
+          field: 'cr-number',
+          editable: 'never', },
+        { title: 'Judge',
+          field: 'judge' ,
+          editable: 'never'},
+        { title: 'Defense',
+          field: 'defense-attorney' ,
+          editable: 'never' },
+
         // Staff columns - only supervisors/superusers should see these
         {
           title: 'Prosecutor',
@@ -40,24 +57,7 @@ class RuleList extends React.Component {
           editable: 'never',
           hidden: !this.props.management
         },
-
-        // Case Information
-        { title: 'Defendant',
-          field: 'defendant',
-          editable: 'never' },
-        { title: 'DA Case #',
-          field: 'case-number',
-          editable: 'never' },
-        { title: 'CR #',
-          field: 'cr-number',
-          editable: 'never', },
-        { title: 'Judge',
-          field: 'judge' ,
-          editable: 'never'},
-        { title: 'Defense',
-          field: 'defense-attorney' ,
-          editable: 'never' },
-
+          
         // Deadlines
         { title: 'Initial Witness List',
           field: 'initial-witness-list',
