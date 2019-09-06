@@ -112,10 +112,16 @@
             <ul class="left hide-on-med-and-down">
                 <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
                 <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
+                {% if is_management %}
+                <li><a href="javascript:alert('Not Implemented')">Reassign Case</a></li>
+                {% endif %}
                 <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
                 <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
             </ul>
             <ul class="right">
+                {% if is_management %}
+                <li><a href="javascript:alert('Not Implemented')">Change Staff Position</a></li>
+                {% endif %}
                 <li><i class="material-icons">account_circle</i></li>
                 <li><a class="disabled">{{ user }}</a></li>
                 <li><a href= "mailto:coders@da2nd.state.nm.us?subject=Reminders%20Issue">Help</a></li>
@@ -132,6 +138,9 @@
     <ul class="sidenav" id="mobile-demo">
                 <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
                 <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
+                {% if is_management %}
+                <li><a href="javascript:alert('Not Implemented')">Reassign Case</a></li>
+                {% endif %}
                 <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
                 <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
     </ul>
