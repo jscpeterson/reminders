@@ -17,7 +17,7 @@ class UpcomingDeadlines extends React.Component {
 
               { title: 'Defendant',
                 field: 'defendant' },
-              { title: 'CR#',
+              { title: 'DA Case #',
                 field: 'case-number',},
               { title: 'Judge',
                 field: 'judge' ,},
