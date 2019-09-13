@@ -288,7 +288,7 @@ class RuleList extends React.Component {
       row['stayed'] = caseJSON['stayed'];
 
       // Populate deadlines for case
-      const deadlines = caseJSON['deadline_set']
+      const deadlines = caseJSON['deadline_set'];
       deadlines.forEach(function(deadline){
         const key = deadline['type'];
         // row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
@@ -306,8 +306,10 @@ class RuleList extends React.Component {
 
   fetchCases() {
     let url = "/api/cases";
+    this.state.title = "Rule List";
     if (this.state.management) {
         url = "/api/staff_cases";
+        this.state.title = "Staff Rule List";
     }
 
     return fetch(url)
@@ -347,7 +349,7 @@ class RuleList extends React.Component {
   render() {
     return (
       <MaterialTable
-        title="Rule List"
+        title={this.state.title}
         columns={this.state.columns}
         data={this.state.tableData}
         options={{

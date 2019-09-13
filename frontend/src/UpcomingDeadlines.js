@@ -75,8 +75,10 @@ class UpcomingDeadlines extends React.Component {
 
   fetchDeadlines() {
       let url = "/api/deadlines";
+      this.state.title = "Upcoming Deadlines";
       if (this.state.management) {
           url = "/api/staff_deadlines";
+          this.state.title = "Staff Deadlines";
       }
 
       return fetch(url)
@@ -124,7 +126,7 @@ class UpcomingDeadlines extends React.Component {
   render() {
     return (
         <MaterialTable
-            title="Upcoming Deadlines"
+            title={this.state.title}
             columns={this.state.columns}
             data={this.state.tableData}
             options={{

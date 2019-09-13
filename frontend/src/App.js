@@ -26,7 +26,7 @@ class App extends React.Component {
         this.setState({
             is_superuser:userData[0]['is_superuser'],
             is_supervisor:userData[0]['is_supervisor']
-        })
+        });
     }
 
     componentDidMount() {
@@ -58,10 +58,10 @@ class App extends React.Component {
       return (
       <Tabs justified={true}>
         <Tab value="pane-1" label="Rule List">
-          <RuleList management={false}/>
+          <RuleList management={false} />
         </Tab>
         <Tab value="pane-2" label="Upcoming Deadlines">
-          <UpcomingDeadlines management={false}/>
+          <UpcomingDeadlines management={false} />
         </Tab>
           { staffRuleList }
           { staffDeadlines }
