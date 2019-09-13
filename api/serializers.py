@@ -77,10 +77,10 @@ class CaseSerializer(WritableNestedModelSerializer):
         return str(obj.prosecutor)
 
     def get_secretary(self, obj):
-        return str(obj.prosecutor)
+        return str(obj.secretary)
 
     def get_paralegal(self, obj):
-        return str(obj.prosecutor)
+        return str(obj.paralegal)
 
     def get_victim_advocate(self, obj):
         return str(obj.victim_advocate)
