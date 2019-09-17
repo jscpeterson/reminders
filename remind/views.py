@@ -14,7 +14,8 @@ from django.core.exceptions import PermissionDenied
 from users.models import CustomUser
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm, MotionFormWithCase, FirstTimeUserForm, ReassignCasesForm, ReassignCasesWithUserForm
+    MotionResponseForm, MotionFormWithCase, FirstTimeUserForm, ReassignCasesForm, ReassignCasesWithUserForm, \
+    ChangeStaffForm, ChangeStaffWithUserForm
 from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, SUPPORT_EMAIL
 from . import utils
 from . import case_utils
@@ -886,3 +887,44 @@ def reassign_cases_with_user(request, *args, **kwargs):
         form = ReassignCasesWithUserForm(user_to_modify=user_to_modify)
 
     return render(request, 'remind/reassign_cases_with_user_form.html', {'form': form})
+
+
+@login_required
+def change_staff(request, *args, **kwargs):
+    """Select a user to change position"""
+    if not request.user.is_supervisor and not request.user.is_superuser:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = ChangeStaffForm(request.POST)
+
+        if form.is_valid():
+            user_to_modify = form.cleaned_data.get('user_to_modify')
+            return HttpResponseRedirect(reverse('remind:change-staff-with-user',
+                                                kwargs={'user_pk': user_to_modify.pk}))
+
+    else:
+        form = ChangeStaffForm()
+
+    return render(request, 'remind/change_staff_form.html', {'form': form})
+
+
+@login_required
+def change_staff_with_user(request, *args, **kwargs):
+    """Select cases from a user to reassign roles on"""
+    user_to_modify = CustomUser.objects.get(pk=kwargs.get('user_pk'))
+
+    if not request.user.is_supervisor and not request.user.is_superuser:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = ChangeStaffWithUserForm(request.POST, user_to_modify=user_to_modify)
+
+        if form.is_valid():
+            # TODO Update user position
+            return HttpResponseRedirect(reverse('remind:dashboard'))
+
+    else:
+        form = ChangeStaffWithUserForm(user_to_modify=user_to_modify)
+
+    return render(request, 'remind/change_staff_with_user_form.html', {'form': form})
