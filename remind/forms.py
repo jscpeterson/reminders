@@ -618,3 +618,13 @@ class UpdateTrackForm(Form):
                 ),
             help_text='Only cases without a scheduling order will appear here.',
         )
+
+
+class ReassignCasesForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        super(ReassignCasesForm, self).__init__(*args, **kwargs)
+
+        self.fields['user_to_modify'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.order_by('last_name'),
+        )

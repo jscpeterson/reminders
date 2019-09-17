@@ -12,7 +12,7 @@ from django.core.exceptions import PermissionDenied
 
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm, MotionFormWithCase, FirstTimeUserForm
+    MotionResponseForm, MotionFormWithCase, FirstTimeUserForm, ReassignCasesForm
 from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, SUPPORT_EMAIL
 from . import utils
 from . import case_utils
@@ -714,6 +714,7 @@ def extension(request, *args, **kwargs):
             return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
+        # TODO Does this request need to be a POST? Think this is a mistake
         form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
 
     return render(
@@ -745,6 +746,7 @@ def judge_confirmed(request, *args, **kwargs):
             return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
+        # TODO Does this request need to be a POST? Think this is a mistake
         form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
 
     return render(
@@ -812,3 +814,27 @@ def resume_case(request, *args, **kwargs):
             'defendant': case.defendant,
         }
     )
+
+
+################################################################################
+# Supervisor Action Views
+
+
+@login_required
+def reassign_cases(request, *args, **kwargs):
+    """Select a user to reassign cases from"""
+    if not request.user.is_supervisor and not request.user.is_superuser:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = ReassignCasesForm(request.POST)
+
+        if form.is_valid():
+            user_to_modify = form.cleaned_data.get('user_to_modify')
+            return HttpResponseRedirect(reverse('remind:reassign-cases-with-user',
+                                                kwargs={'user_pk': user_to_modify.pk}))
+
+    else:
+        form = ReassignCasesForm()
+
+    return render(request, 'remind/reassign_cases_form.html', {'form': form})

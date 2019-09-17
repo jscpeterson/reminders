@@ -113,13 +113,14 @@
                 <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
                 <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
                 {% if is_management %}
-                <li><a href="javascript:alert('Not Implemented')">Reassign Cases</a></li>
+                <li><a href="{% url 'remind:reassign-cases' %}">Reassign Cases</a></li>
                 {% endif %}
                 <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
                 <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
             </ul>
             <ul class="right">
                 {% if is_management %}
+                <!--<li><a href="{% url 'remind:change-staff' %}"">Change Staff Position</a></li>-->
                 <li><a href="javascript:alert('Not Implemented')">Change Staff Position</a></li>
                 {% endif %}
                 <li><i class="material-icons">account_circle</i></li>
@@ -139,7 +140,7 @@
                 <li><a href="{% url 'remind:create-case' %}">Create Case</a></li>
                 <li><a href="{% url 'remind:update-case' %}">Update Case</a></li>
                 {% if is_management %}
-                <li><a href="javascript:alert('Not Implemented')">Reassign Cases</a></li>
+                <li><a href="{% url 'remind:reassign-cases' %}">Reassign Cases</a></li>
                 {% endif %}
                 <li><a href="{% url 'remind:enter-sched' %}">Enter Scheduling Order</a></li>
                 <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
