@@ -119,10 +119,6 @@
                 <li><a href="{% url 'remind:create-motion' %}">Create Motion</a></li>
             </ul>
             <ul class="right">
-                {% if is_management %}
-                {# <!--<li><a href="{% url 'remind:change-staff' %}"">Change Staff Position</a></li>--> #}
-                <li><a href="javascript:alert('Not Implemented')">Change Staff Position</a></li>
-                {% endif %}
                 <li><i class="material-icons">account_circle</i></li>
                 <li><a class="disabled">{{ user }}</a></li>
                 <li><a href= "mailto:coders@da2nd.state.nm.us?subject=Reminders%20Issue">Help</a></li>
