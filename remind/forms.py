@@ -675,22 +675,3 @@ class ReassignCasesWithUserForm(Form):
                 label='{case_number}: {defendant}'.format(case_number=case.case_number, defendant=case.defendant),
                 required=False,
             )
-
-
-class ChangeStaffForm(Form):
-
-    def __init__(self, *args, **kwargs):
-        super(ChangeStaffForm, self).__init__(*args, **kwargs)
-
-        self.fields['user_to_modify'] = forms.ModelChoiceField(
-            queryset=CustomUser.objects.order_by('last_name'),
-            label="Select a user whose position should be changed",
-        )
-
-
-class ChangeStaffWithUserForm(Form):
-
-    def __init__(self, *args, **kwargs):
-        user_to_modify = kwargs.pop('user_to_modify')
-        super(ChangeStaffWithUserForm, self).__init__(*args, **kwargs)
-        # TODO Add fields

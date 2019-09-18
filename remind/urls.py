@@ -34,8 +34,6 @@ urlpatterns = [
     # Supervisor Actions
     path('reassign/', views.reassign_cases, name='reassign-cases'),
     path('reassign/<str:user_pk>', views.reassign_cases_with_user, name='reassign-cases-with-user'),
-    path('change_staff/', views.change_staff, name='change-staff'),
-    path('change_staff/<str:user_pk>', views.change_staff_with_user, name='change-staff-with-user'),
 
     # Miscellaneous
     path('request_pti/<str:case_number>', views.request_pti, name='request_pti'),
