@@ -50,7 +50,7 @@ class Case(TimeStampedModel):
     closed = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.case_number
+        return '{num}: {defendant}'.format(num=self.case_number, defendant=self.defendant)
 
 
 class Motion(models.Model):
