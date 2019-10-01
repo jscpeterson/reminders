@@ -49,7 +49,7 @@ class Email:
     '''
 
     def get_subject(self):
-        output = 'Case {}: '.format(self.case.case_number)
+        output = 'Case {}: '.format(self.case)
 
         subjects = {
             self.DEADLINE_EXPIRED: '{desc} has expired.'.format(
@@ -105,7 +105,7 @@ class Email:
         return '''{indent}The {desc} for case {case} expired on {date}. Administration has been notified.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
-            case=self.case.case_number,
+            case=self.case,
             date=self.deadline.datetime.date(),
         )
 
@@ -183,7 +183,7 @@ been completed or is not necessary in this case, please go to {url} to notify th
 problems, please notify {contact}.'''.format(
             indent=INDENT,
             desc=self.deadline_desc,
-            case=self.case.case_number,
+            case=self.case,
             date=self.deadline.datetime.date(),
             url=url,
             contact=SUPPORT_EMAIL,
@@ -215,7 +215,7 @@ Administration will be notified if the task is not completed by {date}.'''.forma
         return '''{indent}The scheduling conference for case {case_number} was due to take place on {date}. \
 Please enter the results of the scheduling order at {url}.'''.format(
             indent=INDENT,
-            case_number=self.case.case_number,
+            case_number=self.case,
             date=date,
             url=url,
         )
@@ -236,7 +236,7 @@ defense requested pretrial interviews, please enter the date they did so at {url
 failure to conduct pretrial interviews of witnesses as the basis of any sanction."'''.format(
             indent=INDENT,
             days=request_pti_days,
-            case_number=self.case.case_number,
+            case_number=self.case,
             url=url
         )
 
@@ -251,7 +251,7 @@ failure to conduct pretrial interviews of witnesses as the basis of any sanction
 scheduled as soon as possible.'''.format(
             indent=INDENT,
             days=conduct_pti_days,
-            case_number=self.case.case_number,
+            case_number=self.case,
         )
 
     def get_event_reminder_message(self):
@@ -259,6 +259,6 @@ scheduled as soon as possible.'''.format(
         return '''This is a courtesy reminder that the {short_desc} for case {case_number} is scheduled to start on \
 {datetime}.'''.format(
             short_desc=str(self.deadline),
-            case_number=self.case.case_number,
+            case_number=self.case,
             datetime=self.deadline.datetime.strftime('%c'),
         )
