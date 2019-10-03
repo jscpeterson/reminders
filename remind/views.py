@@ -355,7 +355,8 @@ def update_select_case(request, *args, **kwargs):
         form = UpdateCaseForm(request.POST, user=request.user)
 
         if form.is_valid():
-            return HttpResponseRedirect(reverse('remind:update', kwargs={'case_number': form.cleaned_data['case_number']}))
+            case_number = form.cleaned_data['case'].case_number
+            return HttpResponseRedirect(reverse('remind:update', kwargs={'case_number': case_number}))
 
     else:
         form = UpdateCaseForm(user=request.user)

@@ -540,14 +540,14 @@ class UpdateCaseForm(Form):
         user = kwargs.pop('user', None)
         super(UpdateCaseForm, self).__init__(*args, **kwargs)
 
-        self.fields['case_number'] = forms.ModelChoiceField(
+        self.fields['case'] = forms.ModelChoiceField(
             queryset=Case.objects.filter(
                 Q(supervisor=user) |
                 Q(prosecutor=user) |
                 Q(secretary=user) |
                 Q(paralegal=user) |
                 Q(victim_advocate=user)
-            ),
+            ).order_by('defendant'),
         )
 
 
