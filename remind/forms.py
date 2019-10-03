@@ -618,3 +618,60 @@ class UpdateTrackForm(Form):
                 ),
             help_text='Only cases without a scheduling order will appear here.',
         )
+
+
+class ReassignCasesForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        super(ReassignCasesForm, self).__init__(*args, **kwargs)
+
+        self.fields['user_to_modify'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.order_by('last_name'),
+            label="Select a user whose cases will be moved",
+        )
+
+
+class ReassignCasesWithUserForm(Form):
+
+    def __init__(self, *args, **kwargs):
+        user_to_modify = kwargs.pop('user_to_modify')
+        super(ReassignCasesWithUserForm, self).__init__(*args, **kwargs)
+
+        # TODO Iterate over an ALL_POSITIONS list for better maintainability
+        self.fields['supervisor'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(is_supervisor=True).order_by('last_name'),
+            label="Select a new supervisor.",
+            required=False,
+        )
+        self.fields['prosecutor'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.PROSECUTOR).order_by('last_name'),
+            label="Select a new prosecutor.",
+            required=False,
+        )
+        self.fields['paralegal'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.PARALEGAL).order_by('last_name'),
+            label="Select a new paralegal.",
+            required=False,
+        )
+        self.fields['secretary'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.SECRETARY).order_by('last_name'),
+            label="Select a new secretary.",
+            required=False,
+        )
+        self.fields['victim_advocate'] = forms.ModelChoiceField(
+            queryset=CustomUser.objects.filter(position=CustomUser.VICTIM_ADVOCATE).order_by('last_name'),
+            label="Select a new victim advocate.",
+            required=False,
+        )
+
+        for index, case in enumerate(Case.objects.filter(
+                    Q(supervisor=user_to_modify) |
+                    Q(prosecutor=user_to_modify) |
+                    Q(secretary=user_to_modify) |
+                    Q(paralegal=user_to_modify) |
+                    Q(victim_advocate=user_to_modify)
+                )):
+            self.fields['case_{}'.format(index)] = forms.BooleanField(
+                label='{case_number}: {defendant}'.format(case_number=case.case_number, defendant=case.defendant),
+                required=False,
+            )

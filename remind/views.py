@@ -1,5 +1,6 @@
 from dateutil import parser
 from django.contrib import messages
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.urls import reverse
@@ -10,9 +11,10 @@ from remind.models import Deadline
 from cases.models import Case, Motion, Judge
 from django.core.exceptions import PermissionDenied
 
+from users.models import CustomUser
 from .forms import CaseForm, SchedulingForm, TrackForm, TrialForm, OrderForm, RequestPTIForm, UpdateForm, \
     UpdateCaseForm, UpdateTrackForm, CompleteForm, ExtensionForm, JudgeConfirmedForm, MotionForm, MotionDateForm, \
-    MotionResponseForm, MotionFormWithCase, FirstTimeUserForm
+    MotionResponseForm, MotionFormWithCase, FirstTimeUserForm, ReassignCasesForm, ReassignCasesWithUserForm
 from .constants import TRIAL_DEADLINES, DEADLINE_DESCRIPTIONS, WITNESS_LIST_DEADLINE_DAYS, SUPPORT_EMAIL
 from . import utils
 from . import case_utils
@@ -40,6 +42,7 @@ class DashView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(DashView, self).get_context_data(**kwargs)
         context['component'] = self.component
+        context['is_management'] = self.request.user.is_supervisor or self.request.user.is_superuser
         return context
 
 
@@ -713,6 +716,7 @@ def extension(request, *args, **kwargs):
             return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
+        # TODO Does this request need to be a POST? Think this is a mistake
         form = ExtensionForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
 
     return render(
@@ -744,6 +748,7 @@ def judge_confirmed(request, *args, **kwargs):
             return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
+        # TODO Does this request need to be a POST? Think this is a mistake
         form = JudgeConfirmedForm(request.POST, deadline_pk=kwargs.get('deadline_pk'))
 
     return render(
@@ -811,3 +816,73 @@ def resume_case(request, *args, **kwargs):
             'defendant': case.defendant,
         }
     )
+
+
+################################################################################
+# Supervisor Action Views
+
+
+@login_required
+def reassign_cases(request, *args, **kwargs):
+    """Select a user to reassign cases from"""
+    if not request.user.is_supervisor and not request.user.is_superuser:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = ReassignCasesForm(request.POST)
+
+        if form.is_valid():
+            user_to_modify = form.cleaned_data.get('user_to_modify')
+            return HttpResponseRedirect(reverse('remind:reassign-cases-with-user',
+                                                kwargs={'user_pk': user_to_modify.pk}))
+
+    else:
+        form = ReassignCasesForm()
+
+    return render(request, 'remind/reassign_cases_form.html', {'form': form})
+
+
+@login_required
+def reassign_cases_with_user(request, *args, **kwargs):
+    """Select cases from a user to reassign roles on"""
+    user_to_modify = CustomUser.objects.get(pk=kwargs.get('user_pk'))
+
+    if not request.user.is_supervisor and not request.user.is_superuser:
+        raise PermissionDenied
+
+    if request.method == 'POST':
+        form = ReassignCasesWithUserForm(request.POST, user_to_modify=user_to_modify)
+
+        if form.is_valid():
+
+            cases_to_modify = list()
+            for index, case in enumerate(Case.objects.filter(
+                    Q(supervisor=user_to_modify) |
+                    Q(prosecutor=user_to_modify) |
+                    Q(secretary=user_to_modify) |
+                    Q(paralegal=user_to_modify) |
+                    Q(victim_advocate=user_to_modify)
+                )):
+                if form.cleaned_data.get('case_{}'.format(index)):
+                    cases_to_modify.append(case)
+
+            for case in cases_to_modify:
+                # TODO Iterate over an ALL_POSITIONS list for better maintainability
+                if form.cleaned_data.get('supervisor'):
+                    case.supervisor = form.cleaned_data.get('supervisor')
+                if form.cleaned_data.get('prosecutor'):
+                    case.prosecutor = form.cleaned_data.get('prosecutor')
+                if form.cleaned_data.get('paralegal'):
+                    case.paralegal = form.cleaned_data.get('paralegal')
+                if form.cleaned_data.get('secretary'):
+                    case.secretary = form.cleaned_data.get('secretary')
+                if form.cleaned_data.get('victim_advocate'):
+                    case.victim_advocate = form.cleaned_data.get('victim_advocate')
+                case.save()
+
+            return HttpResponseRedirect(reverse('remind:dashboard'))
+
+    else:
+        form = ReassignCasesWithUserForm(user_to_modify=user_to_modify)
+
+    return render(request, 'remind/reassign_cases_with_user_form.html', {'form': form})

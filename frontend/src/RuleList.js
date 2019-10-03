@@ -13,7 +13,9 @@ class RuleList extends React.Component {
     super(props);
 
     this.state = {
+      management: this.props.management,
       columns: [
+        // Case Information
         { title: 'Defendant',
           field: 'defendant',
           editable: 'never' },
@@ -30,6 +32,33 @@ class RuleList extends React.Component {
           field: 'defense-attorney' ,
           editable: 'never' },
 
+        // Staff columns - only supervisors/superusers should see these
+        {
+          title: 'Prosecutor',
+          field: 'prosecutor',
+          editable: 'never',
+          hidden: !this.props.management
+        },
+        {
+          title: 'Secretary',
+          field: 'secretary',
+          editable: 'never',
+          hidden: !this.props.management
+        },
+        {
+          title: 'Paralegal',
+          field: 'paralegal',
+          editable: 'never',
+          hidden: !this.props.management
+        },
+        {
+          title: 'Victim Advocate',
+          field: 'victim_advocate',
+          editable: 'never',
+          hidden: !this.props.management
+        },
+          
+        // Deadlines
         { title: 'Initial Witness List',
           field: 'initial-witness-list',
           type:'date',
@@ -98,6 +127,7 @@ class RuleList extends React.Component {
           render: rowData => <span>{this.displayDate(rowData,'trial')}</span>,
           editable: 'never' },
 
+        // These columns are only for storing data - user shouldn't see these.
         {
           title: 'Stayed Case - YOU SHOULDN\'T SEE THIS',
           field: 'stayed',
@@ -232,6 +262,8 @@ class RuleList extends React.Component {
 
   populateTable(cases) {
 
+    let self = this;
+
     // Save JSON Data to state
     this.setState({jsonData : cases});
 
@@ -239,6 +271,12 @@ class RuleList extends React.Component {
     let dataArray = [];
     cases.forEach(function(caseJSON){
       let row = {};
+
+      // Populate staff column
+      row['prosecutor'] = caseJSON['prosecutor'];
+      row['secretary'] = caseJSON['secretary'];
+      row['paralegal'] = caseJSON['paralegal'];
+      row['victim_advocate'] = caseJSON['victim_advocate'];
 
       // Populate basic case data
       row['defendant'] = caseJSON['defendant'];
@@ -250,7 +288,7 @@ class RuleList extends React.Component {
       row['stayed'] = caseJSON['stayed'];
 
       // Populate deadlines for case
-      const deadlines = caseJSON['deadline_set']
+      const deadlines = caseJSON['deadline_set'];
       deadlines.forEach(function(deadline){
         const key = deadline['type'];
         // row[key] = deadline['datetime'].slice(0, 10); // FIXME Table needs to be tweaked to view date
@@ -267,7 +305,14 @@ class RuleList extends React.Component {
   }
 
   fetchCases() {
-    return fetch("/api/cases/")
+    let url = "/api/cases";
+    this.state.title = "Rule List";
+    if (this.state.management) {
+        url = "/api/staff_cases";
+        this.state.title = "Staff Rule List";
+    }
+
+    return fetch(url)
       .then(response => response.json())
       .then(cases => this.populateTable(cases))
   }
@@ -304,7 +349,7 @@ class RuleList extends React.Component {
   render() {
     return (
       <MaterialTable
-        title="Rule List"
+        title={this.state.title}
         columns={this.state.columns}
         data={this.state.tableData}
         options={{
