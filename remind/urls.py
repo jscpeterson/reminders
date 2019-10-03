@@ -26,10 +26,16 @@ urlpatterns = [
     path('motion_created/<int:motion_pk>', views.motion_created, name='motion_created'),
     path('motion_response/<int:motion_pk>', views.motion_response, name='motion_response'),
 
+    # Update Flow
     path('update/', views.update_select_case, name='update-case'),
     path('update/<str:case_number>', views.update, name='update'),
     path('update_confirm/<str:case_number>', views.update_confirm, name='update_confirm'),
 
+    # Supervisor Actions
+    path('reassign/', views.reassign_cases, name='reassign-cases'),
+    path('reassign/<str:user_pk>', views.reassign_cases_with_user, name='reassign-cases-with-user'),
+
+    # Miscellaneous
     path('request_pti/<str:case_number>', views.request_pti, name='request_pti'),
     path('complete/<int:deadline_pk>', views.complete, name='complete'),
     path('extension/<int:deadline_pk>', views.extension, name='extension'),
