@@ -5,6 +5,7 @@ class UpcomingDeadlines extends React.Component {
     constructor(props) {
       super(props);
       this.state = {
+          management: this.props.management,
           columns: [
               { title: 'Due Date',
                 field: 'datetime',
@@ -16,7 +17,7 @@ class UpcomingDeadlines extends React.Component {
 
               { title: 'Defendant',
                 field: 'defendant' },
-              { title: 'CR#',
+              { title: 'DA Case #',
                 field: 'case-number',},
               { title: 'Judge',
                 field: 'judge' ,},
@@ -73,7 +74,14 @@ class UpcomingDeadlines extends React.Component {
   }
 
   fetchDeadlines() {
-      return fetch("/api/deadlines")
+      let url = "/api/deadlines";
+      this.state.title = "Upcoming Deadlines";
+      if (this.state.management) {
+          url = "/api/staff_deadlines";
+          this.state.title = "Staff Deadlines";
+      }
+
+      return fetch(url)
           .then(response => response.json())
           .then(deadlines => this.populateTable(deadlines))
   }
@@ -118,7 +126,7 @@ class UpcomingDeadlines extends React.Component {
   render() {
     return (
         <MaterialTable
-            title="Upcoming Deadlines"
+            title={this.state.title}
             columns={this.state.columns}
             data={this.state.tableData}
             options={{
