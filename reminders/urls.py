@@ -27,6 +27,10 @@ urlpatterns = [
     path('api/', include('api.urls'))
 ]
 
+handler403 = 'reminders.views.handler403'
+handler404 = 'reminders.views.handler404'
+handler500 = 'reminders.views.handler500'
+
 #if settings.DEBUG:
 #    import debug_toolbar
 #    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
