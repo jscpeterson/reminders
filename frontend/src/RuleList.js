@@ -37,7 +37,6 @@ class RuleList extends React.Component {
           title: 'Prosecutor',
           field: 'prosecutor',
           editable: 'never',
-          hidden: !this.props.management
         },
         {
           title: 'Secretary',
