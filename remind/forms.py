@@ -140,7 +140,7 @@ class MotionForm(Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super(MotionForm, self).__init__(*args, **kwargs)
-        self.fields['case_number'] = forms.ModelChoiceField(
+        self.fields['case'] = forms.ModelChoiceField(
             queryset=Case.objects
             .exclude(trial_date__isnull=True)
             .filter(
@@ -606,7 +606,7 @@ class UpdateTrackForm(Form):
         user = kwargs.pop('user')
         super(UpdateTrackForm, self).__init__(*args, **kwargs)
 
-        self.fields['case_number'] = forms.ModelChoiceField(
+        self.fields['case'] = forms.ModelChoiceField(
             queryset=Case.objects
                 .exclude(trial_date__isnull=False)
                 .filter(

@@ -188,7 +188,7 @@ def scheduling_order_select_case(request, *args, **kwargs):
         form = UpdateTrackForm(request.POST, user=request.user)
 
         if form.is_valid():
-            return HttpResponseRedirect(reverse('remind:track', kwargs={'case_number': form.cleaned_data['case_number']}))
+            return HttpResponseRedirect(reverse('remind:track', kwargs={'case_number': form.cleaned_data['case'].case_number}))
 
     else:
         form = UpdateTrackForm(user=request.user)
@@ -502,7 +502,7 @@ def create_motion_select_case(request, *args, **kwargs):
         if form.is_valid():
             motion = Motion.objects.create(
                 title=form.cleaned_data.get('motion_title'),
-                case=Case.objects.get(case_number=form.cleaned_data['case_number']),
+                case=Case.objects.get(case_number=form.cleaned_data['case'].case_number),
                 type=form.cleaned_data['motion_type'],
                 date_received=form.cleaned_data['date_filed'],
             )
