@@ -58,6 +58,10 @@ AUTHENTICATION_BACKENDS = (
     'guardian.backends.ObjectPermissionBackend',
 )
 
+ADMINS = [
+    (os.environ.get('SYSADMIN_NAME'), os.environ.get('SYSADMIN_EMAIL'))
+]
+
 # LDAP settings
 import ldap
 from django_auth_ldap.config import LDAPSearch, NestedActiveDirectoryGroupType

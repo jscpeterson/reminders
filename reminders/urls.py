@@ -17,6 +17,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from django.views.generic.base import TemplateView
+from . import views
 
 
 urlpatterns = [
@@ -24,8 +25,13 @@ urlpatterns = [
     path('remind/', include('remind.urls')),
     path('admin/', admin.site.urls),
     path('users/', include('django.contrib.auth.urls')),
-    path('api/', include('api.urls'))
+    path('api/', include('api.urls')),
+    path('error/', views.test_exception)
 ]
+
+handler403 = 'reminders.views.handler403'
+handler404 = 'reminders.views.handler404'
+handler500 = 'reminders.views.handler500'
 
 #if settings.DEBUG:
 #    import debug_toolbar
