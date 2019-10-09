@@ -3,6 +3,10 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 
+def test_exception(request):
+    raise Exception("Test exception raised from error/ URL")
+
+
 def handler403(request, exception):
     response = render_to_response("403.html")
     response.status_code = 403
