@@ -389,7 +389,7 @@ class OrderForm(Form):
             initial = utils.get_actual_deadline_from_end(self.case.trial_date, deadline_dict[key])
             self.fields[key] = forms.DateTimeField(
                 label=label,
-                initial=initial,
+                initial=utils.set_default_deadline_time(initial),
                 input_formats=['%Y-%m-%d %H:%M']
             )
 
