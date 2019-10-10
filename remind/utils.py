@@ -7,8 +7,9 @@ from django.utils import timezone
 from remind.models import Deadline
 from cases.models import Judge
 from .constants import SATURDAY, SUNDAY, MIN_DAYS_FOR_DEADLINES, LAST_DAY_HOUR, LAST_DAY_MINUTE, LAST_DAY_SECOND, \
-    TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, \
-    TRIAL_DEADLINES, RESPONSE_AFTER_FILING_DAYS, DEADLINE_DESCRIPTIONS, EVENT_DEADLINES
+    DEFAULT_TIME_HOUR, DEFAULT_TIME_MINUTE, DEFAULT_TIME_SECOND, TRACK_ONE_DEADLINE_LIMITS, TRACK_TWO_DEADLINE_LIMITS, \
+    TRACK_THREE_DEADLINE_LIMITS, TRACKLESS_DEADLINE_LIMITS, TRIAL_DEADLINES, RESPONSE_AFTER_FILING_DAYS, \
+    DEADLINE_DESCRIPTIONS, EVENT_DEADLINES
 
 
 def clear_deadlines(case):
@@ -414,3 +415,11 @@ def complete_old_deadline(deadline):
         deadline.status = Deadline.COMPLETED
         deadline.save(update_fields=['status'])
 
+
+def set_default_deadline_time(datetime):
+    """
+    Sets a datetime object to be passed in as the initial value of a form to the default time in constants.
+    """
+    datetime = datetime.replace(tzinfo=pytz.timezone(settings.TIME_ZONE),
+                                hour=DEFAULT_TIME_HOUR, minute=DEFAULT_TIME_MINUTE, second=DEFAULT_TIME_SECOND)
+    return datetime
