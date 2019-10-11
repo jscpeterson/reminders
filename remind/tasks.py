@@ -70,6 +70,15 @@ def check_all_deadlines():
         # If deadline is in EVENT_DEADLINES it does not need a deadline expiry notice and uses different reminders
         if deadline.type in EVENT_DEADLINES:
 
+            # Month long reminder for Trial.
+            if deadline.type == Deadline.TRIAL \
+                and days_until.days <= FIRST_REMINDER_DAYS[Deadline.TRIAL] \
+                    and deadline.reminders_sent == 0:
+                send_emails(Email.EVENT_REMINDER, deadline, emails_sent)
+                deadline.reminders_sent += 1
+                deadline.save(update_fields=['reminders_sent'])
+                print('Reminder sent for event {} on {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
+
             # If it is approaching the deadline and this is an important event, send a courtesy reminder.
             if deadline.type in IMPORTANT_EVENTS \
                 and days_until.days <= IMPORTANT_EVENT_REMINDER_DAYS \
