@@ -97,16 +97,19 @@ TRIAL_DEADLINES = (
     str(Deadline.PRETRIAL_CONFERENCE),
 )
 
-# Deadlines that do not require a reminder
 EVENT_DEADLINES = (
     Deadline.SCHEDULING_CONFERENCE,
     Deadline.PRETRIAL_CONFERENCE,
+    Deadline.PRETRIAL_MOTION_HEARING,
     Deadline.TRIAL,
-    Deadline.REQUEST_PTI,
-    Deadline.CONDUCT_PTI,
-    Deadline.PRETRIAL_MOTION_HEARING
 )
 
+PTI_DEADLINES = {
+    Deadline.REQUEST_PTI,
+    Deadline.CONDUCT_PTI,
+}
+
+# IMPORTANT_EVENTS get event reminders.
 IMPORTANT_EVENTS = (
     Deadline.SCHEDULING_CONFERENCE,
     Deadline.PRETRIAL_CONFERENCE,

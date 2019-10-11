@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from .models import Deadline
 from .constants import FIRST_REMINDER_DAYS, SECOND_REMINDER_DAYS, ADMINISTRATION_EMAIL, EVENT_DEADLINES, \
-    IMPORTANT_EVENTS, IMPORTANT_EVENT_REMINDER_DAYS
+    IMPORTANT_EVENTS, IMPORTANT_EVENT_REMINDER_DAYS, PTI_DEADLINES
 from .email import Email
 from . import utils
 from django.core.mail import send_mail
@@ -59,6 +59,14 @@ def check_all_deadlines():
             deadline.save(update_fields=['invalid_notice_sent'])
             continue
 
+        # If deadline is in PTI_DEADLINES handle similar to an EVENT_DEADLINE
+        if deadline.type in PTI_DEADLINES:
+            if days_until <= timedelta(days=0):
+                if deadline.type == Deadline.REQUEST_PTI:
+                    send_emails(Email.REQUEST_PTI, deadline)
+                if deadline.type == Deadline.CONDUCT_PTI:
+                    send_emails(Email.CONDUCT_PTI, deadline)
+
         # If deadline is in EVENT_DEADLINES it does not need a deadline expiry notice and uses different reminders
         if deadline.type in EVENT_DEADLINES:
 
@@ -75,10 +83,6 @@ def check_all_deadlines():
             if days_until <= timedelta(days=0):
                 if deadline.type == Deadline.SCHEDULING_CONFERENCE:
                     send_emails(Email.SCHEDULING_CONFERENCE, deadline)
-                elif deadline.type == Deadline.REQUEST_PTI:
-                    send_emails(Email.REQUEST_PTI, deadline)
-                elif deadline.type == Deadline.CONDUCT_PTI:
-                    send_emails(Email.CONDUCT_PTI, deadline)
                 deadline.status = Deadline.COMPLETED
                 deadline.save(update_fields=['status'])
                 print('Deadline {} completed: {}'.format(deadline.pk, deadline.datetime.strftime('%H:%M:%S.%f')))
