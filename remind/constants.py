@@ -97,16 +97,19 @@ TRIAL_DEADLINES = (
     str(Deadline.PRETRIAL_CONFERENCE),
 )
 
-# Deadlines that do not require a reminder
 EVENT_DEADLINES = (
     Deadline.SCHEDULING_CONFERENCE,
     Deadline.PRETRIAL_CONFERENCE,
+    Deadline.PRETRIAL_MOTION_HEARING,
     Deadline.TRIAL,
-    Deadline.REQUEST_PTI,
-    Deadline.CONDUCT_PTI,
-    Deadline.PRETRIAL_MOTION_HEARING
 )
 
+PTI_DEADLINES = {
+    Deadline.REQUEST_PTI,
+    Deadline.CONDUCT_PTI,
+}
+
+# IMPORTANT_EVENTS get event reminders.
 IMPORTANT_EVENTS = (
     Deadline.SCHEDULING_CONFERENCE,
     Deadline.PRETRIAL_CONFERENCE,
@@ -142,7 +145,7 @@ FIRST_REMINDER_DAYS = {
     Deadline.REQUEST_PTI: 14,
     Deadline.CONDUCT_PTI: 14,
     Deadline.WITNESS_PTI: 14,
-    Deadline.SCIENTIFIC_EVIDENCE: 14,
+    Deadline.SCIENTIFIC_EVIDENCE: 45,
     Deadline.PRETRIAL_MOTION_FILING: 14,
     Deadline.PRETRIAL_MOTION_RESPONSE: 14,
     Deadline.PRETRIAL_MOTION_HEARING: 14,
@@ -151,7 +154,7 @@ FIRST_REMINDER_DAYS = {
     Deadline.PLEA_AGREEMENT: 14,
     Deadline.CERTIFICATION_OF_READINESS: 14,
     Deadline.PRETRIAL_CONFERENCE: 14,
-    Deadline.TRIAL: 14,
+    Deadline.TRIAL: 31,
 }
 
 SECOND_REMINDER_DAYS = {
@@ -161,7 +164,7 @@ SECOND_REMINDER_DAYS = {
     Deadline.REQUEST_PTI: 7,
     Deadline.CONDUCT_PTI: 7,
     Deadline.WITNESS_PTI: 7,
-    Deadline.SCIENTIFIC_EVIDENCE: 7,
+    Deadline.SCIENTIFIC_EVIDENCE: 15,
     Deadline.PRETRIAL_MOTION_FILING: 7,
     Deadline.PRETRIAL_MOTION_RESPONSE: 7,
     Deadline.PRETRIAL_MOTION_HEARING: 7,
