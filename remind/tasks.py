@@ -66,6 +66,7 @@ def check_all_deadlines():
                     send_emails(Email.REQUEST_PTI, deadline, emails_sent)
                 if deadline.type == Deadline.CONDUCT_PTI:
                     send_emails(Email.CONDUCT_PTI, deadline, emails_sent)
+            continue
 
         # If deadline is in EVENT_DEADLINES it does not need a deadline expiry notice and uses different reminders
         if deadline.type in EVENT_DEADLINES:
