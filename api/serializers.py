@@ -14,6 +14,7 @@ class DeadlineSerializer(serializers.ModelSerializer):
     first_reminder_days = serializers.SerializerMethodField()
     second_reminder_days = serializers.SerializerMethodField()
     event = serializers.SerializerMethodField()
+    prosecutor = serializers.SerializerMethodField()
 
     deadline_name = serializers.CharField()
     defendant = serializers.CharField()
@@ -48,6 +49,9 @@ class DeadlineSerializer(serializers.ModelSerializer):
 
     def get_event(self, obj):
         return obj.type in EVENT_DEADLINES
+
+    def get_prosecutor(self, obj):
+        return str(obj.case.prosecutor)
 
 
 class CaseSerializer(WritableNestedModelSerializer):
