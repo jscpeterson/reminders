@@ -140,16 +140,12 @@ class MotionForm(Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super(MotionForm, self).__init__(*args, **kwargs)
+        queryset = utils.filter_cases_by_user_permissions(
+            Case.objects.exclude(trial_date__isnull=True), user
+        )
+
         self.fields['case'] = forms.ModelChoiceField(
-            queryset=Case.objects
-            .exclude(trial_date__isnull=True)
-            .filter(
-                Q(supervisor=user) |
-                Q(prosecutor=user) |
-                Q(secretary=user) |
-                Q(paralegal=user) |
-                Q(victim_advocate=user)
-            ),
+            queryset=queryset,
             help_text='Only cases with a scheduling order will appear here.'
         )
 
@@ -514,15 +510,12 @@ class UpdateCaseForm(Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(UpdateCaseForm, self).__init__(*args, **kwargs)
+        queryset = utils.filter_cases_by_user_permissions(
+            Case.objects.all(), user
+        ).order_by('defendant')
 
         self.fields['case'] = forms.ModelChoiceField(
-            queryset=Case.objects.filter(
-                Q(supervisor=user) |
-                Q(prosecutor=user) |
-                Q(secretary=user) |
-                Q(paralegal=user) |
-                Q(victim_advocate=user)
-            ).order_by('defendant'),
+            queryset=queryset,
         )
 
 
@@ -580,17 +573,12 @@ class UpdateTrackForm(Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super(UpdateTrackForm, self).__init__(*args, **kwargs)
+        queryset = utils.filter_cases_by_user_permissions(
+            Case.objects.exclude(trial_date__isnull=False), user
+        )
 
         self.fields['case'] = forms.ModelChoiceField(
-            queryset=Case.objects
-                .exclude(trial_date__isnull=False)
-                .filter(
-                    Q(supervisor=user) |
-                    Q(prosecutor=user) |
-                    Q(secretary=user) |
-                    Q(paralegal=user) |
-                    Q(victim_advocate=user)
-                ),
+            queryset=queryset,
             help_text='Only cases without a scheduling order will appear here.',
         )
 
