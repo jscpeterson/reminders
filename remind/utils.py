@@ -2,6 +2,7 @@ import pytz
 from django.conf import settings
 from datetime import timedelta
 import holidays
+from django.db.models import Q
 from django.utils import timezone
 
 from remind.models import Deadline
@@ -423,3 +424,23 @@ def set_default_deadline_time(datetime):
     datetime = datetime.replace(tzinfo=pytz.timezone(settings.TIME_ZONE),
                                 hour=DEFAULT_TIME_HOUR, minute=DEFAULT_TIME_MINUTE, second=DEFAULT_TIME_SECOND)
     return datetime
+
+
+def filter_cases_by_user_permissions(case_queryset, user):
+    """
+    Filters a queryset of cases by user permissions. Regular users see all cases they are assigned a role on, superusers
+    see all cases.
+    :param case_queryset: a QuerySet of cases.
+    :param user: the request.user
+    :return: a filtered QuerySet.
+    """
+    if user.is_superuser:
+        return case_queryset
+    else:
+        return case_queryset.filter(
+                Q(supervisor=user) |
+                Q(prosecutor=user) |
+                Q(secretary=user) |
+                Q(paralegal=user) |
+                Q(victim_advocate=user)
+        )

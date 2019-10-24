@@ -21,8 +21,8 @@ class UpcomingDeadlines extends React.Component {
                 field: 'case-number',},
               { title: 'Judge',
                 field: 'judge' ,},
-              { title: 'Defense',
-                field: 'defense-attorney' },
+              { title: 'Prosecutor',
+                field: 'prosecutor',},
 
               // These columns are only for storing data - user shouldn't see these.
               { title: 'PK - YOU SHOULDN\'T SEE ME',
@@ -100,8 +100,8 @@ class UpcomingDeadlines extends React.Component {
           row['datetime'] = deadlineJSON['datetime'];
           row['defendant'] = deadlineJSON['defendant'];
           row['case-number'] = deadlineJSON['case_number'];
+          row['prosecutor'] = deadlineJSON['prosecutor'];
           row['judge'] = deadlineJSON['judge'];
-          row['defense-attorney'] = deadlineJSON['defense_attorney'];
           row['pk'] = deadlineJSON['id'];
           row['event'] = deadlineJSON['event'];
           row['type'] = deadlineJSON['type'];

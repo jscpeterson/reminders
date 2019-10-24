@@ -572,8 +572,7 @@ def motion_deadline(request, *args, **kwargs):
         if form.is_valid():
             motion = Motion.objects.get(pk=kwargs.get('motion_pk'))
             motion.response_deadline = form.cleaned_data['response_deadline']
-            motion.date_hearing = form.cleaned_data['date_hearing']
-            motion.save(update_fields=['response_deadline', 'date_hearing'])
+            motion.save(update_fields=['response_deadline'])
 
             # Create motion response deadline
             deadline = Deadline.objects.create(
@@ -581,15 +580,6 @@ def motion_deadline(request, *args, **kwargs):
                 case=motion.case,
                 motion=motion,
                 datetime=motion.response_deadline,
-            )
-            utils.complete_old_deadline(deadline)
-
-            # Create motion hearing deadline
-            deadline = Deadline.objects.create(
-                type=Deadline.PRETRIAL_MOTION_HEARING,
-                case=motion.case,
-                motion=motion,
-                datetime=motion.date_hearing
             )
             utils.complete_old_deadline(deadline)
 
@@ -613,7 +603,6 @@ def motion_created(request, *args, **kwargs):
     return render(request, 'remind/motion_created.html', {
         'motion_title': motion.title,
         'case_number': motion.case.case_number,
-        'motion_hearing': motion.date_hearing,
         'motion_response_deadline': motion.response_deadline
     })
 

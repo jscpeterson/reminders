@@ -140,16 +140,12 @@ class MotionForm(Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super(MotionForm, self).__init__(*args, **kwargs)
+        queryset = utils.filter_cases_by_user_permissions(
+            Case.objects.exclude(trial_date__isnull=True), user
+        )
+
         self.fields['case'] = forms.ModelChoiceField(
-            queryset=Case.objects
-            .exclude(trial_date__isnull=True)
-            .filter(
-                Q(supervisor=user) |
-                Q(prosecutor=user) |
-                Q(secretary=user) |
-                Q(paralegal=user) |
-                Q(victim_advocate=user)
-            ),
+            queryset=queryset,
             help_text='Only cases with a scheduling order will appear here.'
         )
 
@@ -193,21 +189,11 @@ class MotionDateForm(Form):
         deadline_dict = utils.get_deadline_dict(self.motion.case.track)
 
         initial_response = utils.get_motion_response_deadline(self.motion)
-        initial_hearing = utils.get_actual_deadline_from_end(
-            self.motion.case.trial_date,
-            deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)], 
-        )
 
         self.fields['response_deadline'] = forms.DateTimeField(
             input_formats=['%Y-%m-%d'],
             label='Deadline to file a response',
             initial=initial_response
-        )
-
-        self.fields['date_hearing'] = forms.DateTimeField(
-            input_formats=['%Y-%m-%d %H:%M'],
-            label='Date of the hearing',
-            initial=initial_hearing
         )
 
         self.fields['override'] = forms.BooleanField(
@@ -229,21 +215,6 @@ class MotionDateForm(Form):
                 self.add_error(
                     'response_deadline',
                     'Response deadline is past permissible limit'
-                )
-
-        if 'date_hearing' in cleaned_data:
-            date_hearing = cleaned_data.get('date_hearing')
-            deadline_dict = utils.get_deadline_dict(self.motion.case.track)
-
-            if not utils.is_deadline_within_limits(
-                    deadline=date_hearing,
-                    event=self.motion.case.trial_date,
-                    days=deadline_dict[str(Deadline.PRETRIAL_MOTION_HEARING)],
-                    future_event=True,
-            ):
-                self.add_error(
-                    'date_hearing',
-                    'Hearing date is past permissible limit'
                 )
 
 
@@ -467,7 +438,7 @@ class UpdateForm(Form):
         for index, deadline in enumerate(Deadline.objects.filter(case=self.case).order_by('datetime')):
             key = '{}'.format(index)
             completed_key = '{}_completed'.format(index)
-            if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE, Deadline.PRETRIAL_MOTION_HEARING]:
+            if deadline.type in [Deadline.PRETRIAL_MOTION_RESPONSE]:
                 label = '{expired}{completed}{deadline_desc} for {motion_title}'.format(
                     expired='(EXPIRED) ' if deadline.status == Deadline.EXPIRED else '',
                     completed='(COMPLETED) ' if deadline.status == Deadline.COMPLETED else '',
@@ -539,15 +510,12 @@ class UpdateCaseForm(Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(UpdateCaseForm, self).__init__(*args, **kwargs)
+        queryset = utils.filter_cases_by_user_permissions(
+            Case.objects.all(), user
+        ).order_by('defendant')
 
         self.fields['case'] = forms.ModelChoiceField(
-            queryset=Case.objects.filter(
-                Q(supervisor=user) |
-                Q(prosecutor=user) |
-                Q(secretary=user) |
-                Q(paralegal=user) |
-                Q(victim_advocate=user)
-            ).order_by('defendant'),
+            queryset=queryset,
         )
 
 
@@ -605,17 +573,12 @@ class UpdateTrackForm(Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super(UpdateTrackForm, self).__init__(*args, **kwargs)
+        queryset = utils.filter_cases_by_user_permissions(
+            Case.objects.exclude(trial_date__isnull=False), user
+        )
 
         self.fields['case'] = forms.ModelChoiceField(
-            queryset=Case.objects
-                .exclude(trial_date__isnull=False)
-                .filter(
-                    Q(supervisor=user) |
-                    Q(prosecutor=user) |
-                    Q(secretary=user) |
-                    Q(paralegal=user) |
-                    Q(victim_advocate=user)
-                ),
+            queryset=queryset,
             help_text='Only cases without a scheduling order will appear here.',
         )
 
