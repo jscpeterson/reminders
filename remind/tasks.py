@@ -45,19 +45,20 @@ def check_all_deadlines():
     for deadline in Deadline.objects.filter(status=Deadline.ACTIVE, case__stayed=False):
         days_until = deadline.datetime - now
 
+        # TEMPORARILY REMOVING DUE TO COMPLAINTS
         # Send notice if celery detects a deadline is invalid or requires an extension
-        if utils.is_extension_required(deadline) and not deadline.invalid_notice_sent:
-            print('Deadline {} requires an extension.'.format(deadline.pk))
-            send_emails(Email.DEADLINE_NEEDS_EXTENSION, deadline, emails_sent)
-            deadline.invalid_notice_sent = True
-            deadline.save(update_fields=['invalid_notice_sent'])
-            continue
-        elif utils.is_deadline_invalid(deadline) and not deadline.invalid_notice_sent:
-            print('Deadline {} requires judge approval.'.format(deadline.pk))
-            send_emails(Email.DEADLINE_OUTSIDE_LIMITS, deadline, emails_sent)
-            deadline.invalid_notice_sent = True
-            deadline.save(update_fields=['invalid_notice_sent'])
-            continue
+        # if utils.is_extension_required(deadline) and not deadline.invalid_notice_sent:
+        #     print('Deadline {} requires an extension.'.format(deadline.pk))
+        #     send_emails(Email.DEADLINE_NEEDS_EXTENSION, deadline, emails_sent)
+        #     deadline.invalid_notice_sent = True
+        #     deadline.save(update_fields=['invalid_notice_sent'])
+        #     continue
+        # elif utils.is_deadline_invalid(deadline) and not deadline.invalid_notice_sent:
+        #     print('Deadline {} requires judge approval.'.format(deadline.pk))
+        #     send_emails(Email.DEADLINE_OUTSIDE_LIMITS, deadline, emails_sent)
+        #     deadline.invalid_notice_sent = True
+        #     deadline.save(update_fields=['invalid_notice_sent'])
+        #     continue
 
         # If deadline is in PTI_DEADLINES handle similar to an EVENT_DEADLINE
         if deadline.type in PTI_DEADLINES:
