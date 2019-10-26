@@ -37,7 +37,7 @@ class CaseForm(Form):
         super(CaseForm, self).__init__(*args, **kwargs)
         self.fields['case_number'] = forms.CharField(
             label='DA Case #',
-            help_text='Enter a case number with a format similar to DA-{year}-00000. Year should be current.'.format(
+            help_text='Enter a case number with a format similar to DA-{year}-00000.'.format(
                 year=datetime.now().year
             ),
             required=True,
@@ -100,9 +100,7 @@ class CaseForm(Form):
                 )
 
             # Check DA Case # pattern
-            case_number_format = r'^DA-\D?{year}-\d{{5}}(-\w*)?(-\w*)?$'.format(
-                year=current_year
-            )
+            case_number_format = r'^DA-\D?20\d\d-\d{5}(-\w*)?(-\w*)?$'
             case_number_pattern = re.compile(case_number_format)
 
             if not self.cleaned_data.get('override') and not bool(re.match(case_number_pattern, case_number)):
