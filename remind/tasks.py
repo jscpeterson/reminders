@@ -157,9 +157,10 @@ def send_emails(email_type, deadline, emails_sent):
     )
 
     emails_sent[email_type] += len(recipient_emails)
-    print('\nCASE: {case_num} TYPE: {email_type} {num_recipients} emails sent to {recipients}.'.format(
+    print('\nCASE: {case_num} TYPE: {email_type} {deadline_type}{num_recipients} emails sent to {recipients}.'.format(
         case_num=deadline.case.case_number,
         email_type=Email.EMAIL_TYPES[email_type][1],
+        deadline_type='DEADLINE: {} '.format(deadline) if email_type in Email.DEADLINE_EMAIL_TYPES else '',
         num_recipients=len(recipient_emails),
         recipients=str(recipient_emails),
     ))

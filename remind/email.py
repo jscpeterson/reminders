@@ -29,6 +29,15 @@ class Email:
         (EVENT_REMINDER, 'Upcoming event reminder'),
     )
 
+    # Emails involving a specific deadline.
+    DEADLINE_EMAIL_TYPES = (
+        DEADLINE_EXPIRED,
+        DEADLINE_OUTSIDE_LIMITS,
+        DEADLINE_NEEDS_EXTENSION,
+        FIRST_REMINDER,
+        SECOND_REMINDER,
+    )
+
     def __init__(self, email_type, recipient, deadline):
         self.email_type = email_type
         self.recipient = recipient
