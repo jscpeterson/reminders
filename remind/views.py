@@ -20,7 +20,7 @@ from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from guardian.shortcuts import assign_perm
+from guardian.shortcuts import assign_perm, remove_perm
 
 
 class DashView(LoginRequiredMixin, ListView):
@@ -879,15 +879,26 @@ def reassign_cases_with_user(request, *args, **kwargs):
             for case in cases_to_modify:
                 # TODO Iterate over an ALL_POSITIONS list for better maintainability
                 if form.cleaned_data.get('supervisor'):
+                    # Supervisor privileges should not be removed from a case (they should be superusers anyway)
                     case.supervisor = form.cleaned_data.get('supervisor')
                 if form.cleaned_data.get('prosecutor'):
+                    remove_perm('change_case', case.prosecutor, case)
                     case.prosecutor = form.cleaned_data.get('prosecutor')
                 if form.cleaned_data.get('paralegal'):
+                    remove_perm('change_case', case.paralegal, case)
                     case.paralegal = form.cleaned_data.get('paralegal')
                 if form.cleaned_data.get('secretary'):
+                    remove_perm('change_case', case.secretary, case)
                     case.secretary = form.cleaned_data.get('secretary')
                 if form.cleaned_data.get('victim_advocate'):
+                    remove_perm('change_case', case.victim_advocate, case)
                     case.victim_advocate = form.cleaned_data.get('victim_advocate')
+
+                # Add permissions at end to ensure all new staff members have appropriate permissions
+                for staff_member in [case.supervisor, case.prosecutor, case.paralegal, case.secretary,
+                                     case.victim_advocate]:
+                    assign_perm('change_case', staff_member, case)
+
                 case.save()
 
             return HttpResponseRedirect(reverse('remind:dashboard'))
