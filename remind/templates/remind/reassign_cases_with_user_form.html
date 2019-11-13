@@ -11,6 +11,7 @@
                 {% csrf_token %}
                 {% form form=form %}{% endform %}
                 {# <!-- TODO Special rendering with headers --> #}
+                <div style="margin: 2% 0; font-weight:bold">{{ user_has_no_cases }}</div>
                 <button class="btn" onclick="window.location.href = {% url 'remind:dashboard' %};;
                 return false;">Back</button>
                 <button type="submit" name="_submit" class="btn">Submit</button>

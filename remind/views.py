@@ -856,6 +856,13 @@ def reassign_cases(request, *args, **kwargs):
 def reassign_cases_with_user(request, *args, **kwargs):
     """Select cases from a user to reassign roles on"""
     user_to_modify = CustomUser.objects.get(pk=kwargs.get('user_pk'))
+    user_cases = Case.objects.filter(
+                    Q(supervisor=user_to_modify) |
+                    Q(prosecutor=user_to_modify) |
+                    Q(secretary=user_to_modify) |
+                    Q(paralegal=user_to_modify) |
+                    Q(victim_advocate=user_to_modify)
+                )
 
     if not request.user.is_supervisor and not request.user.is_superuser:
         raise PermissionDenied
@@ -866,13 +873,7 @@ def reassign_cases_with_user(request, *args, **kwargs):
         if form.is_valid():
 
             cases_to_modify = list()
-            for index, case in enumerate(Case.objects.filter(
-                    Q(supervisor=user_to_modify) |
-                    Q(prosecutor=user_to_modify) |
-                    Q(secretary=user_to_modify) |
-                    Q(paralegal=user_to_modify) |
-                    Q(victim_advocate=user_to_modify)
-                )):
+            for index, case in enumerate(user_cases):
                 if form.cleaned_data.get('case_{}'.format(index)):
                     cases_to_modify.append(case)
 
@@ -906,4 +907,10 @@ def reassign_cases_with_user(request, *args, **kwargs):
     else:
         form = ReassignCasesWithUserForm(user_to_modify=user_to_modify)
 
-    return render(request, 'remind/reassign_cases_with_user_form.html', {'form': form})
+    user_has_no_cases_message = '' if len(user_cases) > 0 else 'User {user} has no cases to reassign.'.format(
+        user=user_to_modify
+    )
+
+    return render(request, 'remind/reassign_cases_with_user_form.html', {'form': form,
+                                                                         'user_has_no_cases':
+                                                                             user_has_no_cases_message})
