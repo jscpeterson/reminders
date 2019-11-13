@@ -153,6 +153,10 @@ def scheduling(request, *args, **kwargs):
     """
     case = Case.objects.get(case_number=kwargs.get('case_number'))
 
+    # User may have come to this page from the scheduling_order_track view. If so, return them to the
+    # correct page instead of going to the dashboard. To determine where the user came from, check the URL path.
+    entering_scheduling_order = 'scheduling_conference_date_needed' in request.path
+
     if request.method == 'POST':
         form = SchedulingForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
@@ -170,9 +174,7 @@ def scheduling(request, *args, **kwargs):
             )
             utils.complete_old_deadline(deadline)
 
-            # User may have come to this page from the scheduling_order_track view. If so, return them to the
-            # correct page instead of going to the dashboard. To determine where the user came from, check the URL path.
-            if 'scheduling_conference_date_needed' in request.path:
+            if entering_scheduling_order:
                 return HttpResponseRedirect(reverse('remind:track', kwargs={'case_number': case.case_number}))
             else:
                 return HttpResponseRedirect(reverse('remind:dashboard'))
@@ -180,7 +182,13 @@ def scheduling(request, *args, **kwargs):
     else:
         form = SchedulingForm(case_number=kwargs['case_number'])
 
-    return render(request, 'remind/scheduling_form.html', {'form': form})
+    scheduling_conference_question = \
+        'When will the scheduling conference be held?' if not entering_scheduling_order \
+        else 'When was the scheduling conference held?'
+
+    return render(request, 'remind/scheduling_form.html', {'form': form,
+                                                           'scheduling_conference_question':
+                                                               scheduling_conference_question})
 
 
 ################################################################################
