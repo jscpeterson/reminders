@@ -20,7 +20,7 @@ from . import utils
 from . import case_utils
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from guardian.shortcuts import assign_perm
+from guardian.shortcuts import assign_perm, remove_perm
 
 
 class DashView(LoginRequiredMixin, ListView):
@@ -153,6 +153,10 @@ def scheduling(request, *args, **kwargs):
     """
     case = Case.objects.get(case_number=kwargs.get('case_number'))
 
+    # User may have come to this page from the scheduling_order_track view. If so, return them to the
+    # correct page instead of going to the dashboard. To determine where the user came from, check the URL path.
+    entering_scheduling_order = 'scheduling_conference_date_needed' in request.path
+
     if request.method == 'POST':
         form = SchedulingForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
@@ -169,12 +173,22 @@ def scheduling(request, *args, **kwargs):
                 created_by=request.user
             )
             utils.complete_old_deadline(deadline)
-            return HttpResponseRedirect(reverse('remind:dashboard'))
+
+            if entering_scheduling_order:
+                return HttpResponseRedirect(reverse('remind:track', kwargs={'case_number': case.case_number}))
+            else:
+                return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = SchedulingForm(case_number=kwargs['case_number'])
 
-    return render(request, 'remind/scheduling_form.html', {'form': form})
+    scheduling_conference_question = \
+        'When will the scheduling conference be held?' if not entering_scheduling_order \
+        else 'When was the scheduling conference held?'
+
+    return render(request, 'remind/scheduling_form.html', {'form': form,
+                                                           'scheduling_conference_question':
+                                                               scheduling_conference_question})
 
 
 ################################################################################
@@ -206,6 +220,13 @@ def scheduling_order_track(request, *args, **kwargs):
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
 
+    # Catch if user failed to enter scheduling conference date
+    try:
+        scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
+    except Deadline.DoesNotExist:
+        return HttpResponseRedirect(reverse('remind:scheduling_conference_date_needed',
+                                            kwargs={'case_number': case.case_number}))
+
     if request.method == 'POST':
         form = TrackForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
@@ -222,7 +243,6 @@ def scheduling_order_track(request, *args, **kwargs):
             case.save(update_fields=['track', 'updated_by'])
 
             # Complete scheduling conference deadline timer
-            scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
             scheduling_conference_deadline.status = Deadline.COMPLETED
             scheduling_conference_deadline.updated_by = request.user
             scheduling_conference_deadline.save(update_fields=['status', 'updated_by'])
@@ -836,6 +856,13 @@ def reassign_cases(request, *args, **kwargs):
 def reassign_cases_with_user(request, *args, **kwargs):
     """Select cases from a user to reassign roles on"""
     user_to_modify = CustomUser.objects.get(pk=kwargs.get('user_pk'))
+    user_cases = Case.objects.filter(
+                    Q(supervisor=user_to_modify) |
+                    Q(prosecutor=user_to_modify) |
+                    Q(secretary=user_to_modify) |
+                    Q(paralegal=user_to_modify) |
+                    Q(victim_advocate=user_to_modify)
+                )
 
     if not request.user.is_supervisor and not request.user.is_superuser:
         raise PermissionDenied
@@ -846,28 +873,33 @@ def reassign_cases_with_user(request, *args, **kwargs):
         if form.is_valid():
 
             cases_to_modify = list()
-            for index, case in enumerate(Case.objects.filter(
-                    Q(supervisor=user_to_modify) |
-                    Q(prosecutor=user_to_modify) |
-                    Q(secretary=user_to_modify) |
-                    Q(paralegal=user_to_modify) |
-                    Q(victim_advocate=user_to_modify)
-                )):
+            for index, case in enumerate(user_cases):
                 if form.cleaned_data.get('case_{}'.format(index)):
                     cases_to_modify.append(case)
 
             for case in cases_to_modify:
                 # TODO Iterate over an ALL_POSITIONS list for better maintainability
                 if form.cleaned_data.get('supervisor'):
+                    # Supervisor privileges should not be removed from a case (they should be superusers anyway)
                     case.supervisor = form.cleaned_data.get('supervisor')
                 if form.cleaned_data.get('prosecutor'):
+                    remove_perm('change_case', case.prosecutor, case)
                     case.prosecutor = form.cleaned_data.get('prosecutor')
                 if form.cleaned_data.get('paralegal'):
+                    remove_perm('change_case', case.paralegal, case)
                     case.paralegal = form.cleaned_data.get('paralegal')
                 if form.cleaned_data.get('secretary'):
+                    remove_perm('change_case', case.secretary, case)
                     case.secretary = form.cleaned_data.get('secretary')
                 if form.cleaned_data.get('victim_advocate'):
+                    remove_perm('change_case', case.victim_advocate, case)
                     case.victim_advocate = form.cleaned_data.get('victim_advocate')
+
+                # Add permissions at end to ensure all new staff members have appropriate permissions
+                for staff_member in [case.supervisor, case.prosecutor, case.paralegal, case.secretary,
+                                     case.victim_advocate]:
+                    assign_perm('change_case', staff_member, case)
+
                 case.save()
 
             return HttpResponseRedirect(reverse('remind:dashboard'))
@@ -875,4 +907,10 @@ def reassign_cases_with_user(request, *args, **kwargs):
     else:
         form = ReassignCasesWithUserForm(user_to_modify=user_to_modify)
 
-    return render(request, 'remind/reassign_cases_with_user_form.html', {'form': form})
+    user_has_no_cases_message = '' if len(user_cases) > 0 else 'User {user} has no cases to reassign.'.format(
+        user=user_to_modify
+    )
+
+    return render(request, 'remind/reassign_cases_with_user_form.html', {'form': form,
+                                                                         'user_has_no_cases':
+                                                                             user_has_no_cases_message})
