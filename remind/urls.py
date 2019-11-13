@@ -15,6 +15,8 @@ urlpatterns = [
 
     # Scheduling Order Flow
     path('track/', views.scheduling_order_select_case, name='enter-sched'),
+    path('track/scheduling_conference_date_needed/<str:case_number>/', views.scheduling,
+         name='scheduling_conference_date_needed'),
     path('track/<str:case_number>', views.scheduling_order_track, name='track'),
     path('trial/<str:case_number>', views.scheduling_order_trial, name='trial'),
     path('order/<str:case_number>', views.scheduling_order_deadlines, name='order'),

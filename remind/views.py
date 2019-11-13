@@ -169,7 +169,13 @@ def scheduling(request, *args, **kwargs):
                 created_by=request.user
             )
             utils.complete_old_deadline(deadline)
-            return HttpResponseRedirect(reverse('remind:dashboard'))
+
+            # User may have come to this page from the scheduling_order_track view. If so, return them to the
+            # correct page instead of going to the dashboard. To determine where the user came from, check the URL path.
+            if 'scheduling_conference_date_needed' in request.path:
+                return HttpResponseRedirect(reverse('remind:track', kwargs={'case_number': case.case_number}))
+            else:
+                return HttpResponseRedirect(reverse('remind:dashboard'))
 
     else:
         form = SchedulingForm(case_number=kwargs['case_number'])
@@ -206,6 +212,13 @@ def scheduling_order_track(request, *args, **kwargs):
     if not request.user.has_perm('change_case', case):
         raise PermissionDenied
 
+    # Catch if user failed to enter scheduling conference date
+    try:
+        scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
+    except Deadline.DoesNotExist:
+        return HttpResponseRedirect(reverse('remind:scheduling_conference_date_needed',
+                                            kwargs={'case_number': case.case_number}))
+
     if request.method == 'POST':
         form = TrackForm(request.POST, case_number=kwargs.get('case_number'))
         if form.is_valid():
@@ -222,7 +235,6 @@ def scheduling_order_track(request, *args, **kwargs):
             case.save(update_fields=['track', 'updated_by'])
 
             # Complete scheduling conference deadline timer
-            scheduling_conference_deadline = Deadline.objects.get(case=case, type=Deadline.SCHEDULING_CONFERENCE)
             scheduling_conference_deadline.status = Deadline.COMPLETED
             scheduling_conference_deadline.updated_by = request.user
             scheduling_conference_deadline.save(update_fields=['status', 'updated_by'])
