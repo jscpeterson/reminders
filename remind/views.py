@@ -881,24 +881,30 @@ def reassign_cases_with_user(request, *args, **kwargs):
                 # TODO Iterate over an ALL_POSITIONS list for better maintainability
                 if form.cleaned_data.get('supervisor'):
                     # Supervisor privileges should not be removed from a case (they should be superusers anyway)
+                    # Case should always have a supervisor, no check if supervisor exists
                     case.supervisor = form.cleaned_data.get('supervisor')
                 if form.cleaned_data.get('prosecutor'):
+                    # Case should always have a prosecutor, no check if prosecutor exists
                     remove_perm('change_case', case.prosecutor, case)
                     case.prosecutor = form.cleaned_data.get('prosecutor')
                 if form.cleaned_data.get('paralegal'):
-                    remove_perm('change_case', case.paralegal, case)
+                    if case.paralegal:
+                        remove_perm('change_case', case.paralegal, case)
                     case.paralegal = form.cleaned_data.get('paralegal')
                 if form.cleaned_data.get('secretary'):
-                    remove_perm('change_case', case.secretary, case)
+                    if case.secretary:
+                        remove_perm('change_case', case.secretary, case)
                     case.secretary = form.cleaned_data.get('secretary')
                 if form.cleaned_data.get('victim_advocate'):
-                    remove_perm('change_case', case.victim_advocate, case)
+                    if case.victim_advocate:
+                        remove_perm('change_case', case.victim_advocate, case)
                     case.victim_advocate = form.cleaned_data.get('victim_advocate')
 
                 # Add permissions at end to ensure all new staff members have appropriate permissions
                 for staff_member in [case.supervisor, case.prosecutor, case.paralegal, case.secretary,
                                      case.victim_advocate]:
-                    assign_perm('change_case', staff_member, case)
+                    if staff_member:
+                         assign_perm('change_case', staff_member, case)
 
                 case.save()
 
