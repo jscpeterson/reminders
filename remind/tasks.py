@@ -63,10 +63,14 @@ def check_all_deadlines():
         # If deadline is in PTI_DEADLINES handle similar to an EVENT_DEADLINE
         if deadline.type in PTI_DEADLINES:
             if days_until <= timedelta(days=0):
-                if deadline.type == Deadline.REQUEST_PTI:
+                if deadline.type == Deadline.REQUEST_PTI and not deadline.case.pti_request_email_sent:
                     send_emails(Email.REQUEST_PTI, deadline, emails_sent)
-                if deadline.type == Deadline.CONDUCT_PTI:
+                    deadline.case.pti_request_email_sent = True
+                    deadline.case.save(update_fields=['pti_request_email_sent'])
+                if deadline.type == Deadline.CONDUCT_PTI and not deadline.case.pti_conduct_email_sent:
                     send_emails(Email.CONDUCT_PTI, deadline, emails_sent)
+                    deadline.case.pti_conduct_email_sent = True
+                    deadline.case.save(update_fields=['pti_conduct_email_sent'])
             continue
 
         # If deadline is in EVENT_DEADLINES it does not need a deadline expiry notice and uses different reminders
