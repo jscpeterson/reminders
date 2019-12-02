@@ -45,6 +45,10 @@ class Case(TimeStampedModel):
     pti_request_date = models.DateTimeField(null=True)
     trial_date = models.DateTimeField(null=True)
 
+    # Flags for defense PTIs emails
+    pti_request_email_sent = models.BooleanField(null=True, blank=True, default=False)
+    pti_conduct_email_sent = models.BooleanField(null=True, blank=True, default=False)
+
     stayed = models.BooleanField(default=False)
 
     closed = models.BooleanField(default=False)
