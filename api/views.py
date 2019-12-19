@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.utils.datetime_safe import datetime
 from rest_framework import viewsets
 from api.serializers import DeadlineSerializer, CaseSerializer, UserSerializer
 from cases.models import Case
@@ -27,6 +28,8 @@ class DeadlineViewSet(viewsets.ModelViewSet):
                 status=Deadline.ACTIVE
             ).order_by(
                 'datetime'
+            ).exclude(
+                datetime__lt=datetime.now()
             )
         elif not Case.objects.filter(case_number=case_number).exists():
             return []
@@ -56,6 +59,8 @@ class StaffDeadlineViewSet(viewsets.ModelViewSet):
                     status=Deadline.ACTIVE
                 ).order_by(
                     'datetime'
+                ).exclude(
+                    datetime__lt=datetime.now()
                 )
 
 

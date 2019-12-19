@@ -48,6 +48,7 @@ class Deadline(TimeStampedModel):
         (ACTIVE, 'Active'),
         (COMPLETED, 'Complete'),
         (EXPIRED, 'Expired')
+        # TODO Add "Old" and "Inactive"
     )
 
     type = models.IntegerField(choices=TYPE_CHOICES)
